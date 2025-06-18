@@ -18,7 +18,8 @@ class DataProcessor:
         self.data = data or []
         self.processed_count = 0
     
-    @timing_decorator  # NEW decorator usage
+    @timing_decorator  # Existing decorator
+    @property  # NEW decorator added
     def process_sync(self, multiplier: int = 2) -> List[int]:
         """Synchronous processing with comprehensions."""
         # List comprehension usage
