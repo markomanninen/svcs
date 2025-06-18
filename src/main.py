@@ -5,7 +5,7 @@ import math
 def greet(name="world", punctuation="!"): 
     """Greets the user and includes a constant."""
     # Logic is now changed
-    message = f"Hello, {name}! Did you know pi starts with {math.pi}?"
+    message = f"A hearty hello to {name}! Did you know pi starts with {math.pi}?"
     print(message)
     return message
 
