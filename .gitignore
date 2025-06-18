@@ -17,3 +17,5 @@ ENV/
 .idea/
 *.swp
 *.swo
+
+.env
