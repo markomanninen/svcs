@@ -1,20 +1,32 @@
-# FILE: src/main.py
+# FILE: src/main.py (Comprehensive Test Version)
 
-import os
+import sys  # NEW dependency
+# The 'os' dependency has been removed.
 
-def get_system_info():
-    """A new function to get system information."""
-    return f"You are using the '{os.name}' operating system."
+# The 'get_system_info' function has been removed.
 
-def greet(name="world", punctuation="!"):
-    """Greets the user and ALWAYS includes system details."""
-    
-    system_details = get_system_info()
-    
-    message = f"A hearty hello to {name}{punctuation}\n{system_details}"
-    
-    print(message)
-    return message
+def log_error(error_message):
+    """A new function to log errors."""
+    print(f"ERROR: {error_message}", file=sys.stderr)
+
+def greet(name, salutation="Greetings"): # SIGNATURE changed
+    """
+    Greets the user and demonstrates multiple semantic changes.
+    """
+    # CONTROL FLOW and EXCEPTION HANDLING added
+    try:
+        # INTERNAL CALL added
+        message = f"{salutation}, {name}!"
+        for i in range(2): # New 'for' loop
+            print(f"({i+1}) {message}")
+        
+        # The unconditional call to get_system_info is removed.
+        return message
+
+    except TypeError as e:
+        # INTERNAL CALL added
+        log_error(f"Invalid type for greet: {e}")
+        return None
 
 if __name__ == "__main__":
-    greet()
+    greet("Alice")
