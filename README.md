@@ -111,6 +111,31 @@ SVCS performs comprehensive AST (Abstract Syntax Tree) analysis to understand:
 #### **File-Level Changes**
 - `file_content_changed` - Non-code or top-level script changes
 
+#### **Exception & Error Handling (Extended)**
+- `exception_handling_removed` - Exception handlers removed
+- `error_handling_introduced` - Error handling added to previously unguarded code
+- `error_handling_removed` - All error handling removed from function
+
+#### **Literal & Constant Patterns**
+- `string_literal_usage_changed` - Changes in string literal patterns
+- `numeric_literal_usage_changed` - Changes in numeric literal usage
+- `boolean_literal_usage_changed` - Changes in boolean literal patterns
+- `none_literal_usage_changed` - Changes in None literal usage
+
+#### **Advanced Language Features**
+- `starred_expression_usage_changed` - Changes in *args/**kwargs usage
+- `slice_usage_changed` - Changes in slice expression patterns
+- `nested_class_usage_changed` - Changes in nested class definitions
+- `default_parameters_added` - Default parameter values introduced
+- `default_parameters_removed` - Default parameter values removed
+
+#### **Code Complexity & Architecture**
+- `function_complexity_changed` - Overall function complexity changes
+- `type_annotations_introduced` - Type annotation support added
+- `type_annotations_removed` - Type annotation support removed
+- `functional_programming_adopted` - Introduction of functional programming patterns
+- `functional_programming_removed` - Removal of functional programming patterns
+
 ## 🛠️ Installation & Setup
 
 ### Quick Start
