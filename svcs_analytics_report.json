@@ -1,0 +1,216 @@
+{
+  "generated_at": "2025-06-19T00:40:39.824794",
+  "summary": {
+    "total_events": 123,
+    "unique_event_types": 31,
+    "files_tracked": 7,
+    "contributors": 1
+  },
+  "event_type_distribution": {
+    "dependency_added": 11,
+    "node_added": 39,
+    "node_signature_changed": 10,
+    "attribute_access_changed": 3,
+    "subscript_access_changed": 2,
+    "numeric_literal_usage_changed": 2,
+    "return_pattern_changed": 2,
+    "comprehension_usage_changed": 1,
+    "lambda_usage_changed": 1,
+    "assertion_usage_changed": 1,
+    "unary_operator_usage_changed": 1,
+    "internal_call_added": 3,
+    "internal_call_removed": 2,
+    "exception_handling_added": 3,
+    "control_flow_changed": 4,
+    "string_literal_usage_changed": 1,
+    "none_literal_usage_changed": 1,
+    "default_parameters_added": 1,
+    "function_complexity_changed": 1,
+    "error_handling_introduced": 1,
+    "functional_programming_adopted": 1,
+    "node_removed": 4,
+    "decorator_added": 1,
+    "node_logic_changed": 16,
+    "global_scope_changed": 1,
+    "comparison_operator_usage_changed": 1,
+    "logical_operator_usage_changed": 1,
+    "assignment_pattern_changed": 1,
+    "augmented_assignment_changed": 1,
+    "dependency_removed": 2,
+    "file_content_changed": 4
+  },
+  "author_activity": {
+    "Marko Manninen": 123
+  },
+  "file_hotspots": {
+    "demo_semantic_evolution.py": 44,
+    "test_new_events.py": 2,
+    "src/main.py": 60,
+    "svcs.py": 5,
+    "svcs_discuss.py": 3,
+    "tests/test_discuss.py": 5,
+    "tests/test_discuss_evolution.py": 4
+  },
+  "recent_events": [
+    {
+      "event_type": "dependency_added",
+      "node_id": "module:demo_semantic_evolution.py",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": "Added: logging"
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:calculate_async",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:has_data",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:__str__",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": ""
+    },
+    {
+      "event_type": "node_signature_changed",
+      "node_id": "func:__init__",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": "Args changed from (self, data) to (self, data, batch_size)"
+    },
+    {
+      "event_type": "attribute_access_changed",
+      "node_id": "func:__init__",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": "Attribute access patterns changed"
+    },
+    {
+      "event_type": "subscript_access_changed",
+      "node_id": "func:__init__",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": "Subscript access patterns changed"
+    },
+    {
+      "event_type": "numeric_literal_usage_changed",
+      "node_id": "func:__init__",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": "added 2 new literals"
+    },
+    {
+      "event_type": "node_signature_changed",
+      "node_id": "func:process_numbers",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": "Args changed from (numbers) to (numbers, multiplier, filter_negative)"
+    },
+    {
+      "event_type": "return_pattern_changed",
+      "node_id": "func:process_numbers",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": "Return statements changed from 1 to 3"
+    },
+    {
+      "event_type": "comprehension_usage_changed",
+      "node_id": "func:process_numbers",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": "list comprehensions: 0\u21921; generator comprehensions: 0\u21921"
+    },
+    {
+      "event_type": "lambda_usage_changed",
+      "node_id": "func:process_numbers",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": "Lambda functions changed from 0 to 1"
+    },
+    {
+      "event_type": "assertion_usage_changed",
+      "node_id": "func:process_numbers",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": "Assert statements changed from 0 to 2"
+    },
+    {
+      "event_type": "unary_operator_usage_changed",
+      "node_id": "func:process_numbers",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": "added Not"
+    },
+    {
+      "event_type": "attribute_access_changed",
+      "node_id": "func:process_numbers",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": "Attribute access patterns changed"
+    },
+    {
+      "event_type": "subscript_access_changed",
+      "node_id": "func:process_numbers",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": "Subscript access patterns changed"
+    },
+    {
+      "event_type": "internal_call_added",
+      "node_id": "func:process_numbers",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": "Now calls: all, filter_func, int, isinstance, logging.critical, logging.error, logging.warning"
+    },
+    {
+      "event_type": "internal_call_removed",
+      "node_id": "func:process_numbers",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": "No longer calls: result.append"
+    },
+    {
+      "event_type": "exception_handling_added",
+      "node_id": "func:process_numbers",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": "Now handles: BaseException, Exception"
+    },
+    {
+      "event_type": "control_flow_changed",
+      "node_id": "func:process_numbers",
+      "location": "demo_semantic_evolution.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750281909,
+      "details": "for count changed from 1 to 0"
+    }
+  ]
+}

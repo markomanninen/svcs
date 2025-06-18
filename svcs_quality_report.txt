@@ -1,0 +1,5 @@
+SVCS Quality Report - Generated: 2025-06-19T00:40:49.794226
+============================================================
+
+Total Events Analyzed: 123
+Quality Indicators Tracked: 3
