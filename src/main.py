@@ -1,13 +1,13 @@
 # FILE: src/main.py
 
-import math # <-- NEW dependency
+import math
 
-def greet(name="world"):
+def greet(name="world", punctuation="!"): 
     """Greets the user and includes a constant."""
     # Logic is now changed
     message = f"Hello, {name}! Did you know pi starts with {math.pi}?"
     print(message)
-    return message # <-- Return statement's source is now different
+    return message
 
 if __name__ == "__main__":
     greet()
