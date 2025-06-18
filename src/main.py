@@ -8,7 +8,7 @@ def get_system_info():
 
 def greet(name="world", punctuation="!", show_details=False):
     """Greets the user and includes system details if requested."""
-    message = f"A hearty hello to {name}{punctuation}" 
+    message = f"A hearty hello to {name}{punctuation}"
     if show_details:
         # This new line calls another function within the same file.
         message += f"\n{get_system_info()}"
