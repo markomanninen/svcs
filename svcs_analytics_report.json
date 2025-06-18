@@ -1,14 +1,14 @@
 {
-  "generated_at": "2025-06-19T00:40:39.824794",
+  "generated_at": "2025-06-19T00:47:34.805166",
   "summary": {
-    "total_events": 123,
+    "total_events": 194,
     "unique_event_types": 31,
-    "files_tracked": 7,
+    "files_tracked": 13,
     "contributors": 1
   },
   "event_type_distribution": {
-    "dependency_added": 11,
-    "node_added": 39,
+    "dependency_added": 17,
+    "node_added": 104,
     "node_signature_changed": 10,
     "attribute_access_changed": 3,
     "subscript_access_changed": 2,
@@ -40,9 +40,15 @@
     "file_content_changed": 4
   },
   "author_activity": {
-    "Marko Manninen": 123
+    "Marko Manninen": 194
   },
   "file_hotspots": {
+    "demo_php_evolution.php": 15,
+    "svcs_analytics.py": 7,
+    "svcs_ci.py": 15,
+    "svcs_multilang.py": 17,
+    "svcs_quality.py": 9,
+    "svcs_web.py": 8,
     "demo_semantic_evolution.py": 44,
     "test_new_events.py": 2,
     "src/main.py": 60,
@@ -54,163 +60,163 @@
   "recent_events": [
     {
       "event_type": "dependency_added",
-      "node_id": "module:demo_semantic_evolution.py",
-      "location": "demo_semantic_evolution.py",
+      "node_id": "module:demo_php_evolution.php",
+      "location": "demo_php_evolution.php",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
-      "details": "Added: logging"
+      "timestamp": 1750283224,
+      "details": "Added: DateTime, implements:GreeterInterface, namespace:App\\Math"
     },
     {
       "event_type": "node_added",
-      "node_id": "func:calculate_async",
-      "location": "demo_semantic_evolution.py",
+      "node_id": "prop:operation",
+      "location": "demo_php_evolution.php",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
+      "timestamp": 1750283224,
       "details": ""
     },
     {
       "event_type": "node_added",
-      "node_id": "func:has_data",
-      "location": "demo_semantic_evolution.py",
+      "node_id": "func:divide",
+      "location": "demo_php_evolution.php",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
+      "timestamp": 1750283224,
       "details": ""
     },
     {
       "event_type": "node_added",
-      "node_id": "func:__str__",
-      "location": "demo_semantic_evolution.py",
+      "node_id": "prop:history",
+      "location": "demo_php_evolution.php",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
+      "timestamp": 1750283224,
       "details": ""
     },
     {
-      "event_type": "node_signature_changed",
-      "node_id": "func:__init__",
-      "location": "demo_semantic_evolution.py",
+      "event_type": "node_added",
+      "node_id": "func:setGreeting",
+      "location": "demo_php_evolution.php",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
-      "details": "Args changed from (self, data) to (self, data, batch_size)"
+      "timestamp": 1750283224,
+      "details": ""
     },
     {
-      "event_type": "attribute_access_changed",
-      "node_id": "func:__init__",
-      "location": "demo_semantic_evolution.py",
+      "event_type": "node_added",
+      "node_id": "func:getHistory",
+      "location": "demo_php_evolution.php",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
-      "details": "Attribute access patterns changed"
+      "timestamp": 1750283224,
+      "details": ""
     },
     {
-      "event_type": "subscript_access_changed",
-      "node_id": "func:__init__",
-      "location": "demo_semantic_evolution.py",
+      "event_type": "node_added",
+      "node_id": "prop:greeter",
+      "location": "demo_php_evolution.php",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
-      "details": "Subscript access patterns changed"
+      "timestamp": 1750283224,
+      "details": ""
     },
     {
-      "event_type": "numeric_literal_usage_changed",
-      "node_id": "func:__init__",
-      "location": "demo_semantic_evolution.py",
+      "event_type": "node_added",
+      "node_id": "interface:GreeterInterface",
+      "location": "demo_php_evolution.php",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
-      "details": "added 2 new literals"
+      "timestamp": 1750283224,
+      "details": ""
     },
     {
-      "event_type": "node_signature_changed",
-      "node_id": "func:process_numbers",
-      "location": "demo_semantic_evolution.py",
+      "event_type": "node_added",
+      "node_id": "prop:result",
+      "location": "demo_php_evolution.php",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
-      "details": "Args changed from (numbers) to (numbers, multiplier, filter_negative)"
+      "timestamp": 1750283224,
+      "details": ""
     },
     {
-      "event_type": "return_pattern_changed",
-      "node_id": "func:process_numbers",
-      "location": "demo_semantic_evolution.py",
+      "event_type": "node_added",
+      "node_id": "prop:greeting",
+      "location": "demo_php_evolution.php",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
-      "details": "Return statements changed from 1 to 3"
+      "timestamp": 1750283224,
+      "details": ""
     },
     {
-      "event_type": "comprehension_usage_changed",
-      "node_id": "func:process_numbers",
-      "location": "demo_semantic_evolution.py",
+      "event_type": "node_added",
+      "node_id": "prop:this",
+      "location": "demo_php_evolution.php",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
-      "details": "list comprehensions: 0\u21921; generator comprehensions: 0\u21921"
+      "timestamp": 1750283224,
+      "details": ""
     },
     {
-      "event_type": "lambda_usage_changed",
-      "node_id": "func:process_numbers",
-      "location": "demo_semantic_evolution.py",
+      "event_type": "node_added",
+      "node_id": "func:__construct",
+      "location": "demo_php_evolution.php",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
-      "details": "Lambda functions changed from 0 to 1"
+      "timestamp": 1750283224,
+      "details": ""
     },
     {
-      "event_type": "assertion_usage_changed",
-      "node_id": "func:process_numbers",
-      "location": "demo_semantic_evolution.py",
+      "event_type": "node_added",
+      "node_id": "func:create_calculator",
+      "location": "demo_php_evolution.php",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
-      "details": "Assert statements changed from 0 to 2"
+      "timestamp": 1750283224,
+      "details": ""
     },
     {
-      "event_type": "unary_operator_usage_changed",
-      "node_id": "func:process_numbers",
-      "location": "demo_semantic_evolution.py",
+      "event_type": "node_added",
+      "node_id": "class:Greeter",
+      "location": "demo_php_evolution.php",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
-      "details": "added Not"
+      "timestamp": 1750283224,
+      "details": ""
     },
     {
-      "event_type": "attribute_access_changed",
-      "node_id": "func:process_numbers",
-      "location": "demo_semantic_evolution.py",
+      "event_type": "node_added",
+      "node_id": "func:logOperation",
+      "location": "demo_php_evolution.php",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
-      "details": "Attribute access patterns changed"
+      "timestamp": 1750283224,
+      "details": ""
     },
     {
-      "event_type": "subscript_access_changed",
-      "node_id": "func:process_numbers",
-      "location": "demo_semantic_evolution.py",
+      "event_type": "dependency_added",
+      "node_id": "module:svcs_analytics.py",
+      "location": "svcs_analytics.py",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
-      "details": "Subscript access patterns changed"
+      "timestamp": 1750283224,
+      "details": "Added: api, collections, datetime, json, os, sqlite3, sys, traceback"
     },
     {
-      "event_type": "internal_call_added",
-      "node_id": "func:process_numbers",
-      "location": "demo_semantic_evolution.py",
+      "event_type": "node_added",
+      "node_id": "func:analyze_temporal_patterns",
+      "location": "svcs_analytics.py",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
-      "details": "Now calls: all, filter_func, int, isinstance, logging.critical, logging.error, logging.warning"
+      "timestamp": 1750283224,
+      "details": ""
     },
     {
-      "event_type": "internal_call_removed",
-      "node_id": "func:process_numbers",
-      "location": "demo_semantic_evolution.py",
+      "event_type": "node_added",
+      "node_id": "func:analyze_complexity_trends",
+      "location": "svcs_analytics.py",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
-      "details": "No longer calls: result.append"
+      "timestamp": 1750283224,
+      "details": ""
     },
     {
-      "event_type": "exception_handling_added",
-      "node_id": "func:process_numbers",
-      "location": "demo_semantic_evolution.py",
+      "event_type": "node_added",
+      "node_id": "func:analyze_technology_adoption",
+      "location": "svcs_analytics.py",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
-      "details": "Now handles: BaseException, Exception"
+      "timestamp": 1750283224,
+      "details": ""
     },
     {
-      "event_type": "control_flow_changed",
-      "node_id": "func:process_numbers",
-      "location": "demo_semantic_evolution.py",
+      "event_type": "node_added",
+      "node_id": "func:generate_json_report",
+      "location": "svcs_analytics.py",
       "author": "Marko Manninen",
-      "timestamp": 1750281909,
-      "details": "for count changed from 1 to 0"
+      "timestamp": 1750283224,
+      "details": ""
     }
   ]
 }

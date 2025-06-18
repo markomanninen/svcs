@@ -38,6 +38,7 @@ SVCS performs comprehensive AST (Abstract Syntax Tree) analysis to understand:
 
 ### ✨ Core Capabilities
 - **Automatic Semantic Analysis** - Runs on every Git commit via post-commit hooks
+- **Multi-Language Support** - Comprehensive analysis for Python, JavaScript/TypeScript, Go, and PHP
 - **Rich Query Interface** - Filter by author, event type, function name, or file location
 - **Conversational Queries** - Natural language interface for exploring code history
 - **Git Integration** - Seamlessly works with your existing Git workflows
@@ -135,6 +136,47 @@ SVCS performs comprehensive AST (Abstract Syntax Tree) analysis to understand:
 - `type_annotations_removed` - Type annotation support removed
 - `functional_programming_adopted` - Introduction of functional programming patterns
 - `functional_programming_removed` - Removal of functional programming patterns
+
+## 🌍 Multi-Language Support
+
+SVCS now supports comprehensive semantic analysis across multiple programming languages:
+
+### 🐍 **Python** (Complete Support)
+- **File Extensions**: `.py`, `.pyw`, `.pyi`
+- **Advanced Features**: Full AST analysis with 31+ semantic event types
+- **Supported Constructs**: Functions, classes, decorators, async/await, generators, comprehensions, type annotations, exception handling
+
+### 🌐 **JavaScript/TypeScript** 
+- **File Extensions**: `.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`
+- **Supported Constructs**: Functions, classes, imports/requires, ES6+ features
+- **Detection**: Arrow functions, class definitions, module imports
+
+### 🐹 **Go**
+- **File Extensions**: `.go`
+- **Supported Constructs**: Functions, structs, packages, imports
+- **Detection**: Method receivers, struct definitions, package imports
+
+### 🐘 **PHP** (New!)
+- **File Extensions**: `.php`, `.phtml`, `.php3`, `.php4`, `.php5`, `.phps`
+- **Supported Constructs**: Classes, interfaces, traits, methods, properties, constants
+- **Advanced Features**: 
+  - Namespace declarations
+  - Interface implementations
+  - Trait usage
+  - Property and constant definitions
+  - Exception handling
+  - Use statements and includes
+
+### 🔧 **Multi-Language Analytics**
+```bash
+# Test multi-language support
+python3 svcs_multilang.py
+
+# View language-specific statistics
+python3 demo_php_support.py   # For PHP-specific insights
+```
+
+Each language analyzer automatically detects semantic patterns specific to that language while maintaining consistent event types across the system.
 
 ## 🛠️ Installation & Setup
 
