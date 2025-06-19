@@ -1,6 +1,3 @@
-def old_style_function(items):
-    result = []
-    for item in items:
-        if item % 2 == 0:
-            result.append(item * 2)
-    return result
+def modern_function(items):
+    # Modern Python with list comprehension
+    return [item * 2 for item in items if item % 2 == 0]
