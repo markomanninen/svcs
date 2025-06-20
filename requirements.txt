@@ -1,0 +1,11 @@
+# SVCS Layer 5 True AI Dependencies
+google-generativeai>=0.3.0
+rich>=12.0.0
+
+# Optional: For enhanced error handling and retry logic
+tenacity>=8.0.0
+
+# Development dependencies (optional)
+# pytest>=7.0.0
+# black>=22.0.0
+# flake8>=5.0.0

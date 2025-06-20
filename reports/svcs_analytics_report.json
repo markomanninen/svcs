@@ -1,0 +1,225 @@
+{
+  "generated_at": "2025-06-19T01:15:37.148074",
+  "summary": {
+    "total_events": 245,
+    "unique_event_types": 31,
+    "files_tracked": 16,
+    "contributors": 1
+  },
+  "event_type_distribution": {
+    "dependency_added": 20,
+    "node_added": 142,
+    "unary_operator_usage_changed": 2,
+    "comparison_operator_usage_changed": 2,
+    "augmented_assignment_changed": 2,
+    "internal_call_added": 4,
+    "internal_call_removed": 3,
+    "control_flow_changed": 5,
+    "string_literal_usage_changed": 2,
+    "numeric_literal_usage_changed": 3,
+    "function_complexity_changed": 2,
+    "node_removed": 5,
+    "node_signature_changed": 10,
+    "attribute_access_changed": 3,
+    "subscript_access_changed": 2,
+    "return_pattern_changed": 2,
+    "comprehension_usage_changed": 1,
+    "lambda_usage_changed": 1,
+    "assertion_usage_changed": 1,
+    "exception_handling_added": 3,
+    "none_literal_usage_changed": 1,
+    "default_parameters_added": 1,
+    "error_handling_introduced": 1,
+    "functional_programming_adopted": 1,
+    "decorator_added": 1,
+    "node_logic_changed": 16,
+    "global_scope_changed": 1,
+    "logical_operator_usage_changed": 1,
+    "assignment_pattern_changed": 1,
+    "dependency_removed": 2,
+    "file_content_changed": 4
+  },
+  "author_activity": {
+    "Marko Manninen": 245
+  },
+  "file_hotspots": {
+    "svcs_layer5_ai.py": 18,
+    "layer5_demo_before.py": 14,
+    "demo_php_evolution.php": 32,
+    "demo_php_support.py": 2,
+    "svcs_analytics.py": 7,
+    "svcs_ci.py": 15,
+    "svcs_multilang.py": 17,
+    "svcs_quality.py": 9,
+    "svcs_web.py": 8,
+    "demo_semantic_evolution.py": 44,
+    "test_new_events.py": 2,
+    "src/main.py": 60,
+    "svcs.py": 5,
+    "svcs_discuss.py": 3,
+    "tests/test_discuss.py": 5,
+    "tests/test_discuss_evolution.py": 4
+  },
+  "recent_events": [
+    {
+      "event_type": "dependency_added",
+      "node_id": "module:svcs_layer5_ai.py",
+      "location": "svcs_layer5_ai.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284926,
+      "details": "Added: api, ast, dataclasses, enum, os, re, sys, typing"
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:analyze_semantic_changes",
+      "location": "svcs_layer5_ai.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284926,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "class:SemanticChange",
+      "location": "svcs_layer5_ai.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284926,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:_detect_error_handling_improvements",
+      "location": "svcs_layer5_ai.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284926,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:_detect_code_simplification",
+      "location": "svcs_layer5_ai.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284926,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:_extract_relevant_snippet",
+      "location": "svcs_layer5_ai.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284926,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:simulate_contextual_analysis",
+      "location": "svcs_layer5_ai.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284926,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:_detect_design_patterns",
+      "location": "svcs_layer5_ai.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284926,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:_count_exception_types",
+      "location": "svcs_layer5_ai.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284926,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "class:RefactoringPattern",
+      "location": "svcs_layer5_ai.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284926,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "class:ContextualSemanticAnalyzer",
+      "location": "svcs_layer5_ai.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284926,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:__init__",
+      "location": "svcs_layer5_ai.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284926,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:_detect_algorithm_optimization",
+      "location": "svcs_layer5_ai.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284926,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:_find_loop_patterns",
+      "location": "svcs_layer5_ai.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284926,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:analyze_contextual_changes",
+      "location": "svcs_layer5_ai.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284926,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:_detect_loop_to_comprehension",
+      "location": "svcs_layer5_ai.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284926,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:_detect_conditional_to_builtin",
+      "location": "svcs_layer5_ai.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284926,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:_find_comprehensions",
+      "location": "svcs_layer5_ai.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284926,
+      "details": ""
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:advanced_processing",
+      "location": "layer5_demo_before.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284816,
+      "details": ""
+    },
+    {
+      "event_type": "unary_operator_usage_changed",
+      "node_id": "func:calculate_stats",
+      "location": "layer5_demo_before.py",
+      "author": "Marko Manninen",
+      "timestamp": 1750284816,
+      "details": "added Not"
+    }
+  ]
+}

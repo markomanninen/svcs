@@ -19,3 +19,5 @@ ENV/
 *.swo
 
 .env
+
+*.tmp
