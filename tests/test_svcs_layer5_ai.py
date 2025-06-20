@@ -12,8 +12,10 @@ from typing import Dict, List, Set, Tuple, Any, Optional
 from dataclasses import dataclass
 from enum import Enum
 
-# Add SVCS modules
-sys.path.insert(0, '.svcs')
+# Add project root to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.svcs'))
+
 from api import get_full_log
 
 class RefactoringPattern(Enum):

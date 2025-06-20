@@ -10,8 +10,10 @@ import json
 from typing import Dict, List, Set, Tuple, Any, Optional
 from dataclasses import dataclass
 
-# Add SVCS modules
-sys.path.insert(0, '.svcs')
+# Add project root to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.svcs'))
+
 try:
     from api import get_full_log
 except ImportError:
@@ -415,7 +417,3 @@ def find_max(numbers):
             for sc in semantic_changes:
                 print(f"   🎯 {sc.change_type}: {sc.description}")
                 print(f"      Confidence: {sc.confidence:.1%}")
-
-if __name__ == "__main__":
-    analyze_with_true_ai()
-    test_layer5_with_real_changes()

@@ -10,9 +10,8 @@ from typing import List, Dict, Any
 from rich.console import Console
 from rich.table import Table
 
-# Add project root to path
-script_dir = os.path.dirname(os.path.realpath(__file__))
-project_root = os.path.dirname(script_dir) if '.svcs' in script_dir else script_dir
+# Add project root to path for imports
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
 console = Console()
@@ -32,21 +31,22 @@ class SVCSComplete5LayerAnalyzer:
         
         # Layer 5a: Original AI layer
         try:
-            from svcs_layer5_ai import ContextualSemanticAnalyzer
+            sys.path.insert(0, os.path.join(project_root, 'tests'))
+            from test_svcs_layer5_ai import ContextualSemanticAnalyzer
             self.layers_available['layer5_ai'] = True
         except ImportError:
             self.layers_available['layer5_ai'] = False
         
         # Layer 5b: True AI layer (with genai)
         try:
-            from svcs_layer5_true_ai import LLMSemanticAnalyzer, Layer5Config
+            from test_svcs_layer5_true_ai import LLMSemanticAnalyzer, Layer5Config
             self.layers_available['layer5_true_ai'] = True
         except ImportError:
             self.layers_available['layer5_true_ai'] = False
         
         # Multi-language support
         try:
-            from svcs_multilang import MultiLanguageAnalyzer
+            from test_svcs_multilang import MultiLanguageAnalyzer
             self.layers_available['multilang'] = True
         except ImportError:
             self.layers_available['multilang'] = False
@@ -107,7 +107,7 @@ class SVCSComplete5LayerAnalyzer:
     def _run_layer5_ai(self, filepath: str, before_content: str, after_content: str) -> List[Dict[str, Any]]:
         """Run Layer 5a AI analysis."""
         try:
-            from svcs_layer5_ai import ContextualSemanticAnalyzer
+            from test_svcs_layer5_ai import ContextualSemanticAnalyzer
             
             analyzer = ContextualSemanticAnalyzer()
             semantic_changes = analyzer.analyze_semantic_changes(
@@ -136,7 +136,7 @@ class SVCSComplete5LayerAnalyzer:
     def _run_layer5_true_ai(self, filepath: str, before_content: str, after_content: str) -> List[Dict[str, Any]]:
         """Run Layer 5b True AI analysis."""
         try:
-            from svcs_layer5_true_ai import LLMSemanticAnalyzer, Layer5Config
+            from test_svcs_layer5_true_ai import LLMSemanticAnalyzer, Layer5Config
             
             config = Layer5Config()
             analyzer = LLMSemanticAnalyzer(config)
