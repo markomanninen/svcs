@@ -39,7 +39,8 @@ try:
         get_recent_activity,
         get_project_statistics,
         search_semantic_patterns,
-        get_filtered_evolution
+        get_filtered_evolution,
+        debug_query_tools
     )
     # Import LLM logger
     from llm_logger import llm_logger
@@ -87,6 +88,7 @@ You have access to powerful search and analysis tools:
 
 3. **search_semantic_patterns** - Find specific AI-detected patterns
    Use for "show me architecture changes" or "performance optimizations"
+   IMPORTANT: For performance queries, use pattern_type="performance" which maps to "abstract_performance_optimization" events
 
 4. **get_project_statistics** - Overview and summary information
    Use for "project summary" or "what types of changes happen most?"
@@ -97,18 +99,39 @@ You have access to powerful search and analysis tools:
 6. **get_filtered_evolution** - Filtered evolution history
    Use for "show only signature changes for func:greet since June"
 
-IMPORTANT GUIDELINES:
+7. **debug_query_tools** - Diagnostic tool when queries return no results
+   Use when you get no results for a reasonable query to understand why
+
+CRITICAL TOOL USAGE GUIDELINES:
+
+For PERFORMANCE OPTIMIZATION queries:
+- ALWAYS try search_semantic_patterns(pattern_type="performance") first
+- If that returns no results, try search_events_advanced(event_types=["abstract_performance_optimization"])
+- Consider lowering min_confidence to 0.5 or 0.6 to catch more results
+- Check recent activity with get_recent_activity() and filter for performance events
+
+For DATE-BASED queries:
+- Use since_date parameter in format "YYYY-MM-DD" or relative terms like "7 days ago"
+- For "last week" use since_date with a date 7 days ago
+- For "recent" use get_recent_activity(days=7) or similar
+
+RESPONSE GUIDELINES:
 - Always limit results to 10-20 items by default to avoid overwhelming output
-- For large datasets, show a summary first and offer to show more details
+- If no results found, suggest trying with lower confidence thresholds or broader search terms
 - Group similar events and tell a narrative story, don't just list events
-- Use the most specific tool for each query
 - Format results clearly with markdown tables when appropriate
+- Include readable dates, confidence scores for AI events
 - Offer follow-up suggestions based on results
 
-When showing results:
-- Include readable dates, confidence scores for AI events
-- Highlight key insights and patterns  
-- Suggest related queries the user might find interesting
+TROUBLESHOOTING:
+- If you get no results for a reasonable query, FIRST call debug_query_tools() to understand the data available
+- Then try multiple approaches:
+  1. Different tool functions
+  2. Lower confidence thresholds (try 0.5 or 0.6 instead of 0.7+)
+  3. Broader date ranges
+  4. Alternative search terms
+- Always explain what you searched for and suggest alternatives if no results found
+- Use the debug information to guide your alternative search strategies
 """
 
     # Set up the Gemini Pro model with enhanced tools
@@ -125,7 +148,8 @@ When showing results:
             get_recent_activity,
             get_project_statistics,
             search_semantic_patterns,
-            get_filtered_evolution
+            get_filtered_evolution,
+            debug_query_tools
         ],
         system_instruction=system_instruction
     )
