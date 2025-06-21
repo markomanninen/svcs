@@ -1,0 +1,14 @@
+README.md
+pyproject.toml
+svcs_mcp/__init__.py
+svcs_mcp/cli.py
+svcs_mcp/git_hooks.py
+svcs_mcp/integration.py
+svcs_mcp/semantic_analyzer.py
+svcs_mcp/server.py
+svcs_mcp.egg-info/PKG-INFO
+svcs_mcp.egg-info/SOURCES.txt
+svcs_mcp.egg-info/dependency_links.txt
+svcs_mcp.egg-info/entry_points.txt
+svcs_mcp.egg-info/requires.txt
+svcs_mcp.egg-info/top_level.txt

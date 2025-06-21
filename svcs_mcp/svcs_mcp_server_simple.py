@@ -73,6 +73,7 @@ class GlobalSVCSDatabase:
                     author TEXT,
                     timestamp INTEGER,
                     message TEXT,
+                    created_at INTEGER,
                     PRIMARY KEY (commit_hash, project_id),
                     FOREIGN KEY (project_id) REFERENCES projects(project_id)
                 )
@@ -104,6 +105,9 @@ class GlobalSVCSDatabase:
         """Register a new project and return project_id."""
         project_id = str(uuid.uuid4())
         created_at = int(datetime.now().timestamp())
+        
+        # Normalize path to resolve symlinks (e.g., /tmp -> /private/tmp on macOS)
+        path = str(Path(path).resolve())
         
         with self.get_connection() as conn:
             conn.execute("""
@@ -149,6 +153,9 @@ class GlobalSVCSDatabase:
     
     def get_project_by_path(self, path: str) -> Optional[Dict]:
         """Get project info by path."""
+        # Normalize path to resolve symlinks (e.g., /tmp -> /private/tmp on macOS)
+        path = str(Path(path).resolve())
+        
         with self.get_connection() as conn:
             cursor = conn.execute("""
                 SELECT project_id, name, path, created_at, last_analyzed, status
@@ -187,6 +194,101 @@ class GlobalSVCSDatabase:
                 })
             
             return projects
+    
+    def query_semantic_events(self, project_id: Optional[str] = None, 
+                             event_type: Optional[str] = None, 
+                             limit: int = 10) -> List[Dict[str, Any]]:
+        """Query semantic events with optional filters."""
+        query = """
+            SELECT 
+                se.event_id,
+                se.project_id,
+                se.commit_hash,
+                se.event_type,
+                se.node_id,
+                se.location,
+                se.details,
+                se.layer,
+                se.confidence,
+                se.created_at,
+                c.author,
+                c.timestamp,
+                c.message,
+                p.name as project_name
+            FROM semantic_events se
+            LEFT JOIN commits c ON se.commit_hash = c.commit_hash AND se.project_id = c.project_id
+            LEFT JOIN projects p ON se.project_id = p.project_id
+            WHERE 1=1
+        """
+        
+        params = []
+        
+        if project_id:
+            query += " AND se.project_id = ?"
+            params.append(project_id)
+        
+        if event_type:
+            query += " AND se.event_type = ?"
+            params.append(event_type)
+        
+        query += " ORDER BY se.created_at DESC LIMIT ?"
+        params.append(limit)
+        
+        with self.get_connection() as conn:
+            cursor = conn.execute(query, params)
+            columns = [description[0] for description in cursor.description]
+            results = []
+            
+            for row in cursor.fetchall():
+                event = dict(zip(columns, row))
+                results.append(event)
+        
+        return results
+    
+    def get_project_statistics(self, project_id: str) -> Dict[str, Any]:
+        """Get statistics for a specific project."""
+        with self.get_connection() as conn:
+            # Total events
+            cursor = conn.execute(
+                "SELECT COUNT(*) FROM semantic_events WHERE project_id = ?",
+                (project_id,)
+            )
+            total_events = cursor.fetchone()[0]
+            
+            # Event types breakdown
+            cursor = conn.execute("""
+                SELECT event_type, COUNT(*) as count 
+                FROM semantic_events 
+                WHERE project_id = ? 
+                GROUP BY event_type 
+                ORDER BY count DESC
+            """, (project_id,))
+            event_types = dict(cursor.fetchall())
+            
+            # Layer breakdown
+            cursor = conn.execute("""
+                SELECT layer, COUNT(*) as count 
+                FROM semantic_events 
+                WHERE project_id = ? 
+                GROUP BY layer 
+                ORDER BY count DESC
+            """, (project_id,))
+            layers = dict(cursor.fetchall())
+            
+            # Recent commits
+            cursor = conn.execute("""
+                SELECT COUNT(DISTINCT commit_hash) 
+                FROM semantic_events 
+                WHERE project_id = ?
+            """, (project_id,))
+            total_commits = cursor.fetchone()[0]
+            
+            return {
+                "total_events": total_events,
+                "total_commits": total_commits,
+                "event_types": event_types,
+                "layers": layers
+            }
 
 
 class ProjectManager:
@@ -225,16 +327,16 @@ process_commit('$REPO_PATH')
         if not git_hooks_dir.exists():
             return False
         
-        # Create symlinks to global hook
-        for hook_name in ["post-commit", "post-merge"]:
-            hook_path = git_hooks_dir / hook_name
-            
-            # Remove existing hook if it exists
-            if hook_path.exists():
-                hook_path.unlink()
-            
-            # Create symlink to global hook
-            hook_path.symlink_to(self.hook_script)
+        # Only install post-commit hook (not pre-commit to avoid double analysis)
+        hook_name = "post-commit"
+        hook_path = git_hooks_dir / hook_name
+        
+        # Remove existing hook if it exists
+        if hook_path.exists():
+            hook_path.unlink()
+        
+        # Create symlink to global hook
+        hook_path.symlink_to(self.hook_script)
         
         return True
     
@@ -246,7 +348,7 @@ process_commit('$REPO_PATH')
             return False
         
         # Remove SVCS hooks
-        for hook_name in ["post-commit", "post-merge"]:
+        for hook_name in ["post-commit", "pre-commit"]:  # Remove both in case of old installations
             hook_path = git_hooks_dir / hook_name
             
             # Only remove if it's pointing to our global hook
@@ -272,35 +374,99 @@ class SVCSQueryEngine:
             "message": "Evolution querying ready for integration with existing SVCS"
         }
     
-    def get_project_statistics(self, project_id: str) -> Dict:
-        """Get statistics for a project."""
-        with self.db.get_connection() as conn:
-            # Count events by type
+    def query_semantic_events(self, project_id: Optional[str] = None, 
+                             event_type: Optional[str] = None, 
+                             limit: int = 10) -> List[Dict[str, Any]]:
+        """Query semantic events with optional filters."""
+        query = """
+            SELECT 
+                se.event_id,
+                se.project_id,
+                se.commit_hash,
+                se.event_type,
+                se.node_id,
+                se.location,
+                se.details,
+                se.layer,
+                se.confidence,
+                se.created_at,
+                c.author,
+                c.timestamp,
+                c.message,
+                p.name as project_name
+            FROM semantic_events se
+            LEFT JOIN commits c ON se.commit_hash = c.commit_hash AND se.project_id = c.project_id
+            LEFT JOIN projects p ON se.project_id = p.project_id
+            WHERE 1=1
+        """
+        
+        params = []
+        
+        if project_id:
+            query += " AND se.project_id = ?"
+            params.append(project_id)
+        
+        if event_type:
+            query += " AND se.event_type = ?"
+            params.append(event_type)
+        
+        query += " ORDER BY se.created_at DESC LIMIT ?"
+        params.append(limit)
+        
+        with self.get_connection() as conn:
+            cursor = conn.execute(query, params)
+            columns = [description[0] for description in cursor.description]
+            results = []
+            
+            for row in cursor.fetchall():
+                event = dict(zip(columns, row))
+                results.append(event)
+        
+        return results
+    
+    def get_project_statistics(self, project_id: str) -> Dict[str, Any]:
+        """Get statistics for a specific project."""
+        with self.get_connection() as conn:
+            # Total events
+            cursor = conn.execute(
+                "SELECT COUNT(*) FROM semantic_events WHERE project_id = ?",
+                (project_id,)
+            )
+            total_events = cursor.fetchone()[0]
+            
+            # Event types breakdown
             cursor = conn.execute("""
-                SELECT event_type, COUNT(*) as count
+                SELECT event_type, COUNT(*) as count 
                 FROM semantic_events 
-                WHERE project_id = ?
-                GROUP BY event_type
+                WHERE project_id = ? 
+                GROUP BY event_type 
                 ORDER BY count DESC
             """, (project_id,))
+            event_types = dict(cursor.fetchall())
             
-            event_stats = {row[0]: row[1] for row in cursor.fetchall()}
-            
-            # Get total events and recent activity
+            # Layer breakdown
             cursor = conn.execute("""
-                SELECT COUNT(*) as total,
-                       COUNT(CASE WHEN created_at > ? THEN 1 END) as recent
+                SELECT layer, COUNT(*) as count 
+                FROM semantic_events 
+                WHERE project_id = ? 
+                GROUP BY layer 
+                ORDER BY count DESC
+            """, (project_id,))
+            layers = dict(cursor.fetchall())
+            
+            # Recent commits
+            cursor = conn.execute("""
+                SELECT COUNT(DISTINCT commit_hash) 
                 FROM semantic_events 
                 WHERE project_id = ?
-            """, (int((datetime.now() - timedelta(days=7)).timestamp()), project_id))
-            
-            total, recent = cursor.fetchone()
+            """, (project_id,))
+            total_commits = cursor.fetchone()[0]
             
             return {
-                "project_id": project_id,
-                "total_events": total,
-                "recent_events_7days": recent,
-                "event_types": event_stats
+                "total_events": total_events,
+                "total_commits": total_commits,
+                "event_types": event_types,
+                "layers": layers
             }
 
 
@@ -308,10 +474,298 @@ def process_commit(repo_path: str):
     """Process a git commit for semantic analysis."""
     logger.info(f"Processing commit in: {repo_path}")
     
-    # This would integrate with existing SVCS analysis logic
-    # 1. Get project_id from repo_path
-    # 2. Run semantic analysis on latest commit
-    # 3. Store results in global database with project_id
+    try:
+        # Import the semantic analyzer and rich for tables
+        import sys
+        from pathlib import Path
+        from rich.console import Console
+        from rich.table import Table
+        from rich import box
+        
+        # Add paths for imports
+        script_dir = Path(__file__).parent.parent
+        sys.path.insert(0, str(script_dir / ".svcs"))
+        
+        from svcs_complete_5layer import SVCSComplete5LayerAnalyzer
+        import subprocess
+        import time
+        
+        # Initialize components
+        db = GlobalSVCSDatabase()
+        analyzer = SVCSComplete5LayerAnalyzer()
+        console = Console()
+        
+        # Normalize repo path to resolve symlinks (e.g., /tmp -> /private/tmp on macOS)
+        repo_path = str(Path(repo_path).resolve())
+        
+        # Get project info
+        project = db.get_project_by_path(repo_path)
+        if not project:
+            print(f"⚠️  Project not registered: {repo_path}")
+            logger.warning(f"Project not registered: {repo_path}")
+            return
+        
+        project_id = project['project_id']
+        project_name = project['name']
+        
+        # Get latest commit hash
+        try:
+            result = subprocess.run(
+                ['git', 'rev-parse', 'HEAD'],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            commit_hash = result.stdout.strip()
+        except subprocess.CalledProcessError:
+            print("❌ Could not get commit hash")
+            logger.error("Could not get commit hash")
+            return
+        
+        # Get commit metadata
+        try:
+            # Get author
+            result = subprocess.run(
+                ['git', 'log', '-1', '--pretty=format:%an', commit_hash],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            author = result.stdout.strip()
+            
+            # Get message
+            result = subprocess.run(
+                ['git', 'log', '-1', '--pretty=format:%s', commit_hash],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            commit_message = result.stdout.strip()
+            
+            # Get timestamp
+            result = subprocess.run(
+                ['git', 'log', '-1', '--pretty=format:%ct', commit_hash],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            timestamp = int(result.stdout.strip())
+            
+        except subprocess.CalledProcessError:
+            author = "Unknown"
+            commit_message = "Unknown"
+            timestamp = int(time.time())
+        
+        # Header matching original .svcs format
+        console.print("\n[bold cyan]--=[ SVCS Semantic Analysis ]=--[/bold cyan]")
+        
+        # Get parent hash for debug info like original
+        try:
+            result = subprocess.run(
+                ['git', 'rev-parse', f'{commit_hash}~1'],
+                cwd=repo_path,
+                capture_output=True,
+                text=True
+            )
+            parent_hash = result.stdout.strip() if result.returncode == 0 else None
+        except:
+            parent_hash = None
+        
+        console.print(f"[bold magenta][DEBUG][/bold magenta] Analyzing commit: [yellow]{commit_hash[:7]}[/yellow] (Parent: [yellow]{parent_hash[:7] if parent_hash else 'None'}[/yellow]) - Project: [cyan]{project_name}[/cyan]")
+        console.print(f"[bold magenta][DEBUG][/bold magenta] Author: [blue]{author}[/blue] | Message: [white]{commit_message}[/white]")
+        
+        # Get changed files
+        try:
+            result = subprocess.run(
+                ['git', 'show', '--name-only', '--format=', commit_hash],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            changed_files = [f.strip() for f in result.stdout.strip().split('\n') if f.strip()]
+        except subprocess.CalledProcessError:
+            console.print("[bold red]❌ Could not get changed files[/bold red]")
+            logger.error("Could not get changed files")
+            return
+        
+        if not changed_files:
+            console.print("[yellow]📄 No files changed in this commit[/yellow]")
+            return
+        
+        # Store commit metadata first before storing events
+        try:
+            with db.get_connection() as conn:
+                conn.execute("""
+                    INSERT OR REPLACE INTO commits (
+                        project_id, commit_hash, author, message, timestamp, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?)
+                """, (
+                    project_id,
+                    commit_hash,
+                    author,
+                    commit_message,
+                    timestamp,
+                    int(time.time())
+                ))
+                conn.commit()
+        except Exception as e:
+            logger.error(f"Error storing commit metadata: {e}")
+        
+        total_events = 0
+        all_file_events = []
+        
+        # Analyze each changed file
+        for file_path in changed_files:
+            if not file_path.endswith('.py'):
+                console.print(f"[dim]⏭️  Skipping {file_path} (not Python)[/dim]")
+                continue
+            
+            console.print(f"[bold magenta][DEBUG][/bold magenta] Processing file: [green]{file_path}[/green]")
+            
+            try:
+                # Get file content before and after
+                try:
+                    result_before = subprocess.run(
+                        ['git', 'show', f'{commit_hash}~1:{file_path}'],
+                        cwd=repo_path,
+                        capture_output=True,
+                        text=True
+                    )
+                    before_content = result_before.stdout if result_before.returncode == 0 else ""
+                except:
+                    before_content = ""
+                
+                # Get current content
+                full_path = Path(repo_path) / file_path
+                if full_path.exists():
+                    with open(full_path, 'r') as f:
+                        after_content = f.read()
+                else:
+                    console.print(f"[yellow]⚠️  File {file_path} not found[/yellow]")
+                    continue
+                
+                # Run semantic analysis
+                events = analyzer.analyze_complete(file_path, before_content, after_content)
+                
+                # Process and enhance events with better details
+                for event in events:
+                    # Add default details if missing
+                    if not event.get('details'):
+                        event_type = event.get('event_type', '')
+                        node_id = event.get('node_id', '')
+                        
+                        if event_type == 'node_added':
+                            if node_id.startswith('func:'):
+                                event['details'] = f"Function '{node_id[5:]}' was added to the codebase"
+                            elif node_id.startswith('class:'):
+                                event['details'] = f"Class '{node_id[6:]}' was added to the codebase"
+                            else:
+                                event['details'] = f"New code element '{node_id}' was added"
+                        elif event_type == 'node_removed':
+                            if node_id.startswith('func:'):
+                                event['details'] = f"Function '{node_id[5:]}' was removed from the codebase"
+                            elif node_id.startswith('class:'):
+                                event['details'] = f"Class '{node_id[6:]}' was removed from the codebase"
+                            else:
+                                event['details'] = f"Code element '{node_id}' was removed"
+                        elif event_type == 'node_logic_changed':
+                            event['details'] = f"Implementation logic of '{node_id}' was modified"
+                
+                all_file_events.extend(events)
+                
+                # Store events in database (avoid duplicates)
+                stored_count = 0
+                for event in events:
+                    try:
+                        with db.get_connection() as conn:
+                            # Create a unique event ID based on content
+                            event_signature = f"{project_id}_{commit_hash}_{event.get('event_type')}_{event.get('node_id')}_{file_path}"
+                            event_id = f"evt_{hash(event_signature) & 0x7FFFFFFF}"  # Positive hash
+                            
+                            # Check if event already exists
+                            cursor = conn.execute(
+                                "SELECT 1 FROM semantic_events WHERE event_id = ?",
+                                (event_id,)
+                            )
+                            if cursor.fetchone():
+                                continue  # Skip duplicate
+                                
+                            conn.execute("""
+                                INSERT INTO semantic_events (
+                                    event_id, project_id, commit_hash, event_type,
+                                    node_id, location, details, layer, confidence,
+                                    created_at
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            """, (
+                                event_id,
+                                project_id,
+                                commit_hash,
+                                event.get('event_type', 'unknown'),
+                                event.get('node_id', ''),
+                                file_path,
+                                str(event.get('details', '')),
+                                str(event.get('layer', 'core')),
+                                event.get('confidence', 1.0),
+                                timestamp
+                            ))
+                            stored_count += 1
+                            total_events += 1
+                    except Exception as e:
+                        console.print(f"[bold red]❌ Error storing event: {e}[/bold red]")
+                        logger.error(f"Error storing event: {e}")
+                
+            except Exception as e:
+                console.print(f"[bold red]❌ Error analyzing file {file_path}: {e}[/bold red]")
+                logger.error(f"Error analyzing file {file_path}: {e}")
+        
+        
+        # Display events in a rich table matching original .svcs format
+        table = Table(
+            title=f"Detected Semantic Events for Commit {commit_hash[:7]}",
+            box=box.MINIMAL_DOUBLE_HEAD,
+            expand=True
+        )
+        table.add_column("Event Type", style="cyan", no_wrap=True, width=25)
+        table.add_column("Semantic Node", style="magenta", no_wrap=True, width=25)
+        table.add_column("Location", style="green", no_wrap=True, width=15)
+        table.add_column("Details", style="yellow")
+        
+        if not all_file_events:
+            table.add_row("[yellow]No semantic events detected.[/yellow]", "", "", "")
+        else:
+            for event in all_file_events:
+                event_type = event.get("event_type", "N/A")
+                node_id = event.get("node_id", "N/A")
+                location = event.get("location", "N/A")
+                details = event.get("details", "")
+                
+                # Add layer and confidence info to details if available
+                layer = event.get("layer", "")
+                confidence = event.get("confidence", 1.0)
+                if layer and layer != "core":
+                    details = f"[Layer {layer}] {details}"
+                if confidence != 1.0:
+                    details = f"{details} (confidence: {confidence:.1%})"
+                
+                table.add_row(event_type, node_id, location, details)
+        
+        console.print(table)
+        
+        # Summary
+        if all_file_events:
+            console.print(f"\nStored [bold green]{len(all_file_events)}[/bold green] semantic events in the global database.")
+        
+        logger.info(f"Stored {total_events} semantic events for commit {commit_hash[:8]}")
+        
+    except Exception as e:
+        console.print(f"\n[bold red]❌ Error in semantic analysis: {e}[/bold red]")
+        logger.error(f"Error in process_commit: {e}")
+        # Don't fail the git operation if analysis fails
 
 
 # Simple demonstration function

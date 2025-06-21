@@ -61,10 +61,6 @@ case "$HOOK_TYPE" in
         echo "🔍 SVCS: Analyzing semantic changes..."
         svcs analyze-commit "$PROJECT_ROOT" "$@"
         ;;
-    "pre-commit")
-        echo "🔍 SVCS: Pre-commit analysis..."
-        svcs analyze-pre-commit "$PROJECT_ROOT" "$@"
-        ;;
     *)
         # For other hooks, just log the event
         svcs log-hook-event "$PROJECT_ROOT" "$HOOK_TYPE" "$@"
@@ -85,7 +81,7 @@ exit 0
     def install_project_hooks(self, project_path: str, hooks: List[str] = None) -> bool:
         """Install SVCS hooks for a specific project."""
         if hooks is None:
-            hooks = ['post-commit', 'pre-commit']
+            hooks = ['post-commit']  # Only post-commit to avoid double analysis
         
         project_path = Path(project_path).resolve()
         git_hooks_dir = project_path / ".git" / "hooks"
@@ -126,7 +122,7 @@ exit 0
     def uninstall_project_hooks(self, project_path: str, hooks: List[str] = None) -> bool:
         """Remove SVCS hooks from a specific project."""
         if hooks is None:
-            hooks = ['post-commit', 'pre-commit']
+            hooks = ['post-commit', 'pre-commit']  # Remove both in case of old installations
         
         project_path = Path(project_path).resolve()
         git_hooks_dir = project_path / ".git" / "hooks"
@@ -164,6 +160,7 @@ exit 0
         git_hooks_dir = project_path / ".git" / "hooks"
         
         status = {}
+        # Check post-commit (primary) and pre-commit (for cleanup detection)
         for hook_name in ['post-commit', 'pre-commit']:
             hook_path = git_hooks_dir / hook_name
             

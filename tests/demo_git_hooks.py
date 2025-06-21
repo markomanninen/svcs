@@ -75,7 +75,7 @@ def demo_git_hooks():
     # Show actual symlinks
     print("\n4️⃣  Verifying Symlinks...")
     git_hooks_dir = Path(current_project) / ".git" / "hooks"
-    for hook_name in ['post-commit', 'pre-commit']:
+    for hook_name in ['post-commit']:  # Only install post-commit to avoid double analysis
         hook_path = git_hooks_dir / hook_name
         if hook_path.exists() and hook_path.is_symlink():
             target = hook_path.resolve()
@@ -117,7 +117,6 @@ def demo_git_hooks():
     print("│  └─ Routes to 'svcs analyze-commit' etc.")
     print("│")
     print("├─ Project/.git/hooks/post-commit -> Global Script")
-    print("├─ Project/.git/hooks/pre-commit -> Global Script")
     print("└─ Multiple projects can use same global hook")
     
     print("\n✨ Git Hook Demo Summary:")

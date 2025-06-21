@@ -11,6 +11,7 @@ import json
 import logging
 import os
 import sqlite3
+import subprocess
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -110,6 +111,9 @@ class GlobalSVCSDatabase:
         project_id = str(uuid.uuid4())
         created_at = int(datetime.now().timestamp())
         
+        # Normalize path to resolve symlinks (e.g., /tmp -> /private/tmp on macOS)
+        path = str(Path(path).resolve())
+        
         with self.get_connection() as conn:
             conn.execute("""
                 INSERT INTO projects (project_id, name, path, created_at)
@@ -154,6 +158,9 @@ class GlobalSVCSDatabase:
     
     def get_project_by_path(self, path: str) -> Optional[Dict]:
         """Get project info by path."""
+        # Normalize path to resolve symlinks (e.g., /tmp -> /private/tmp on macOS)
+        path = str(Path(path).resolve())
+        
         with self.get_connection() as conn:
             cursor = conn.execute("""
                 SELECT project_id, name, path, created_at, last_analyzed, status
@@ -230,16 +237,16 @@ process_commit('$REPO_PATH')
         if not git_hooks_dir.exists():
             return False
         
-        # Create symlinks to global hook
-        for hook_name in ["post-commit", "post-merge"]:
-            hook_path = git_hooks_dir / hook_name
-            
-            # Remove existing hook if it exists
-            if hook_path.exists():
-                hook_path.unlink()
-            
-            # Create symlink to global hook
-            hook_path.symlink_to(self.hook_script)
+        # Only install post-commit hook to avoid double analysis
+        hook_name = "post-commit"
+        hook_path = git_hooks_dir / hook_name
+        
+        # Remove existing hook if it exists
+        if hook_path.exists():
+            hook_path.unlink()
+        
+        # Create symlink to global hook
+        hook_path.symlink_to(self.hook_script)
         
         return True
     
@@ -250,8 +257,8 @@ process_commit('$REPO_PATH')
         if not git_hooks_dir.exists():
             return False
         
-        # Remove SVCS hooks
-        for hook_name in ["post-commit", "post-merge"]:
+        # Remove SVCS hooks (check both post-commit and any legacy hooks)
+        for hook_name in ["post-commit", "post-merge", "pre-commit"]:
             hook_path = git_hooks_dir / hook_name
             
             # Only remove if it's pointing to our global hook
@@ -418,18 +425,50 @@ async def handle_call_tool(name: str, arguments: dict | None) -> list[types.Text
                     text=f"Project already registered: {existing['name']}"
                 )]
             
+            # Check if it's a git repository, if not initialize it
+            git_dir = Path(path) / '.git'
+            git_init_msg = ""
+            
+            if not git_dir.exists():
+                try:
+                    result = subprocess.run(['git', 'init'], cwd=path, capture_output=True, text=True, timeout=30)
+                    if result.returncode == 0:
+                        git_init_msg = f"📁 Directory was not a git repository. Git initialized in {path}\n"
+                    else:
+                        return [types.TextContent(
+                            type="text",
+                            text=f"❌ Error initializing git: {result.stderr.strip() or 'Git init failed'}"
+                        )]
+                except FileNotFoundError:
+                    return [types.TextContent(
+                        type="text",
+                        text="❌ Error: git command not found. Please install git first."
+                    )]
+                except subprocess.TimeoutExpired:
+                    return [types.TextContent(
+                        type="text",
+                        text="❌ Error: git init timed out"
+                    )]
+                except Exception as e:
+                    return [types.TextContent(
+                        type="text",
+                        text=f"❌ Error initializing git: {str(e)}"
+                    )]
+            
             # Register project
             project_id = db.register_project(project_name, path)
             
             # Install git hooks
             success = project_manager.install_hooks(path)
             
+            result = git_init_msg
             if success:
-                result = f"✅ Successfully registered project '{project_name}'\n"
-                result += f"Project ID: {project_id}\n"
-                result += f"Git hooks installed in: {path}/.git/hooks/"
+                result += f"✅ Project '{project_name}' registered!\n"
+                result += f"📝 Project ID: {project_id[:8]}...\n"
+                result += f"📁 Path: {path}\n"
+                result += f"🔗 Git hooks installed successfully"
             else:
-                result = f"⚠️ Project registered but failed to install git hooks\n"
+                result += f"⚠️ Project registered but failed to install git hooks\n"
                 result += f"Please ensure {path} is a valid git repository"
             
             return [types.TextContent(type="text", text=result)]
