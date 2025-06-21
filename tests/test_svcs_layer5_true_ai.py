@@ -105,6 +105,11 @@ class LLMSemanticAnalyzer:
         
         if before_code == after_code:
             return []
+        
+        # 🚀 INTELLIGENT FILTERING: Only call LLM for non-trivial changes
+        if not self._is_change_worth_llm_analysis(before_code, after_code, file_path):
+            print(f"⚡ Skipping LLM analysis for trivial change in {file_path}")
+            return []
             
         # Prepare prompt for LLM
         prompt = self._create_analysis_prompt(before_code, after_code, file_path)
@@ -366,6 +371,106 @@ Only detect changes that require SEMANTIC UNDERSTANDING beyond syntax analysis.
         ])
         
         return "\n".join(report)
+
+    def _is_change_worth_llm_analysis(self, before_code: str, after_code: str, file_path: str) -> bool:
+        """Determine if the change is significant enough to warrant expensive LLM analysis."""
+        
+        # Calculate basic metrics
+        before_lines = before_code.count('\n') + 1 if before_code else 0
+        after_lines = after_code.count('\n') + 1 if after_code else 0
+        lines_changed = abs(after_lines - before_lines)
+        
+        # Skip LLM for very small files (likely trivial)
+        if after_lines <= 5 and before_lines <= 5:
+            return False
+        
+        # Skip LLM for very small changes (comments, whitespace, etc.)
+        if lines_changed <= 2 and max(before_lines, after_lines) <= 10:
+            return False
+        
+        # Check for trivial changes (only comments, whitespace, simple literals)
+        if self._is_trivial_change(before_code, after_code):
+            return False
+        
+        # Check minimum code complexity threshold
+        if not self._meets_complexity_threshold(before_code, after_code):
+            return False
+        
+        return True
+    
+    def _is_trivial_change(self, before_code: str, after_code: str) -> bool:
+        """Check if the change is trivial (comments, literals, simple formatting)."""
+        import re
+        
+        # Remove comments and whitespace for comparison
+        def normalize_code(code):
+            # Remove single-line comments
+            code = re.sub(r'#.*$', '', code, flags=re.MULTILINE)
+            # Remove multi-line strings/docstrings (basic detection)
+            code = re.sub(r'\"\"\".*?\"\"\"', '', code, flags=re.DOTALL)
+            code = re.sub(r"'''.*?'''", '', code, flags=re.DOTALL)
+            # Remove extra whitespace
+            code = re.sub(r'\s+', ' ', code).strip()
+            return code
+        
+        normalized_before = normalize_code(before_code)
+        normalized_after = normalize_code(after_code)
+        
+        # If normalized versions are very similar, it's likely trivial
+        if normalized_before == normalized_after:
+            return True
+        
+        # Check for only literal/constant changes
+        literal_change_patterns = [
+            r'return\s+\d+',  # Simple return values
+            r'=\s*["\'].*?["\']',  # String literals
+            r'=\s*\d+',  # Numeric literals
+        ]
+        
+        # If change only involves simple literals, consider trivial
+        diff_significant = False
+        for line_before, line_after in zip(before_code.split('\n'), after_code.split('\n')):
+            if line_before.strip() != line_after.strip():
+                # Check if this is just a literal change
+                is_literal_only = any(
+                    re.search(pattern, line_before) and re.search(pattern, line_after)
+                    for pattern in literal_change_patterns
+                )
+                if not is_literal_only:
+                    diff_significant = True
+                    break
+        
+        return not diff_significant
+    
+    def _meets_complexity_threshold(self, before_code: str, after_code: str) -> bool:
+        """Check if the code meets minimum complexity for worthwhile LLM analysis."""
+        
+        # Check for complex constructs that might benefit from LLM analysis
+        complex_patterns = [
+            r'class\s+\w+',  # Class definitions
+            r'def\s+\w+.*:',  # Function definitions (multiple)
+            r'import\s+\w+',  # Import statements
+            r'from\s+\w+\s+import',  # From imports
+            r'async\s+def',  # Async functions
+            r'@\w+',  # Decorators
+            r'with\s+\w+',  # Context managers
+            r'try:|except:|finally:',  # Error handling
+            r'if\s+.*:\s*$',  # Control flow
+            r'for\s+.*:\s*$',  # Loops
+            r'while\s+.*:\s*$',  # While loops
+        ]
+        
+        combined_code = before_code + '\n' + after_code
+        
+        # Count complex patterns
+        complexity_score = 0
+        for pattern in complex_patterns:
+            import re
+            matches = re.findall(pattern, combined_code, re.MULTILINE)
+            complexity_score += len(matches)
+        
+        # Require minimum complexity score for LLM analysis
+        return complexity_score >= 3
 
 def analyze_with_true_ai():
     """Demonstrate true AI-powered Layer 5 semantic analysis."""
