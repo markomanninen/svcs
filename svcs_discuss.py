@@ -28,12 +28,18 @@ from rich.markdown import Markdown
 
 sys.path.insert(0, '.svcs')
 try:
-    # Import all the specific API functions
+    # Import all the specific API functions including new enhanced ones
     from api import (
         find_dependency_changes, 
         get_commit_details, 
         get_full_log,
-        get_node_evolution
+        get_node_evolution,
+        # New enhanced functions for conversational interface
+        search_events_advanced,
+        get_recent_activity,
+        get_project_statistics,
+        search_semantic_patterns,
+        get_filtered_evolution
     )
     # Import LLM logger
     from llm_logger import llm_logger
@@ -65,28 +71,62 @@ def main():
     """The main entry point for the conversational REPL."""
     configure_llm()
     
-    # NEW: Enhanced system prompt for better summarization.
+    # Enhanced system prompt for better conversational search capabilities
     system_instruction = """
 You are the SVCS Semantic VCS Assistant, an expert software archeologist. Your
 purpose is to help developers understand the history of their codebase by telling
 clear, concise stories about how the code evolved.
 
-You must use the provided tools to find semantic events. When asked for a history
-or evolution of a node, use the `get_node_evolution` tool.
+You have access to powerful search and analysis tools:
 
-Synthesize the list of events into a high-level narrative. Do not just list every
-single event. Instead, group similar changes. For example, instead of listing five
-separate signature changes, summarize them as 'The function signature was changed
-multiple times, eventually stabilizing with the arguments...'.
+1. **search_events_advanced** - Comprehensive filtering by date, author, confidence, layers, etc.
+   Use for complex queries like "show me performance optimizations by John in the last week"
 
-Always start with the creation event and end with the last known modification or
-removal. Be concise and use markdown for clarity.
+2. **get_recent_activity** - Quick access to recent changes
+   Use for "what happened recently?" or "recent changes by X"
+
+3. **search_semantic_patterns** - Find specific AI-detected patterns
+   Use for "show me architecture changes" or "performance optimizations"
+
+4. **get_project_statistics** - Overview and summary information
+   Use for "project summary" or "what types of changes happen most?"
+
+5. **get_node_evolution** - Complete history of a specific function/class
+   Use for "tell me the story of func:greet"
+
+6. **get_filtered_evolution** - Filtered evolution history
+   Use for "show only signature changes for func:greet since June"
+
+IMPORTANT GUIDELINES:
+- Always limit results to 10-20 items by default to avoid overwhelming output
+- For large datasets, show a summary first and offer to show more details
+- Group similar events and tell a narrative story, don't just list events
+- Use the most specific tool for each query
+- Format results clearly with markdown tables when appropriate
+- Offer follow-up suggestions based on results
+
+When showing results:
+- Include readable dates, confidence scores for AI events
+- Highlight key insights and patterns  
+- Suggest related queries the user might find interesting
 """
 
-    # Set up the Gemini Pro model with the enhanced system prompt.
+    # Set up the Gemini Pro model with enhanced tools
     model = genai.GenerativeModel(
         model_name="gemini-1.5-flash",
-        tools=[find_dependency_changes, get_commit_details, get_full_log, get_node_evolution],
+        tools=[
+            # Core tools
+            find_dependency_changes, 
+            get_commit_details, 
+            get_full_log, 
+            get_node_evolution,
+            # Enhanced conversational tools
+            search_events_advanced,
+            get_recent_activity,
+            get_project_statistics,
+            search_semantic_patterns,
+            get_filtered_evolution
+        ],
         system_instruction=system_instruction
     )
 
