@@ -49,11 +49,20 @@ class DataProcessor:
         return all(field in item for field in required_fields)
     
     def _apply_mathematical_transform(self, value: float) -> float:
-        """Apply complex mathematical transformation."""
+        """Apply complex mathematical transformation with caching."""
+        # Add caching for expensive mathematical operations
+        cache_key = f"transform_{value}"
+        if cache_key in self.cache:
+            return self.cache[cache_key]
+            
         if value < 0:
-            return math.log(abs(value) + 1) * -1
+            result = math.log(abs(value) + 1) * -1
         else:
-            return math.sqrt(value + 1)
+            result = math.sqrt(value + 1)
+            
+        # Cache the result for future use
+        self.cache[cache_key] = result
+        return result
     
     def _calculate_statistics(self, items: List[Dict]) -> Dict:
         """Calculate statistics from processed items."""
