@@ -4,4 +4,5 @@ A simple test file for trivial changes
 """
 
 def simple_function():
-    return "hello"
+    # Just changing the return value
+    return "hello world"
