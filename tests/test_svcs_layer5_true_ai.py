@@ -20,6 +20,13 @@ except ImportError:
     # Gracefully handle missing SVCS API
     get_full_log = None
 
+# Import LLM logger for tracking interactions
+try:
+    from llm_logger import llm_logger
+except ImportError:
+    print("⚠️  llm_logger not available")
+    llm_logger = None
+
 # Import Google Generative AI
 try:
     import google.generativeai as genai
@@ -103,15 +110,76 @@ class LLMSemanticAnalyzer:
         prompt = self._create_analysis_prompt(before_code, after_code, file_path)
         
         try:
+            # Log the LLM interaction start
+            if llm_logger:
+                llm_logger.log_inference(
+                    component="layer5b_semantic_analysis",
+                    prompt=prompt,
+                    response="[PENDING]",
+                    model=self.config.model_name,
+                    metadata={
+                        'filepath': file_path,
+                        'before_code_length': len(before_code),
+                        'after_code_length': len(after_code),
+                        'analysis_type': 'abstract_semantic_changes'
+                    }
+                )
+            
             # Call LLM using genai SDK (like svcs_discuss.py)
             response = self._model.generate_content(prompt)
+            
+            # Log the successful response
+            if llm_logger and hasattr(response, 'text'):
+                llm_logger.log_inference(
+                    component="layer5b_semantic_analysis",
+                    prompt=prompt,
+                    response=response.text,
+                    model=self.config.model_name,
+                    metadata={
+                        'filepath': file_path,
+                        'before_code_length': len(before_code),
+                        'after_code_length': len(after_code),
+                        'analysis_type': 'abstract_semantic_changes',
+                        'response_length': len(response.text),
+                        'success': True
+                    }
+                )
             
             # Parse LLM response into semantic changes
             changes = self._parse_genai_response(response)
             
+            # Log parsing results
+            if llm_logger:
+                llm_logger.log_inference(
+                    component="layer5b_parse_results",
+                    prompt=f"Parsing {len(changes)} changes from response",
+                    response=f"Successfully parsed {len(changes)} abstract semantic changes",
+                    model=self.config.model_name,
+                    metadata={
+                        'filepath': file_path,
+                        'changes_detected': len(changes),
+                        'confidence_threshold': self.config.confidence_threshold
+                    }
+                )
+            
             return changes
             
         except Exception as e:
+            # Log the error
+            if llm_logger:
+                llm_logger.log_error(
+                    component="layer5b_semantic_analysis",
+                    prompt=prompt,
+                    error=str(e),
+                    model=self.config.model_name,
+                    metadata={
+                        'filepath': file_path,
+                        'before_code_length': len(before_code),
+                        'after_code_length': len(after_code),
+                        'error_type': type(e).__name__
+                    }
+                )
+            
             print(f"🔥 Layer 5 LLM call failed: {e}")
             return []
     

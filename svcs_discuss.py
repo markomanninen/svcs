@@ -35,6 +35,8 @@ try:
         get_full_log,
         get_node_evolution
     )
+    # Import LLM logger
+    from llm_logger import llm_logger
 except ImportError:
     print("Error: Could not import from '.svcs/api.py'. Please ensure the file exists.")
     sys.exit(1)
@@ -100,7 +102,33 @@ removal. Be concise and use markdown for clarity.
                 console.print("[bold cyan]Goodbye![/bold cyan]")
                 break
             
-            response = chat_session.send_message(user_input)
+            # Log the prompt before sending
+            try:
+                response = chat_session.send_message(user_input)
+                
+                # Log successful inference
+                llm_logger.log_inference(
+                    component="svcs_discuss",
+                    prompt=user_input,
+                    response=response.text,
+                    model="gemini-1.5-flash",
+                    metadata={
+                        "prompt_length": len(user_input),
+                        "response_length": len(response.text),
+                        "tools_used": bool(getattr(response, 'function_calls', None))
+                    }
+                )
+                
+            except Exception as e:
+                # Log error
+                llm_logger.log_error(
+                    component="svcs_discuss",
+                    prompt=user_input,
+                    error=str(e),
+                    model="gemini-1.5-flash",
+                    metadata={"prompt_length": len(user_input)}
+                )
+                raise
             
             console.print("\n[bold blue]Assistant:[/bold blue]")
             console.print(Markdown(response.text))

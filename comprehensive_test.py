@@ -230,3 +230,8 @@ async def comprehensive_processing_pipeline(data: Dict[str, Union[int, float, Li
                 results[f"list_{i}"] = result
     
     return results
+
+# Test function to trigger Layer 5b with logging
+def simple_logging_test():
+    """Simple function to test LLM logging."""
+    print("Testing LLM logging functionality")
