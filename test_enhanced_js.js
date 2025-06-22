@@ -4,6 +4,7 @@ class Calculator {
     constructor(precision = 2) {
         this.precision = precision;
         this.history = [];
+        this.maxHistory = 100; // New property
     }
     
     add(a, b) {
@@ -18,6 +19,14 @@ class Calculator {
         return this.round(result);
     }
     
+    // New method
+    divide(a, b) {
+        if (b === 0) throw new Error('Division by zero');
+        const result = a / b;
+        this.logOperation('divide', a, b, result);
+        return this.round(result);
+    }
+    
     logOperation(op, a, b, result) {
         this.history.push({
             operation: op,
@@ -25,6 +34,11 @@ class Calculator {
             result: result,
             timestamp: new Date()
         });
+        
+        // Trim history if too long
+        if (this.history.length > this.maxHistory) {
+            this.history.shift();
+        }
     }
     
     round(value) {
