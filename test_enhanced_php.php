@@ -13,9 +13,11 @@ class DemoClass implements DemoInterface {
     public string $name;
     private $data = [];
     protected static int $instanceCount = 0;
+    public ?string $description = null;  // New property
     
-    public function __construct(string $name) {
+    public function __construct(string $name, ?string $description = null) {
         $this->name = $name;
+        $this->description = $description;
         self::$instanceCount++;
     }
     
