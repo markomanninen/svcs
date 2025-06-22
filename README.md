@@ -120,6 +120,52 @@ python3 svcs_discuss.py
 - **Architecture Archaeology**: Understand how current architecture evolved
 - **Decision Archaeology**: Rediscover reasoning behind historical changes
 
+### **🔗 Full Git Traceability & Integration**
+
+**Every semantic event is linked to its exact git commit identifier**, enabling complete traceability:
+
+```bash
+# Find semantic events with commit hashes
+python3 svcs_mcp/cli.py query-events --limit 5
+# Shows: Event: node_added, Commit: 88e833c5...
+
+# Access the actual file changes
+git show 88e833c5
+# Shows: full diff of what changed in that commit
+
+# View commit context
+git log --oneline 88e833c5
+# Shows: commit message, author, date
+```
+
+**New: Programmatic Git Integration** 🆕
+
+SVCS now provides direct access to git changes through both the MCP server and conversational interface:
+
+```bash
+# Via MCP tools in VS Code/Cursor:
+> get changed files for commit 88e833c5
+> show me the diff for commit 88e833c5
+> summarize commit 88e833c5
+
+# Via conversational interface:
+python3 svcs_discuss.py
+> "What files were changed in commit 88e833c5?"
+> "Show me the actual diff for that commit"
+> "What were the exact code changes that led to the authentication refactoring?"
+```
+
+**Enhanced API Functions**:
+- `get_commit_changed_files(commit_hash)` - List of files changed in commit
+- `get_commit_diff(commit_hash, file_path=None)` - Git diff for commit (optionally filtered to specific file)
+- `get_commit_summary(commit_hash)` - Comprehensive commit information including metadata, files, and semantic events
+
+**Database Schema Linkage**:
+- Every `semantic_events` record contains a `commit_hash` field
+- Links directly to git commits for full historical context
+- Enables forensic analysis of how semantic changes relate to actual code changes
+- Supports advanced workflows like blame analysis and bisect operations
+
 ### **🎓 Advanced Learning & Research**
 
 **Programming Education**:
@@ -413,6 +459,12 @@ python3 svcs_discuss.py
 "Show me all dependency changes by Alice"
 "How has the DataProcessor class evolved?"
 "Which commits had the most significant semantic changes?"
+
+# New git integration queries:
+"What files were changed in commit abc123?"
+"Show me the actual diff for that commit"
+"What were the exact code changes that led to the authentication refactoring?"
+"Show me only the changes to auth.py in commit abc123"
 ```
 
 ### **Web Dashboard (`svcs_web.py`)**
@@ -499,15 +551,24 @@ python3 svcs_ci.py --pr-analysis --target=main
 Modern AI-integrated interface for multiple projects:
 
 ### **Available MCP Tools**
+
+#### **Project Management**
 - `list_projects` - List all registered SVCS projects
 - `register_project` - Register new project for tracking
 - `get_project_statistics` - Get semantic statistics for project
+
+#### **Semantic Analysis**
 - `query_semantic_events` - Query events with filtering
 - `get_recent_activity` - Get recent semantic changes
 - `search_semantic_patterns` - AI-powered pattern search
 - `get_filtered_evolution` - Track specific code element evolution
 - `search_events_advanced` - Advanced filtering and search
 - `analyze_current_commit` - Analyze most recent commit
+
+#### **Git Integration** 🆕
+- `get_commit_changed_files` - List files changed in a specific commit
+- `get_commit_diff` - Get git diff for a commit (optionally filtered to specific file)
+- `get_commit_summary` - Comprehensive commit information including metadata, files, and semantic events
 
 ### **Practical Usage**
 
@@ -524,6 +585,12 @@ In any MCP-compatible IDE (VS Code, Cursor, etc.):
 > show recent architecture changes
 > what functions were added last week?
 > analyze error handling patterns
+
+# Git integration queries
+> get changed files for commit abc123
+> show me the diff for commit abc123
+> summarize commit abc123
+> show diff for file.py in commit abc123
 ```
 
 ### **Project Management CLI**

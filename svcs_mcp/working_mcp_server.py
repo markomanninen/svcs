@@ -175,6 +175,43 @@ async def handle_list_tools() -> List[Tool]:
                 },
                 "required": ["project_path"]
             }
+        ),
+        Tool(
+            name="get_commit_changed_files",
+            description="Get the list of files that were changed in a specific commit",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string", "description": "Project path"},
+                    "commit_hash": {"type": "string", "description": "Commit hash (full or short)"}
+                },
+                "required": ["project_path", "commit_hash"]
+            }
+        ),
+        Tool(
+            name="get_commit_diff",
+            description="Get the git diff for a specific commit, optionally filtered to a specific file",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string", "description": "Project path"},
+                    "commit_hash": {"type": "string", "description": "Commit hash (full or short)"},
+                    "file_path": {"type": "string", "description": "Optional: specific file to show diff for"}
+                },
+                "required": ["project_path", "commit_hash"]
+            }
+        ),
+        Tool(
+            name="get_commit_summary",
+            description="Get comprehensive summary of a commit including metadata, changed files, and semantic events",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string", "description": "Project path"},
+                    "commit_hash": {"type": "string", "description": "Commit hash (full or short)"}
+                },
+                "required": ["project_path", "commit_hash"]
+            }
         )
     ]
 
@@ -507,6 +544,149 @@ async def handle_call_tool(name: str, arguments: Dict[str, Any]) -> List[types.T
                 return [types.TextContent(
                     type="text",
                     text=f"❌ Error executing debug_query_tools: {str(e)}"
+                )]
+        
+        elif name == "get_commit_changed_files":
+            project_path = arguments.get("project_path")
+            commit_hash = arguments.get("commit_hash")
+            
+            try:
+                import os
+                import sys
+                # Change to project directory for git operations
+                original_cwd = os.getcwd()
+                os.chdir(project_path)
+                
+                try:
+                    # Import the api module to use the new functions
+                    sys.path.insert(0, os.path.join(project_path, '.svcs'))
+                    from api import get_commit_changed_files
+                    
+                    changed_files = get_commit_changed_files(commit_hash)
+                    
+                    if not changed_files:
+                        result = f"📄 No files changed in commit {commit_hash[:8]}"
+                    else:
+                        result = f"📁 Files changed in commit {commit_hash[:8]}:\n\n"
+                        for i, file_path in enumerate(changed_files, 1):
+                            result += f"{i}. {file_path}\n"
+                        result += f"\nTotal: {len(changed_files)} files changed"
+                    
+                    return [types.TextContent(type="text", text=result)]
+                    
+                finally:
+                    os.chdir(original_cwd)
+                    
+            except Exception as e:
+                return [types.TextContent(
+                    type="text",
+                    text=f"❌ Error getting changed files for commit {commit_hash}: {str(e)}"
+                )]
+        
+        elif name == "get_commit_diff":
+            project_path = arguments.get("project_path")
+            commit_hash = arguments.get("commit_hash")
+            file_path = arguments.get("file_path")
+            
+            try:
+                import os
+                # Change to project directory for git operations
+                original_cwd = os.getcwd()
+                os.chdir(project_path)
+                
+                try:
+                    # Import the api module to use the new functions
+                    import sys
+                    sys.path.insert(0, os.path.join(project_path, '.svcs'))
+                    from api import get_commit_diff
+                    
+                    diff_output = get_commit_diff(commit_hash, file_path)
+                    
+                    if file_path:
+                        header = f"🔍 Git diff for commit {commit_hash[:8]} (file: {file_path}):\n\n"
+                    else:
+                        header = f"🔍 Git diff for commit {commit_hash[:8]}:\n\n"
+                    
+                    # Truncate very long diffs
+                    if len(diff_output) > 8000:
+                        truncated_diff = diff_output[:8000] + "\n\n... (diff truncated, showing first 8000 characters)"
+                        result = header + truncated_diff
+                    else:
+                        result = header + diff_output
+                    
+                    return [types.TextContent(type="text", text=result)]
+                    
+                finally:
+                    os.chdir(original_cwd)
+                    
+            except Exception as e:
+                return [types.TextContent(
+                    type="text",
+                    text=f"❌ Error getting diff for commit {commit_hash}: {str(e)}"
+                )]
+        
+        elif name == "get_commit_summary":
+            project_path = arguments.get("project_path")
+            commit_hash = arguments.get("commit_hash")
+            
+            try:
+                import os
+                # Change to project directory for git operations
+                original_cwd = os.getcwd()
+                os.chdir(project_path)
+                
+                try:
+                    # Import the api module to use the new functions
+                    import sys
+                    sys.path.insert(0, os.path.join(project_path, '.svcs'))
+                    from api import get_commit_summary
+                    
+                    summary = get_commit_summary(commit_hash)
+                    
+                    result = f"📋 Commit Summary for {commit_hash[:8]}:\n\n"
+                    
+                    # Commit info
+                    commit_info = summary['commit_info']
+                    result += f"**Commit Information:**\n"
+                    result += f"• Hash: {commit_info['commit_hash'][:8]}\n"
+                    result += f"• Author: {commit_info['author']}\n"
+                    result += f"• Date: {commit_info['date']}\n"
+                    result += f"• Message: {commit_info['message']}\n\n"
+                    
+                    # Changed files
+                    result += f"**Changed Files ({summary['file_count']}):**\n"
+                    for file_path in summary['changed_files']:
+                        result += f"• {file_path}\n"
+                    result += "\n"
+                    
+                    # Semantic events
+                    result += f"**Semantic Events ({summary['semantic_event_count']}):**\n"
+                    if summary['semantic_events']:
+                        for event in summary['semantic_events']:
+                            event_type = event.get('event_type', 'unknown')
+                            node_id = event.get('node_id', '')
+                            location = event.get('location', '')
+                            layer = event.get('layer', 'core')
+                            result += f"• {event_type}"
+                            if node_id:
+                                result += f" ({node_id})"
+                            if layer != 'core':
+                                result += f" [Layer {layer}]"
+                            if location:
+                                result += f" in {location}"
+                            result += "\n"
+                    else:
+                        result += "• No semantic events detected\n"
+                    
+                    return [types.TextContent(type="text", text=result)]
+                    
+                finally:
+                    os.chdir(original_cwd)
+                    
+            except Exception as e:
+                return [types.TextContent(
+                    type="text",
+                    text=f"❌ Error getting commit summary for {commit_hash}: {str(e)}"
                 )]
         
         else:

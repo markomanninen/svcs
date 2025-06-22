@@ -40,7 +40,11 @@ try:
         get_project_statistics,
         search_semantic_patterns,
         get_filtered_evolution,
-        debug_query_tools
+        debug_query_tools,
+        # New git integration functions
+        get_commit_changed_files,
+        get_commit_diff,
+        get_commit_summary
     )
     # Import LLM logger
     from llm_logger import llm_logger
@@ -102,6 +106,17 @@ You have access to powerful search and analysis tools:
 7. **debug_query_tools** - Diagnostic tool when queries return no results
    Use when you get no results for a reasonable query to understand why
 
+8. **get_commit_changed_files** - Get list of files changed in a specific commit
+   Use for "what files were changed in commit abc123?" or "show me files in that commit"
+
+9. **get_commit_diff** - Get actual git diff for a commit (optionally filtered to specific file)
+   Use for "show me the diff for commit abc123" or "what were the actual changes in that commit?"
+   Include file_path parameter to filter to specific file: get_commit_diff(commit_hash, file_path="path/to/file.py")
+   IMPORTANT: When showing diff output, present it in a code block without interpretation or summary
+
+10. **get_commit_summary** - Comprehensive commit information including metadata, files, and semantic events
+    Use for "tell me everything about commit abc123" or "summarize that commit"
+
 CRITICAL TOOL USAGE GUIDELINES:
 
 For PERFORMANCE OPTIMIZATION queries:
@@ -122,6 +137,7 @@ RESPONSE GUIDELINES:
 - Format results clearly with markdown tables when appropriate
 - Include readable dates, confidence scores for AI events
 - Offer follow-up suggestions based on results
+- **IMPORTANT: For get_commit_diff results, show the raw diff output in a code block without interpretation**
 
 TROUBLESHOOTING:
 - If you get no results for a reasonable query, FIRST call debug_query_tools() to understand the data available
@@ -149,7 +165,11 @@ TROUBLESHOOTING:
             get_project_statistics,
             search_semantic_patterns,
             get_filtered_evolution,
-            debug_query_tools
+            debug_query_tools,
+            # New git integration tools
+            get_commit_changed_files,
+            get_commit_diff,
+            get_commit_summary
         ],
         system_instruction=system_instruction
     )

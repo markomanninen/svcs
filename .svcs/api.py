@@ -541,6 +541,120 @@ def get_filtered_evolution(
     """
     pass  # Implementation will be added
 
+# --- Git Integration Functions for Changed Files and Diffs ---
+
+def get_commit_changed_files(commit_hash: str):
+    """
+    Gets the list of files that were changed in a specific commit.
+    
+    Args:
+        commit_hash (str): The full or short hash of the commit to inspect.
+        
+    Returns:
+        List[str]: List of file paths that were changed in the commit.
+    """
+    try:
+        # Get parent commit
+        parent_result = subprocess.run(
+            ['git', 'rev-parse', f'{commit_hash}~1'],
+            capture_output=True,
+            text=True
+        )
+        
+        if parent_result.returncode == 0:
+            # Compare with parent commit
+            parent_hash = parent_result.stdout.strip()
+            cmd = ['git', 'diff', '--name-only', parent_hash, commit_hash]
+        else:
+            # Initial commit, list all files
+            cmd = ['git', 'ls-tree', '-r', '--name-only', commit_hash]
+        
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        files = [f.strip() for f in result.stdout.split('\n') if f.strip()]
+        return files
+        
+    except subprocess.CalledProcessError as e:
+        raise Exception(f"Failed to get changed files for commit {commit_hash}: {e}")
+
+def get_commit_diff(commit_hash: str, file_path: str = None):
+    """
+    Gets the git diff for a specific commit, optionally filtered to a specific file.
+    
+    Args:
+        commit_hash (str): The full or short hash of the commit to inspect.
+        file_path (str, optional): If provided, only show diff for this specific file.
+        
+    Returns:
+        str: The git diff output for the commit.
+    """
+    try:
+        # Build the git show command
+        cmd = ['git', 'show', commit_hash]
+        
+        # If file_path is provided, filter to just that file
+        if file_path:
+            cmd.extend(['--', file_path])
+        
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        return result.stdout
+        
+    except subprocess.CalledProcessError as e:
+        raise Exception(f"Failed to get diff for commit {commit_hash}: {e}")
+
+def get_commit_summary(commit_hash: str):
+    """
+    Gets a comprehensive summary of a commit including metadata, changed files, and semantic events.
+    
+    Args:
+        commit_hash (str): The full or short hash of the commit to inspect.
+        
+    Returns:
+        dict: Comprehensive commit information including:
+            - commit_info: Basic git metadata (author, message, date)
+            - changed_files: List of files changed
+            - semantic_events: List of semantic events detected
+            - file_count: Number of files changed
+            - semantic_event_count: Number of semantic events
+    """
+    try:
+        # Get basic commit info
+        author_result = subprocess.run(
+            ['git', 'log', '-1', '--pretty=format:%an', commit_hash],
+            capture_output=True, text=True, check=True
+        )
+        message_result = subprocess.run(
+            ['git', 'log', '-1', '--pretty=format:%s', commit_hash],
+            capture_output=True, text=True, check=True
+        )
+        date_result = subprocess.run(
+            ['git', 'log', '-1', '--pretty=format:%ci', commit_hash],
+            capture_output=True, text=True, check=True
+        )
+        
+        commit_info = {
+            'commit_hash': commit_hash,
+            'author': author_result.stdout.strip(),
+            'message': message_result.stdout.strip(),
+            'date': date_result.stdout.strip()
+        }
+        
+        # Get changed files
+        changed_files = get_commit_changed_files(commit_hash)
+        
+        # Get semantic events
+        semantic_events = get_commit_details(commit_hash)
+        
+        return {
+            'commit_info': commit_info,
+            'changed_files': changed_files,
+            'semantic_events': semantic_events,
+            'file_count': len(changed_files),
+            'semantic_event_count': len(semantic_events)
+        }
+        
+    except Exception as e:
+        raise Exception(f"Failed to get commit summary for {commit_hash}: {e}")
+
 # --- Helper Functions ---
 
 def _parse_relative_date(date_str):
