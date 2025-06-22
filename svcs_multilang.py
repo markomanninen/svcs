@@ -6,15 +6,34 @@ Provides semantic analysis for multiple programming languages beyond Python.
 
 import re
 import sys # For sys.stderr
-# import ast # No longer needed for PHP part, assuming phpparser has its own AST nodes
-# Let's assume a hypothetical PHP parsing library
+# Real PHP and JavaScript parsing libraries
+
+# Modern Tree-sitter PHP parser (supports PHP 7.4+ and 8.x)
 try:
-    import phpparser
-    from phpparser import ast as php_ast # Assuming similar structure to Python's ast
-    # Ensure php_ast is also available if phpparser is.
+    import tree_sitter
+    import tree_sitter_php
+    tree_sitter_available = True
+    # Initialize Tree-sitter PHP language
+    php_language_capsule = tree_sitter_php.language_php()
+    php_language = tree_sitter.Language(php_language_capsule)
 except ImportError:
-    phpparser = None # Fallback or error handling will be needed
-    php_ast = None # Initialize php_ast to None if phpparser import fails
+    tree_sitter_available = False
+    tree_sitter = tree_sitter_php = php_language = None
+
+# Legacy phply parser (PHP 5.x-7.3 fallback)
+try:
+    from phply import phplex, phpparse, phpast
+    phply_available = True
+except ImportError:
+    phply_available = False
+    phplex = phpparse = phpast = None
+
+try:
+    import esprima
+    esprima_available = True
+except ImportError:
+    esprima_available = False
+    esprima = None
 
 from typing import Dict, List, Any, Optional
 from abc import ABC, abstractmethod
@@ -35,46 +54,453 @@ class LanguageAnalyzer(ABC):
 class PHPAnalyzer(LanguageAnalyzer):
     """Semantic analyzer for PHP code."""
 
-    def _extract_docstring(self, node: 'php_ast.Node') -> Optional[str]: # String literal type hint
-        """Helper to extract docstring from a PHP node (hypothetical)."""
-        if not php_ast: return None # Guard clause
-        if hasattr(node, 'doc_comment') and node.doc_comment:
-            return node.doc_comment.text
+    def _extract_docstring(self, node) -> Optional[str]:
+        """Helper to extract docstring from a PHP node."""
+        if not phply_available:
+            return None
+        # phply doesn't have built-in docstring support, so we'll extract it from comments
+        # This is a simplified approach - in practice you'd need to track comments
         return None
 
-    def _parse_parameters(self, params_node: Optional['php_ast.Parameters']) -> list: # String literal type hint
-        """Helper to parse function/method parameters (hypothetical)."""
-        if not php_ast or not params_node or not hasattr(params_node, 'params'): # Guard clause
+    def _parse_parameters(self, params) -> list:
+        """Helper to parse function/method parameters."""
+        if not phply_available or not params:
             return []
 
         parsed_params = []
-        for param in params_node.params:
-            param_info = {'name': param.name.name if hasattr(param.name, 'name') else str(param.name)}
-            if hasattr(param, 'type') and param.type:
-                param_info['type'] = php_ast.dump(param.type) # Or a more specific type name extraction
-            if hasattr(param, 'default') and param.default:
-                param_info['default'] = True # Mark that a default exists
-            parsed_params.append(param_info)
+        for param in params:
+            if hasattr(param, 'name'):
+                param_info = {'name': param.name}
+                if hasattr(param, 'type') and param.type:
+                    param_info['type'] = str(param.type)
+                if hasattr(param, 'default') and param.default:
+                    param_info['default'] = True
+                parsed_params.append(param_info)
         return parsed_params
 
-    def _parse_body(self, body_nodes: list) -> dict:
-        """Helper to get a summary of the body content (hypothetical)."""
-        # This would be a complex part, for now, a simple hash or line count
-        # In a real scenario, we'd extract statements, control flow, etc.
+    def _parse_body(self, body_nodes) -> dict:
+        """Helper to get a summary of the body content."""
+        if not body_nodes:
+            return {"source_hash": 0, "line_count": 0}
+        
         source_lines = []
         for stmt in body_nodes:
-            if hasattr(stmt, 'lineno') and hasattr(stmt, 'end_lineno'):
-                 source_lines.append(f"{stmt.lineno}-{stmt.end_lineno}")
+            if hasattr(stmt, 'lineno'):
+                source_lines.append(str(stmt.lineno))
         return {"source_hash": hash(tuple(source_lines)), "line_count": len(source_lines)}
 
 
     def parse_code(self, content: str) -> Dict[str, Any]:
-        """Parse PHP code using phpparser and extract detailed semantic elements."""
-        if not phpparser:
-            # Fallback to basic regex parsing if phpparser is not available
-            # This is important for graceful degradation
-            print("Warning: phpparser library not found. Falling back to basic PHP parsing.", file=sys.stderr)
-            return self._parse_code_regex_fallback(content)
+        """Parse PHP code using modern Tree-sitter parser first, then fallback to phply."""
+        # Try Tree-sitter first (supports modern PHP 7.4+ and 8.x)
+        if tree_sitter_available:
+            try:
+                return self._parse_code_tree_sitter(content)
+            except Exception as e:
+                print(f"Tree-sitter PHP parsing failed: {e}. Falling back to phply.", file=sys.stderr)
+        
+        # Fallback to phply (legacy PHP 5.x-7.3)
+        if phply_available:
+            try:
+                return self._parse_code_phply(content)
+            except Exception as e:
+                print(f"phply parsing failed: {e}. Falling back to regex.", file=sys.stderr)
+        
+        # Final fallback to regex parsing
+        print("Warning: No PHP AST parsers available. Using basic regex parsing.", file=sys.stderr)
+        return self._parse_code_regex_fallback(content)
+
+    def _parse_code_tree_sitter(self, content: str) -> Dict[str, Any]:
+        """Parse PHP code using Tree-sitter and extract detailed semantic elements."""
+        elements: Dict[str, Any] = {
+            'functions': {}, 'classes': {}, 'interfaces': {}, 'traits': {},
+            'namespaces': {}, 'constants': {}, 'uses': [], 'global_code': {},
+            'enums': {}  # Modern PHP 8.1+ feature
+        }
+
+        # Create parser
+        parser = tree_sitter.Parser()
+        parser.language = php_language
+        
+        # Parse the content
+        tree = parser.parse(content.encode('utf-8'))
+        
+        if tree.root_node.has_error:
+            raise Exception("Tree-sitter parsing failed with syntax errors")
+        
+        current_namespace = "global"
+        
+        # Process the AST
+        self._process_tree_sitter_node(tree.root_node, elements, current_namespace, content)
+        
+        return elements
+
+    def _process_tree_sitter_node(self, node, elements: Dict[str, Any], namespace: str, source_code: str):
+        """Process Tree-sitter AST nodes recursively."""
+        node_type = node.type
+        
+        # Handle namespace declarations
+        if node_type == 'namespace_definition':
+            namespace_name = self._extract_tree_sitter_text(node, source_code, 'namespace_name')
+            if namespace_name:
+                namespace = namespace_name
+                elements['namespaces'][f"namespace:{namespace}"] = {
+                    'name': namespace,
+                    'start_line': node.start_point[0] + 1,
+                    'children': []
+                }
+        
+        # Handle use statements
+        elif node_type == 'namespace_use_declaration':
+            use_info = self._extract_use_statement(node, source_code)
+            if use_info:
+                elements['uses'].append(use_info)
+        
+        # Handle function declarations
+        elif node_type == 'function_definition':
+            func_info = self._extract_function_tree_sitter(node, source_code, namespace)
+            if func_info:
+                func_id = f"func:{namespace}::{func_info['name']}" if namespace != "global" else f"func:{func_info['name']}"
+                elements['functions'][func_id] = func_info
+        
+        # Handle class declarations
+        elif node_type == 'class_declaration':
+            class_info = self._extract_class_tree_sitter(node, source_code, namespace)
+            if class_info:
+                class_id = f"class:{namespace}::{class_info['name']}" if namespace != "global" else f"class:{class_info['name']}"
+                elements['classes'][class_id] = class_info
+        
+        # Handle interface declarations
+        elif node_type == 'interface_declaration':
+            interface_info = self._extract_interface_tree_sitter(node, source_code, namespace)
+            if interface_info:
+                interface_id = f"interface:{namespace}::{interface_info['name']}" if namespace != "global" else f"interface:{interface_info['name']}"
+                elements['interfaces'][interface_id] = interface_info
+        
+        # Handle trait declarations
+        elif node_type == 'trait_declaration':
+            trait_info = self._extract_trait_tree_sitter(node, source_code, namespace)
+            if trait_info:
+                trait_id = f"trait:{namespace}::{trait_info['name']}" if namespace != "global" else f"trait:{trait_info['name']}"
+                elements['traits'][trait_id] = trait_info
+        
+        # Handle enum declarations (PHP 8.1+)
+        elif node_type == 'enum_declaration':
+            enum_info = self._extract_enum_tree_sitter(node, source_code, namespace)
+            if enum_info:
+                enum_id = f"enum:{namespace}::{enum_info['name']}" if namespace != "global" else f"enum:{enum_info['name']}"
+                elements['enums'][enum_id] = enum_info
+        
+        # Handle global constants
+        elif node_type == 'const_declaration' and self._is_global_context(node):
+            const_info = self._extract_constant_tree_sitter(node, source_code, namespace)
+            if const_info:
+                const_id = f"const:{namespace}::{const_info['name']}" if namespace != "global" else f"const:{const_info['name']}"
+                elements['constants'][const_id] = const_info
+        
+        # Recursively process child nodes
+        for child in node.children:
+            self._process_tree_sitter_node(child, elements, namespace, source_code)
+
+    def _extract_tree_sitter_text(self, node, source_code: str, field_name: str = None) -> str:
+        """Extract text from a Tree-sitter node."""
+        if field_name:
+            # Try to find a specific field
+            for child in node.children:
+                if child.type == field_name or (hasattr(child, 'field_name') and child.field_name == field_name):
+                    return source_code[child.start_byte:child.end_byte]
+        
+        # Fallback to node text
+        return source_code[node.start_byte:node.end_byte]
+
+    def _extract_use_statement(self, node, source_code: str) -> Optional[Dict[str, Any]]:
+        """Extract use statement information from Tree-sitter node."""
+        use_text = source_code[node.start_byte:node.end_byte]
+        # Simplified use statement parsing - could be enhanced
+        return {
+            'name': use_text.strip(),
+            'alias': None,
+            'type': 'normal'
+        }
+
+    def _extract_function_tree_sitter(self, node, source_code: str, namespace: str) -> Optional[Dict[str, Any]]:
+        """Extract function information from Tree-sitter node."""
+        func_name = None
+        params = []
+        return_type = None
+        
+        for child in node.children:
+            if child.type == 'name':
+                func_name = source_code[child.start_byte:child.end_byte]
+            elif child.type == 'formal_parameters':
+                params = self._extract_parameters_tree_sitter(child, source_code)
+            elif child.type == 'return_type':
+                return_type = source_code[child.start_byte:child.end_byte]
+        
+        if not func_name:
+            return None
+        
+        return {
+            'name': func_name,
+            'namespace': namespace,
+            'params': params,
+            'return_type': return_type,
+            'body_summary': {'source_hash': hash(source_code[node.start_byte:node.end_byte]), 'line_count': node.end_point[0] - node.start_point[0]},
+            'docstring': None,  # Tree-sitter doesn't parse comments by default
+            'start_line': node.start_point[0] + 1,
+            'attributes': []  # Could be extracted from attribute nodes
+        }
+
+    def _extract_parameters_tree_sitter(self, params_node, source_code: str) -> List[Dict[str, Any]]:
+        """Extract function parameters from Tree-sitter node."""
+        params = []
+        for child in params_node.children:
+            if child.type == 'simple_parameter' or child.type == 'typed_parameter':
+                param_info = {'name': None, 'type': None, 'default': False}
+                
+                for param_child in child.children:
+                    if param_child.type == 'variable_name':
+                        param_info['name'] = source_code[param_child.start_byte:param_child.end_byte]
+                    elif param_child.type == 'type':
+                        param_info['type'] = source_code[param_child.start_byte:param_child.end_byte]
+                    elif param_child.type == 'default_value':
+                        param_info['default'] = True
+                
+                if param_info['name']:
+                    params.append(param_info)
+        
+        return params
+
+    def _extract_class_tree_sitter(self, node, source_code: str, namespace: str) -> Optional[Dict[str, Any]]:
+        """Extract class information from Tree-sitter node."""
+        class_name = None
+        extends = None
+        implements = []
+        methods = {}
+        properties = {}
+        constants = {}
+        
+        for child in node.children:
+            if child.type == 'name':
+                class_name = source_code[child.start_byte:child.end_byte]
+            elif child.type == 'base_clause':
+                extends = source_code[child.start_byte:child.end_byte]
+            elif child.type == 'class_interface_clause':
+                # Extract implemented interfaces
+                implements = [source_code[iface.start_byte:iface.end_byte] for iface in child.children if iface.type == 'name']
+            elif child.type == 'declaration_list':
+                # Process class members
+                for member in child.children:
+                    if member.type == 'method_declaration':
+                        method_info = self._extract_function_tree_sitter(member, source_code, namespace)
+                        if method_info:
+                            method_id = f"method:{class_name}::{method_info['name']}"
+                            methods[method_id] = method_info
+                    elif member.type == 'property_declaration':
+                        prop_info = self._extract_property_tree_sitter(member, source_code)
+                        if prop_info:
+                            prop_id = f"prop:{class_name}::{prop_info['name']}"
+                            properties[prop_id] = prop_info
+                    elif member.type == 'const_declaration':
+                        const_info = self._extract_constant_tree_sitter(member, source_code, namespace)
+                        if const_info:
+                            const_id = f"const:{class_name}::{const_info['name']}"
+                            constants[const_id] = const_info
+        
+        if not class_name:
+            return None
+        
+        return {
+            'name': class_name,
+            'namespace': namespace,
+            'extends': extends,
+            'implements': implements,
+            'methods': methods,
+            'properties': properties,
+            'constants': constants,
+            'docstring': None,
+            'start_line': node.start_point[0] + 1,
+            'attributes': [],
+            'is_abstract': 'abstract' in source_code[node.start_byte:node.end_byte].lower(),
+            'is_final': 'final' in source_code[node.start_byte:node.end_byte].lower(),
+            'is_readonly': 'readonly' in source_code[node.start_byte:node.end_byte].lower()  # PHP 8.2+
+        }
+
+    def _extract_property_tree_sitter(self, node, source_code: str) -> Optional[Dict[str, Any]]:
+        """Extract property information from Tree-sitter node."""
+        prop_name = None
+        prop_type = None
+        visibility = 'public'
+        is_static = False
+        
+        for child in node.children:
+            if child.type == 'variable_name':
+                prop_name = source_code[child.start_byte:child.end_byte]
+            elif child.type == 'type':
+                prop_type = source_code[child.start_byte:child.end_byte]
+            elif child.type == 'visibility_modifier':
+                visibility = source_code[child.start_byte:child.end_byte]
+            elif child.type == 'static_modifier':
+                is_static = True
+        
+        if not prop_name:
+            return None
+        
+        return {
+            'name': prop_name,
+            'type': prop_type,
+            'visibility': visibility,
+            'is_static': is_static,
+            'default_value': None,  # Could be extracted
+            'docstring': None,
+            'start_line': node.start_point[0] + 1,
+            'attributes': []
+        }
+
+    def _extract_interface_tree_sitter(self, node, source_code: str, namespace: str) -> Optional[Dict[str, Any]]:
+        """Extract interface information from Tree-sitter node."""
+        interface_name = None
+        extends = []
+        methods = {}
+        constants = {}
+        
+        for child in node.children:
+            if child.type == 'name':
+                interface_name = source_code[child.start_byte:child.end_byte]
+            elif child.type == 'base_clause':
+                extends = [source_code[ext.start_byte:ext.end_byte] for ext in child.children if ext.type == 'name']
+            elif child.type == 'declaration_list':
+                for member in child.children:
+                    if member.type == 'method_declaration':
+                        method_info = self._extract_function_tree_sitter(member, source_code, namespace)
+                        if method_info:
+                            method_id = f"method:{interface_name}::{method_info['name']}"
+                            methods[method_id] = method_info
+                    elif member.type == 'const_declaration':
+                        const_info = self._extract_constant_tree_sitter(member, source_code, namespace)
+                        if const_info:
+                            const_id = f"const:{interface_name}::{const_info['name']}"
+                            constants[const_id] = const_info
+        
+        if not interface_name:
+            return None
+        
+        return {
+            'name': interface_name,
+            'namespace': namespace,
+            'extends': extends,
+            'methods': methods,
+            'constants': constants,
+            'docstring': None,
+            'start_line': node.start_point[0] + 1
+        }
+
+    def _extract_trait_tree_sitter(self, node, source_code: str, namespace: str) -> Optional[Dict[str, Any]]:
+        """Extract trait information from Tree-sitter node."""
+        trait_name = None
+        methods = {}
+        properties = {}
+        
+        for child in node.children:
+            if child.type == 'name':
+                trait_name = source_code[child.start_byte:child.end_byte]
+            elif child.type == 'declaration_list':
+                for member in child.children:
+                    if member.type == 'method_declaration':
+                        method_info = self._extract_function_tree_sitter(member, source_code, namespace)
+                        if method_info:
+                            method_id = f"method:{trait_name}::{method_info['name']}"
+                            methods[method_id] = method_info
+                    elif member.type == 'property_declaration':
+                        prop_info = self._extract_property_tree_sitter(member, source_code)
+                        if prop_info:
+                            prop_id = f"prop:{trait_name}::{prop_info['name']}"
+                            properties[prop_id] = prop_info
+        
+        if not trait_name:
+            return None
+        
+        return {
+            'name': trait_name,
+            'namespace': namespace,
+            'methods': methods,
+            'properties': properties,
+            'docstring': None,
+            'start_line': node.start_point[0] + 1
+        }
+
+    def _extract_enum_tree_sitter(self, node, source_code: str, namespace: str) -> Optional[Dict[str, Any]]:
+        """Extract enum information from Tree-sitter node (PHP 8.1+)."""
+        enum_name = None
+        enum_type = None
+        cases = []
+        
+        for child in node.children:
+            if child.type == 'name':
+                enum_name = source_code[child.start_byte:child.end_byte]
+            elif child.type == 'enum_type':
+                enum_type = source_code[child.start_byte:child.end_byte]
+            elif child.type == 'declaration_list':
+                for member in child.children:
+                    if member.type == 'enum_case':
+                        case_name = None
+                        case_value = None
+                        for case_child in member.children:
+                            if case_child.type == 'name':
+                                case_name = source_code[case_child.start_byte:case_child.end_byte]
+                            elif case_child.type == 'value':
+                                case_value = source_code[case_child.start_byte:case_child.end_byte]
+                        if case_name:
+                            cases.append({'name': case_name, 'value': case_value})
+        
+        if not enum_name:
+            return None
+        
+        return {
+            'name': enum_name,
+            'namespace': namespace,
+            'type': enum_type,
+            'cases': cases,
+            'docstring': None,
+            'start_line': node.start_point[0] + 1
+        }
+
+    def _extract_constant_tree_sitter(self, node, source_code: str, namespace: str) -> Optional[Dict[str, Any]]:
+        """Extract constant information from Tree-sitter node."""
+        const_name = None
+        const_value = None
+        
+        for child in node.children:
+            if child.type == 'name':
+                const_name = source_code[child.start_byte:child.end_byte]
+            elif child.type == 'value':
+                const_value = source_code[child.start_byte:child.end_byte]
+        
+        if not const_name:
+            return None
+        
+        return {
+            'name': const_name,
+            'namespace': namespace,
+            'value': const_value,
+            'start_line': node.start_point[0] + 1
+        }
+
+    def _is_global_context(self, node) -> bool:
+        """Check if a node is in global context (not inside a class/interface/trait)."""
+        parent = node.parent
+        while parent:
+            if parent.type in ['class_declaration', 'interface_declaration', 'trait_declaration']:
+                return False
+            parent = parent.parent
+        return True
+
+    def _parse_code_phply(self, content: str) -> Dict[str, Any]:
+        """Parse PHP code using phply (legacy method)."""
+    def _parse_code_phply(self, content: str) -> Dict[str, Any]:
+        """Parse PHP code using phply (legacy method)."""
+        if not phply_available:
+            raise Exception("phply not available")
 
         elements: Dict[str, Any] = {
             'functions': {}, # Key: func:name, Value: dict of details
@@ -88,193 +514,211 @@ class PHPAnalyzer(LanguageAnalyzer):
         }
 
         try:
-            tree = phpparser.parse(content)
+            parser = phpparse.make_parser()
+            tree = parser.parse(content, lexer=phplex.lexer)
         except Exception as e:
-            print(f"Error parsing PHP code with phpparser: {e}", file=sys.stderr)
-            # Optionally, fallback to regex on parsing failure
-            return self._parse_code_regex_fallback(content)
+            raise Exception(f"phply parsing failed: {e}")
 
         current_namespace = "global" # Default namespace
 
-        for node in tree.children: # Assuming tree.children gives top-level nodes
-            if isinstance(node, php_ast.Namespace):
-                namespace_name = node.name.name if node.name else "global"
+        for node in tree: # phply returns a list of top-level nodes
+            if isinstance(node, phpast.Namespace):
+                namespace_name = node.name if node.name else "global"
                 current_namespace = namespace_name
                 elements['namespaces'][f"namespace:{namespace_name}"] = {
                     'name': namespace_name,
-                    'start_line': node.lineno,
-                    'end_line': node.end_lineno,
+                    'start_line': getattr(node, 'lineno', 0),
                     'children': [] # Store top-level elements within this namespace
                 }
                 # Process nodes within the namespace
-                for sub_node in node.children: # Assuming namespaces can have children
+                for sub_node in node.nodes: # phply namespace has 'nodes' attribute
                     self._parse_node(sub_node, elements, current_namespace)
-            elif isinstance(node, php_ast.UseDeclarations):
-                 for use_node in node.uses:
-                     elements['uses'].append({
-                         'name': use_node.name.name,
-                         'alias': use_node.alias.name if use_node.alias else None,
-                         'type': use_node.type # function, const, or normal
-                     })
+            elif isinstance(node, phpast.UseDeclarations):
+                # Handle different possible attributes for use declarations
+                use_nodes = getattr(node, 'uses', getattr(node, 'declarations', []))
+                for use_node in use_nodes:
+                    elements['uses'].append({
+                        'name': getattr(use_node, 'name', str(use_node)),
+                        'alias': getattr(use_node, 'alias', None),
+                        'type': getattr(use_node, 'type', 'normal') # function, const, or normal
+                    })
             else:
                 # Parse top-level elements in the global namespace
                 self._parse_node(node, elements, current_namespace)
         
         # For simplicity, a placeholder for global code analysis
-        elements['global_code'] = self._parse_body(tree.children)
+        elements['global_code'] = self._parse_body(tree)
 
         return elements
 
-    def _parse_node(self, node: 'php_ast.Node', elements: Dict[str, Any], namespace: str): # String literal type hint
-        """Helper function to parse individual PHP AST nodes."""
-        if not php_ast: return # Guard clause, nothing to do if no AST module
+    def _parse_node(self, node, elements: Dict[str, Any], namespace: str):
+        """Helper function to parse individual PHP AST nodes using phply."""
+        if not phply_available:
+            return # Guard clause, nothing to do if no AST module
 
         node_namespace_prefix = f"{namespace}::" if namespace != "global" else ""
 
-        if isinstance(node, php_ast.FunctionDeclaration):
-            func_name = node.name.name
+        if isinstance(node, phpast.Function):
+            func_name = node.name
             func_id = f"func:{node_namespace_prefix}{func_name}"
             elements['functions'][func_id] = {
                 'name': func_name,
                 'namespace': namespace,
-                'params': self._parse_parameters(getattr(node, 'params', None)),
-                'return_type': php_ast.dump(node.return_type) if getattr(node, 'return_type', None) else None,
-                'body_summary': self._parse_body(node.body.children if hasattr(node, 'body') and hasattr(node.body, 'children') else []),
+                'params': self._parse_parameters(getattr(node, 'params', [])),
+                'return_type': str(getattr(node, 'return_type', None)) if getattr(node, 'return_type', None) else None,
+                'body_summary': self._parse_body(getattr(node, 'nodes', [])),
                 'docstring': self._extract_docstring(node),
-                'attributes': [php_ast.dump(attr) for attr in node.attributes] if hasattr(node, 'attributes') else [],
-                'start_line': node.lineno,
-                'end_line': node.end_lineno,
+                'start_line': getattr(node, 'lineno', 0),
             }
-        elif isinstance(node, php_ast.ClassDeclaration):
-            class_name = node.name.name
+        elif isinstance(node, phpast.Class):
+            class_name = node.name
             class_id = f"class:{node_namespace_prefix}{class_name}"
             elements['classes'][class_id] = {
                 'name': class_name,
                 'namespace': namespace,
-                'extends': node.extends.name if hasattr(node, 'extends') and node.extends else None,
-                'implements': [impl.name for impl in node.implements] if hasattr(node, 'implements') else [],
+                'extends': getattr(node, 'extends', None),
+                'implements': getattr(node, 'implements', []),
                 'methods': {},
                 'properties': {},
                 'constants': {},
                 'docstring': self._extract_docstring(node),
-                'attributes': [php_ast.dump(attr) for attr in node.attributes] if hasattr(node, 'attributes') else [],
-                'is_abstract': getattr(node, 'is_abstract', False),
-                'is_final': getattr(node, 'is_final', False),
-                'start_line': node.lineno,
-                'end_line': node.end_lineno,
+                'start_line': getattr(node, 'lineno', 0),
             }
             # Parse class members
-            for member in node.body.children: # Assuming class body has children
-                if isinstance(member, php_ast.MethodDeclaration):
-                    method_name = member.name.name
+            for member in getattr(node, 'nodes', []):
+                if isinstance(member, phpast.Method):
+                    method_name = member.name
                     method_id = f"method:{class_name}::{method_name}"
                     elements['classes'][class_id]['methods'][method_id] = {
                         'name': method_name,
-                        'params': self._parse_parameters(getattr(member, 'params', None)),
-                        'return_type': php_ast.dump(member.return_type) if getattr(member, 'return_type', None) else None,
-                        'body_summary': self._parse_body(member.body.children if hasattr(member, 'body') and hasattr(member.body, 'children') else []),
-                        'visibility': member.visibility, # public, protected, private
+                        'params': self._parse_parameters(getattr(member, 'params', [])),
+                        'return_type': str(getattr(member, 'return_type', None)) if getattr(member, 'return_type', None) else None,
+                        'body_summary': self._parse_body(getattr(member, 'nodes', [])),
+                        'visibility': getattr(member, 'visibility', 'public'),
                         'is_static': getattr(member, 'is_static', False),
                         'is_abstract': getattr(member, 'is_abstract', False),
                         'is_final': getattr(member, 'is_final', False),
                         'docstring': self._extract_docstring(member),
-                        'attributes': [php_ast.dump(attr) for attr in member.attributes] if hasattr(member, 'attributes') else [],
-                        'start_line': member.lineno,
-                        'end_line': member.end_lineno,
+                        'start_line': getattr(member, 'lineno', 0),
                     }
-                elif isinstance(member, php_ast.PropertyDeclaration):
-                    # Properties can declare multiple props like: public $a, $b;
-                    for prop_item in member.props:
-                        prop_name = prop_item.name.name
-                        prop_id = f"prop:{class_name}::{prop_name}"
-                        elements['classes'][class_id]['properties'][prop_id] = {
-                            'name': prop_name,
-                            'type': php_ast.dump(member.type) if hasattr(member, 'type') and member.type else None,
-                            'visibility': member.visibility,
-                            'is_static': getattr(member, 'is_static', False),
-                            'default_value': php_ast.dump(prop_item.default) if hasattr(prop_item, 'default') and prop_item.default else None,
-                            'docstring': self._extract_docstring(member), # Docstring is usually on the declaration
-                            'attributes': [php_ast.dump(attr) for attr in member.attributes] if hasattr(member, 'attributes') else [],
-                            'start_line': member.lineno,
-                            'end_line': member.end_lineno,
-                        }
-                elif isinstance(member, php_ast.ClassConstantDeclaration):
-                     for const_item in member.consts:
-                        const_name = const_item.name.name
-                        const_id = f"const:{class_name}::{const_name}"
-                        elements['classes'][class_id]['constants'][const_id] = {
-                            'name': const_name,
-                            'value': php_ast.dump(const_item.value), # Or a better representation
-                            'visibility': getattr(member, 'visibility', 'public'), # Constants have visibility in PHP 7.1+
-                            'docstring': self._extract_docstring(member),
-                            'start_line': member.lineno,
-                            'end_line': member.end_lineno,
-                        }
-        elif isinstance(node, php_ast.InterfaceDeclaration):
-            interface_name = node.name.name
+                elif isinstance(member, phpast.ClassVariables):
+                    # ClassVariables contains multiple variable declarations
+                    for var in getattr(member, 'vars', []):
+                        if hasattr(var, 'name'):
+                            prop_name = var.name
+                            prop_id = f"prop:{class_name}::{prop_name}"
+                            elements['classes'][class_id]['properties'][prop_id] = {
+                                'name': prop_name,
+                                'visibility': getattr(member, 'visibility', 'public'),
+                                'is_static': getattr(member, 'is_static', False),
+                                'default_value': str(getattr(var, 'initial', None)) if getattr(var, 'initial', None) else None,
+                                'docstring': self._extract_docstring(member),
+                                'start_line': getattr(member, 'lineno', 0),
+                            }
+                elif isinstance(member, phpast.ClassConstants):
+                    # ClassConstants contains multiple constant declarations
+                    for const in getattr(member, 'constants', []):
+                        if hasattr(const, 'name'):
+                            const_name = const.name
+                            const_id = f"const:{class_name}::{const_name}"
+                            elements['classes'][class_id]['constants'][const_id] = {
+                                'name': const_name,
+                                'value': str(getattr(const, 'value', None)),
+                                'start_line': getattr(member, 'lineno', 0),
+                            }
+        elif isinstance(node, phpast.Interface):
+            interface_name = node.name
             interface_id = f"interface:{node_namespace_prefix}{interface_name}"
             elements['interfaces'][interface_id] = {
                 'name': interface_name,
                 'namespace': namespace,
-                'extends': [ext.name for ext in node.extends] if hasattr(node, 'extends') else [],
-                'methods': {}, # Store method signatures
+                'extends': getattr(node, 'extends', []),
+                'methods': {},
                 'constants': {},
                 'docstring': self._extract_docstring(node),
-                'start_line': node.lineno,
-                'end_line': node.end_lineno,
+                'start_line': getattr(node, 'lineno', 0),
             }
-            for member in node.body.children:
-                if isinstance(member, php_ast.MethodDeclaration): # Interface methods
-                    method_name = member.name.name
-                    elements['interfaces'][interface_id]['methods'][f"method:{interface_name}::{method_name}"] = {
+            # Parse interface members
+            for member in getattr(node, 'nodes', []):
+                if isinstance(member, phpast.Method): # Interface methods
+                    method_name = member.name
+                    method_id = f"method:{interface_name}::{method_name}"
+                    elements['interfaces'][interface_id]['methods'][method_id] = {
                          'name': method_name,
-                         'params': self._parse_parameters(getattr(member, 'params', None)),
-                         'return_type': php_ast.dump(member.return_type) if getattr(member, 'return_type', None) else None,
-                         'visibility': member.visibility,
-                         'is_static': getattr(member, 'is_static', False),
+                         'params': self._parse_parameters(getattr(member, 'params', [])),
+                         'return_type': str(getattr(member, 'return_type', None)) if getattr(member, 'return_type', None) else None,
                          'docstring': self._extract_docstring(member),
+                         'start_line': getattr(member, 'lineno', 0),
                     }
-                elif isinstance(member, php_ast.ClassConstantDeclaration): # Interface constants
-                    for const_item in member.consts:
-                        const_name = const_item.name.name
-                        elements['interfaces'][interface_id]['constants'][f"const:{interface_name}::{const_name}"] = {
-                            'name': const_name,
-                            'value': php_ast.dump(const_item.value),
-                            'docstring': self._extract_docstring(member),
-                        }
-        elif isinstance(node, php_ast.TraitDeclaration):
-            trait_name = node.name.name
+                elif isinstance(member, phpast.ClassConstants): # Interface constants
+                    for const in getattr(member, 'constants', []):
+                        if hasattr(const, 'name'):
+                            const_name = const.name
+                            const_id = f"const:{interface_name}::{const_name}"
+                            elements['interfaces'][interface_id]['constants'][const_id] = {
+                                'name': const_name,
+                                'value': str(getattr(const, 'value', None)),
+                                'start_line': getattr(member, 'lineno', 0),
+                            }
+        elif isinstance(node, phpast.Trait):
+            trait_name = node.name
             trait_id = f"trait:{node_namespace_prefix}{trait_name}"
             elements['traits'][trait_id] = {
                 'name': trait_name,
                 'namespace': namespace,
-                'methods': {}, # Similar to class methods
-                'properties': {}, # Similar to class properties
-                'uses': [], # For trait adaptations (insteadof, as) - complex
+                'methods': {},
+                'properties': {},
                 'docstring': self._extract_docstring(node),
-                'start_line': node.lineno,
-                'end_line': node.end_lineno,
+                'start_line': getattr(node, 'lineno', 0),
             }
-            # Parse trait members (methods, properties) similar to classes
-            # ... (implementation would be similar to class member parsing) ...
-        elif isinstance(node, php_ast.ConstantDeclaration): # Global constants
-            for const_item in node.consts:
-                const_name = const_item.name.name
-                const_id = f"const:{node_namespace_prefix}{const_name}"
-                elements['constants'][const_id] = {
-                    'name': const_name,
-                    'namespace': namespace,
-                    'value': php_ast.dump(const_item.value),
-                    'docstring': self._extract_docstring(node),
-                    'start_line': node.lineno,
-                    'end_line': node.end_lineno,
-                }
+            # Parse trait members (similar to class members)
+            for member in getattr(node, 'nodes', []):
+                if isinstance(member, phpast.Method):
+                    method_name = member.name
+                    method_id = f"method:{trait_name}::{method_name}"
+                    elements['traits'][trait_id]['methods'][method_id] = {
+                        'name': method_name,
+                        'params': self._parse_parameters(getattr(member, 'params', [])),
+                        'return_type': str(getattr(member, 'return_type', None)) if getattr(member, 'return_type', None) else None,
+                        'body_summary': self._parse_body(getattr(member, 'nodes', [])),
+                        'visibility': getattr(member, 'visibility', 'public'),
+                        'is_static': getattr(member, 'is_static', False),
+                        'is_abstract': getattr(member, 'is_abstract', False),
+                        'is_final': getattr(member, 'is_final', False),
+                        'docstring': self._extract_docstring(member),
+                        'start_line': getattr(member, 'lineno', 0),
+                    }
+                elif isinstance(member, phpast.ClassVariables):
+                    for var in getattr(member, 'vars', []):
+                        if hasattr(var, 'name'):
+                            prop_name = var.name
+                            prop_id = f"prop:{trait_name}::{prop_name}"
+                            elements['traits'][trait_id]['properties'][prop_id] = {
+                                'name': prop_name,
+                                'visibility': getattr(member, 'visibility', 'public'),
+                                'is_static': getattr(member, 'is_static', False),
+                                'default_value': str(getattr(var, 'initial', None)) if getattr(var, 'initial', None) else None,
+                                'docstring': self._extract_docstring(member),
+                                'start_line': getattr(member, 'lineno', 0),
+                            }
+        elif isinstance(node, phpast.ConstantDeclarations):
+            # Global constants
+            for const in getattr(node, 'constants', []):
+                if hasattr(const, 'name'):
+                    const_name = const.name
+                    const_id = f"const:{node_namespace_prefix}{const_name}"
+                    elements['constants'][const_id] = {
+                        'name': const_name,
+                        'namespace': namespace,
+                        'value': str(getattr(const, 'value', None)),
+                        'start_line': getattr(node, 'lineno', 0),
+                    }
 
     def _parse_code_regex_fallback(self, content: str) -> Dict[str, Any]:
         """Original regex-based parsing as a fallback."""
         elements = {
             'functions': {}, 'classes': {}, 'variables': set(), 'includes': [],
-            'interfaces': {}, 'traits': {}, 'namespaces': {}, 'constants': {}, 'uses': [], 'global_code': {}
+            'interfaces': {}, 'traits': {}, 'namespaces': {}, 'constants': {}, 'uses': [], 'global_code': {}, 'enums': {}
         }
         # Extract PHP functions
         function_pattern = r'function\s+([a-zA-Z_]\w*)\s*\([^)]*\)'
@@ -312,7 +756,7 @@ class PHPAnalyzer(LanguageAnalyzer):
         events: List[Dict[str, Any]] = []
         location = "php_file" # Placeholder, will be overwritten by MultiLanguageAnalyzer
 
-        # Fallback to simpler diff if using regex data (e.g. phpparser failed)
+        # Fallback to simpler diff if using regex data (e.g. phply failed)
         # We can check this by seeing if 'params' exists for functions, a feature of the new parser.
         is_detailed_parsing = True
         if list(before['functions'].values()) and 'params' not in list(before['functions'].values())[0]:
@@ -352,6 +796,9 @@ class PHPAnalyzer(LanguageAnalyzer):
 
         # Compare Traits
         self._compare_top_level_elements(before, after, 'traits', 'Trait', events, location, self._compare_trait_details)
+
+        # Compare Enums (PHP 8.1+)
+        self._compare_top_level_elements(before, after, 'enums', 'Enum', events, location, self._compare_enum_details)
 
         # Compare global code (very basic)
         if before.get('global_code', {}).get('source_hash') != after.get('global_code', {}).get('source_hash'):
@@ -525,9 +972,9 @@ class PHPAnalyzer(LanguageAnalyzer):
             events.append({'event_type': 'php_inheritance_changed', 'node_id': class_id, 'location': location,
                            'details': f"{context}extends changed from {before_class.get('extends')} to {after_class.get('extends')}"})
 
-        if sorted(before_class.get('implements', [])) != sorted(after_class.get('implements', [])):
-            added = set(after_class.get('implements', [])) - set(before_class.get('implements', []))
-            removed = set(before_class.get('implements', [])) - set(after_class.get('implements', []))
+        if sorted(before_class.get('implements', []) or []) != sorted(after_class.get('implements', []) or []):
+            added = set(after_class.get('implements', []) or []) - set(before_class.get('implements', []) or [])
+            removed = set(before_class.get('implements', []) or []) - set(after_class.get('implements', []) or [])
             details = []
             if added: details.append(f"added interfaces: {', '.join(added)}")
             if removed: details.append(f"removed interfaces: {', '.join(removed)}")
@@ -562,9 +1009,11 @@ class PHPAnalyzer(LanguageAnalyzer):
     def _compare_interface_details(self, before_iface: Dict[str, Any], after_iface: Dict[str, Any], iface_id: str,
                                    events: List[Dict[str, Any]], location: str):
         context = f"interface {after_iface['name']} -> "
-        if sorted(before_iface.get('extends', [])) != sorted(after_iface.get('extends', [])):
+        before_extends = before_iface.get('extends', []) or []
+        after_extends = after_iface.get('extends', []) or []
+        if sorted(before_extends) != sorted(after_extends):
             events.append({'event_type': 'php_interface_extends_changed', 'node_id': iface_id, 'location': location,
-                           'details': f"{context}extends changed from {before_iface.get('extends')} to {after_iface.get('extends')}"})
+                           'details': f"{context}extends changed from {before_extends} to {after_extends}"})
 
         self._compare_docstring(before_iface.get('docstring'), after_iface.get('docstring'), iface_id, events, location, context="Interface ")
 
@@ -591,12 +1040,194 @@ class PHPAnalyzer(LanguageAnalyzer):
         # if before_trait.get('adaptations') != after_trait.get('adaptations'):
         #     events.append({'event_type': 'php_trait_adaptation_changed', ...})
 
+    def _compare_enum_details(self, before_enum: Dict[str, Any], after_enum: Dict[str, Any], enum_id: str,
+                              events: List[Dict[str, Any]], location: str):
+        """Compare enum details (PHP 8.1+ feature)."""
+        context = f"enum {after_enum['name']} -> "
+        
+        # Compare enum type (string, int)
+        if before_enum.get('type') != after_enum.get('type'):
+            events.append({'event_type': 'php_enum_type_changed', 'node_id': enum_id, 'location': location,
+                           'details': f"{context}type changed from {before_enum.get('type')} to {after_enum.get('type')}"})
+        
+        # Compare enum cases
+        before_cases = {case['name']: case.get('value') for case in before_enum.get('cases', [])}
+        after_cases = {case['name']: case.get('value') for case in after_enum.get('cases', [])}
+        
+        added_cases = set(after_cases.keys()) - set(before_cases.keys())
+        removed_cases = set(before_cases.keys()) - set(after_cases.keys())
+        
+        if added_cases:
+            events.append({'event_type': 'php_enum_case_added', 'node_id': enum_id, 'location': location,
+                           'details': f"{context}added cases: {', '.join(added_cases)}"})
+        if removed_cases:
+            events.append({'event_type': 'php_enum_case_removed', 'node_id': enum_id, 'location': location,
+                           'details': f"{context}removed cases: {', '.join(removed_cases)}"})
+        
+        # Check for value changes in existing cases
+        for case_name in set(before_cases.keys()) & set(after_cases.keys()):
+            if before_cases[case_name] != after_cases[case_name]:
+                events.append({'event_type': 'php_enum_case_value_changed', 'node_id': enum_id, 'location': location,
+                               'details': f"{context}case {case_name} value changed"})
+        
+        self._compare_docstring(before_enum.get('docstring'), after_enum.get('docstring'), enum_id, events, location, context="Enum ")
+
 
 class JavaScriptAnalyzer(LanguageAnalyzer):
-    """Semantic analyzer for JavaScript code."""
+    """Semantic analyzer for JavaScript code using real AST parsing."""
+    
+    def _extract_from_ast_node(self, node, elements):
+        """Recursively extract semantic elements from AST nodes."""
+        if not hasattr(node, 'type'):
+            return
+            
+        node_type = getattr(node, 'type', None)
+        
+        # Function declarations
+        if node_type == 'FunctionDeclaration':
+            func_id = getattr(node, 'id', None)
+            func_name = getattr(func_id, 'name', None) if func_id else None
+            if func_name:
+                params = []
+                for param in getattr(node, 'params', []):
+                    param_name = getattr(param, 'name', None)
+                    if param_name:
+                        params.append(param_name)
+                    
+                elements['functions'][f'func:{func_name}'] = {
+                    'name': func_name,
+                    'params': params,
+                    'type': 'FunctionDeclaration',
+                    'location': getattr(node, 'loc', {})
+                }
+        
+        # Function expressions and arrow functions
+        elif node_type in ['FunctionExpression', 'ArrowFunctionExpression']:
+            func_id = getattr(node, 'id', None)
+            func_name = getattr(func_id, 'name', None) if func_id else None
+            if func_name:
+                params = []
+                for param in getattr(node, 'params', []):
+                    param_name = getattr(param, 'name', None)
+                    if param_name:
+                        params.append(param_name)
+                            
+                elements['functions'][f'func:{func_name}'] = {
+                    'name': func_name,
+                    'params': params,
+                    'type': node_type,
+                    'location': getattr(node, 'loc', {})
+                }
+        
+        # Variable declarations with function assignments
+        elif node_type == 'VariableDeclaration':
+            for declarator in getattr(node, 'declarations', []):
+                var_id = getattr(declarator, 'id', None)
+                var_name = getattr(var_id, 'name', None) if var_id else None
+                if var_name:
+                    elements['variables'].add(var_name)
+                    
+                    # Check if it's a function assignment
+                    init = getattr(declarator, 'init', None)
+                    init_type = getattr(init, 'type', None) if init else None
+                    if init_type in ['FunctionExpression', 'ArrowFunctionExpression']:
+                        params = []
+                        for param in getattr(init, 'params', []):
+                            param_name = getattr(param, 'name', None)
+                            if param_name:
+                                params.append(param_name)
+                                    
+                        elements['functions'][f'func:{var_name}'] = {
+                            'name': var_name,
+                            'params': params,
+                            'type': init_type,
+                            'location': getattr(declarator, 'loc', {})
+                        }
+        
+        # Class declarations
+        elif node_type == 'ClassDeclaration':
+            class_id = getattr(node, 'id', None)
+            class_name = getattr(class_id, 'name', None) if class_id else None
+            if class_name:
+                methods = []
+                constructor_found = False
+                class_body = getattr(node, 'body', None)
+                if class_body:
+                    for method in getattr(class_body, 'body', []):
+                        if getattr(method, 'type', None) == 'MethodDefinition':
+                            method_key = getattr(method, 'key', None)
+                            method_name = getattr(method_key, 'name', None) if method_key else None
+                            if method_name:
+                                methods.append(method_name)
+                                if method_name == 'constructor':
+                                    constructor_found = True
+                                    
+                                    # Extract constructor parameters
+                                    method_value = getattr(method, 'value', None)
+                                    if method_value:
+                                        params = []
+                                        for param in getattr(method_value, 'params', []):
+                                            param_name = getattr(param, 'name', None)
+                                            if param_name:
+                                                params.append(param_name)
+                                        
+                                        elements['functions'][f'func:{class_name}::constructor'] = {
+                                            'name': 'constructor',
+                                            'class': class_name,
+                                            'params': params,
+                                            'type': 'MethodDefinition',
+                                            'location': getattr(method, 'loc', {})
+                                        }
+                
+                superclass = None
+                superclass_node = getattr(node, 'superClass', None)
+                if superclass_node:
+                    superclass = getattr(superclass_node, 'name', None)
+                
+                elements['classes'][f'class:{class_name}'] = {
+                    'name': class_name,
+                    'methods': methods,
+                    'superclass': superclass,
+                    'location': getattr(node, 'loc', {})
+                }
+        
+        # Import declarations
+        elif node_type == 'ImportDeclaration':
+            source = getattr(node, 'source', None)
+            source_value = getattr(source, 'value', None) if source else None
+            if source_value:
+                elements['imports'].append(source_value)
+        
+        # Call expressions for require()
+        elif node_type == 'CallExpression':
+            callee = getattr(node, 'callee', None)
+            callee_name = getattr(callee, 'name', None) if callee else None
+            if callee_name == 'require':
+                args = getattr(node, 'arguments', [])
+                if args and getattr(args[0], 'type', None) == 'Literal':
+                    arg_value = getattr(args[0], 'value', None)
+                    if arg_value:
+                        elements['imports'].append(arg_value)
+        
+        # Recursively process child nodes
+        # Get all attributes that could contain child nodes
+        for attr_name in dir(node):
+            if attr_name.startswith('_'):
+                continue
+            try:
+                attr_value = getattr(node, attr_name)
+                if isinstance(attr_value, list):
+                    for item in attr_value:
+                        if hasattr(item, 'type'):
+                            self._extract_from_ast_node(item, elements)
+                elif hasattr(attr_value, 'type'):
+                    self._extract_from_ast_node(attr_value, elements)
+            except:
+                # Skip attributes that cause errors
+                continue
     
     def parse_code(self, content: str) -> Dict[str, Any]:
-        """Parse JavaScript code and extract functions, classes, variables."""
+        """Parse JavaScript code using AST and extract semantic elements."""
         elements = {
             'functions': {},
             'classes': {},
@@ -604,11 +1235,56 @@ class JavaScriptAnalyzer(LanguageAnalyzer):
             'imports': []
         }
         
-        # Extract JavaScript functions
+        if not esprima_available:
+            print("Warning: esprima not available, falling back to regex parsing", file=sys.stderr)
+            return self._parse_code_regex(content)
+        
+        try:
+            # Parse JavaScript code into AST using esprima
+            # Try script parsing first (more permissive), then module parsing
+            ast = None
+            try:
+                ast = esprima.parseScript(content, options={'loc': True, 'tolerant': True})
+            except Exception as script_error:
+                try:
+                    ast = esprima.parseModule(content, options={'loc': True, 'tolerant': True})
+                except Exception as module_error:
+                    print(f"Warning: Could not parse a file due to a syntax error.", file=sys.stderr)
+                    return self._parse_code_regex(content)
+            
+            # Extract semantic elements from AST
+            if ast and hasattr(ast, 'type') and ast.type == 'Program':
+                # Process the body of the program
+                for node in getattr(ast, 'body', []):
+                    self._extract_from_ast_node(node, elements)
+            
+        except Exception as e:
+            # Fall back to regex parsing on error
+            print(f"Warning: Could not parse a file due to a syntax error.", file=sys.stderr)
+            return self._parse_code_regex(content)
+        
+        return elements
+    
+    def _parse_code_regex(self, content: str) -> Dict[str, Any]:
+        """Fallback regex-based parsing for when AST parsing fails."""
+        elements = {
+            'functions': {},
+            'classes': {},
+            'variables': set(),
+            'imports': []
+        }
+        
+        # Extract JavaScript functions - improved patterns
         function_patterns = [
             r'function\s+([a-zA-Z_$]\w*)\s*\([^)]*\)',  # function declaration
-            r'const\s+([a-zA-Z_$]\w*)\s*=\s*\([^)]*\)\s*=>',  # arrow function
-            r'([a-zA-Z_$]\w*)\s*:\s*function\s*\([^)]*\)'  # object method
+            r'const\s+([a-zA-Z_$]\w*)\s*=\s*\([^)]*\)\s*=>', # const arrow function
+            r'let\s+([a-zA-Z_$]\w*)\s*=\s*\([^)]*\)\s*=>', # let arrow function  
+            r'var\s+([a-zA-Z_$]\w*)\s*=\s*\([^)]*\)\s*=>', # var arrow function
+            r'const\s+([a-zA-Z_$]\w*)\s*=\s*function', # const function assignment
+            r'let\s+([a-zA-Z_$]\w*)\s*=\s*function', # let function assignment
+            r'var\s+([a-zA-Z_$]\w*)\s*=\s*function', # var function assignment
+            r'([a-zA-Z_$]\w*)\s*:\s*function\s*\([^)]*\)', # object method
+            r'([a-zA-Z_$]\w*)\s*\([^)]*\)\s*\{' # method shorthand in classes/objects
         ]
         
         for pattern in function_patterns:
@@ -617,22 +1293,26 @@ class JavaScriptAnalyzer(LanguageAnalyzer):
                 elements['functions'][f'func:{func_name}'] = {
                     'name': func_name,
                     'start': match.start(),
-                    'signature': match.group(0)
+                    'signature': match.group(0),
+                    'params': [],  # Could be extracted with more complex regex
+                    'type': 'function'
                 }
         
         # Extract JavaScript classes
-        class_pattern = r'class\s+([a-zA-Z_$]\w*)'
+        class_pattern = r'class\s+([a-zA-Z_$]\w*)(?:\s+extends\s+([a-zA-Z_$]\w*))?'
         for match in re.finditer(class_pattern, content):
             class_name = match.group(1)
+            extends = match.group(2) if match.group(2) else None
             elements['classes'][f'class:{class_name}'] = {
                 'name': class_name,
-                'start': match.start()
+                'start': match.start(),
+                'extends': extends,
+                'methods': []  # Could extract methods with more parsing
             }
         
         # Extract variable declarations
         var_patterns = [
             r'(?:var|let|const)\s+([a-zA-Z_$]\w*)',
-            r'([a-zA-Z_$]\w*)\s*='
         ]
         
         for pattern in var_patterns:
@@ -661,41 +1341,151 @@ class JavaScriptAnalyzer(LanguageAnalyzer):
         
         # Added functions
         for func_id in after_funcs - before_funcs:
+            func_info = after['functions'][func_id]
             events.append({
                 'event_type': 'node_added',
                 'node_id': func_id,
                 'location': 'js_file',
-                'details': f'JavaScript function {func_id} added'
+                'details': f'JavaScript function {func_info["name"]} added'
             })
         
         # Removed functions
         for func_id in before_funcs - after_funcs:
+            func_info = before['functions'][func_id]
             events.append({
                 'event_type': 'node_removed',
                 'node_id': func_id,
                 'location': 'js_file',
-                'details': f'JavaScript function {func_id} removed'
+                'details': f'JavaScript function {func_info["name"]} removed'
             })
         
-        # Class changes (similar pattern as PHP)
+        # Modified functions (check signature/parameters)
+        for func_id in before_funcs & after_funcs:
+            before_func = before['functions'][func_id]
+            after_func = after['functions'][func_id]
+            
+            # Compare parameters if available
+            before_params = before_func.get('params', [])
+            after_params = after_func.get('params', [])
+            if before_params != after_params:
+                events.append({
+                    'event_type': 'js_function_signature_changed',
+                    'node_id': func_id,
+                    'location': 'js_file',
+                    'details': f'Function {before_func["name"]} signature changed. Before: {before_params}, After: {after_params}'
+                })
+            
+            # Compare function type (e.g., function declaration vs arrow function)
+            before_type = before_func.get('type', 'function')
+            after_type = after_func.get('type', 'function')
+            if before_type != after_type:
+                events.append({
+                    'event_type': 'js_function_type_changed',
+                    'node_id': func_id,
+                    'location': 'js_file',
+                    'details': f'Function {before_func["name"]} type changed from {before_type} to {after_type}'
+                })
+        
+        # Class changes
         before_classes = set(before['classes'].keys())
         after_classes = set(after['classes'].keys())
         
         for class_id in after_classes - before_classes:
+            class_info = after['classes'][class_id]
             events.append({
                 'event_type': 'node_added',
                 'node_id': class_id,
                 'location': 'js_file',
-                'details': f'JavaScript class {class_id} added'
+                'details': f'JavaScript class {class_info["name"]} added'
             })
         
         for class_id in before_classes - after_classes:
+            class_info = before['classes'][class_id]
             events.append({
                 'event_type': 'node_removed',
                 'node_id': class_id,
                 'location': 'js_file',
-                'details': f'JavaScript class {class_id} removed'
+                'details': f'JavaScript class {class_info["name"]} removed'
             })
+        
+        # Modified classes (check inheritance)
+        for class_id in before_classes & after_classes:
+            before_class = before['classes'][class_id]
+            after_class = after['classes'][class_id]
+            
+            # Compare inheritance
+            before_extends = before_class.get('superclass') or before_class.get('extends')
+            after_extends = after_class.get('superclass') or after_class.get('extends')
+            if before_extends != after_extends:
+                events.append({
+                    'event_type': 'js_inheritance_changed',
+                    'node_id': class_id,
+                    'location': 'js_file',
+                    'details': f'Class {before_class["name"]} inheritance changed from {before_extends} to {after_extends}'
+                })
+            
+            # Compare methods if available
+            before_methods = set(before_class.get('methods', []))
+            after_methods = set(after_class.get('methods', []))
+            if before_methods != after_methods:
+                added_methods = after_methods - before_methods
+                removed_methods = before_methods - after_methods
+                if added_methods:
+                    events.append({
+                        'event_type': 'js_class_method_added',
+                        'node_id': class_id,
+                        'location': 'js_file',
+                        'details': f'Class {before_class["name"]} added methods: {", ".join(added_methods)}'
+                    })
+                if removed_methods:
+                    events.append({
+                        'event_type': 'js_class_method_removed',
+                        'node_id': class_id,
+                        'location': 'js_file',
+                        'details': f'Class {before_class["name"]} removed methods: {", ".join(removed_methods)}'
+                    })
+        
+        # Variable changes
+        before_vars = before.get('variables', set())
+        after_vars = after.get('variables', set())
+        if before_vars != after_vars:
+            added_vars = after_vars - before_vars
+            removed_vars = before_vars - after_vars
+            if added_vars:
+                events.append({
+                    'event_type': 'js_variable_added',
+                    'node_id': 'global_scope',
+                    'location': 'js_file',
+                    'details': f'Added variables: {", ".join(sorted(added_vars))}'
+                })
+            if removed_vars:
+                events.append({
+                    'event_type': 'js_variable_removed',
+                    'node_id': 'global_scope',
+                    'location': 'js_file',
+                    'details': f'Removed variables: {", ".join(sorted(removed_vars))}'
+                })
+        
+        # Import changes
+        before_imports = set(before.get('imports', []))
+        after_imports = set(after.get('imports', []))
+        if before_imports != after_imports:
+            added_imports = after_imports - before_imports
+            removed_imports = before_imports - after_imports
+            if added_imports:
+                events.append({
+                    'event_type': 'js_dependency_added',
+                    'node_id': 'module',
+                    'location': 'js_file',
+                    'details': f'Added imports: {", ".join(sorted(added_imports))}'
+                })
+            if removed_imports:
+                events.append({
+                    'event_type': 'js_dependency_removed',
+                    'node_id': 'module',
+                    'location': 'js_file',
+                    'details': f'Removed imports: {", ".join(sorted(removed_imports))}'
+                })
         
         return events
 
@@ -754,6 +1544,75 @@ if __name__ == "__main__":
     analyzer = MultiLanguageAnalyzer()
     print(f"Supported languages: {analyzer.get_supported_languages()}")
     
+    # Display which parsers are available
+    print(f"\nAvailable PHP parsers:")
+    print(f"  Tree-sitter (modern PHP 7.4+/8.x): {'✓' if tree_sitter_available else '✗'}")
+    print(f"  phply (legacy PHP 5.x-7.3): {'✓' if phply_available else '✗'}")
+    
+    # Test modern PHP features first (if Tree-sitter is available)
+    if tree_sitter_available:
+        print("\n--- MODERN PHP 8.x ANALYSIS TEST (Tree-sitter) ---")
+        
+        php_modern_before = '''<?php
+namespace App\\Models;
+
+use App\\Traits\\HasTimestamps;
+
+enum Status: string {
+    case Active = 'active';
+    case Inactive = 'inactive';
+}
+
+readonly class User {
+    public function __construct(
+        private string $name,
+        private int $age,
+        private Status $status = Status::Active
+    ) {}
+    
+    public function getName(): string {
+        return $this->name;
+    }
+}
+?>'''
+        
+        php_modern_after = '''<?php
+namespace App\\Models;
+
+use App\\Traits\\HasTimestamps;
+use App\\Enums\\UserRole;
+
+enum Status: string {
+    case Active = 'active';
+    case Inactive = 'inactive';
+    case Pending = 'pending';  // New case
+}
+
+#[Table('users')]
+readonly class User {
+    public function __construct(
+        private string $name,
+        private int $age,
+        private Status $status = Status::Active,
+        private UserRole $role = UserRole::User  // New parameter
+    ) {}
+    
+    public function getName(): ?string {  // Made nullable
+        return $this->name;
+    }
+    
+    public function getRole(): UserRole {  // New method
+        return $this->role;
+    }
+}
+?>'''
+        
+        print("Analyzing modern PHP 8.x changes:")
+        modern_events = analyzer.analyze_file_changes("test_modern.php", php_modern_before, php_modern_after)
+        print(f"Modern PHP events detected: {len(modern_events)}")
+        for event in modern_events:
+            print(f"  - {event['event_type']}: {event['node_id']} - {event['details']}")
+    
     # Test PHP
     print("\n--- ADVANCED PHP ANALYSIS TEST ---")
 
@@ -765,19 +1624,18 @@ use AnotherProject\\Logger;
 /**
  * A utility class.
  */
-#[AnAttribute]
 class Utility {
-    private string $name;
-    public const VERSION = "1.0";
+    private $name;
+    const VERSION = "1.0";
 
-    public function __construct(string $name) {
+    public function __construct($name) {
         $this->name = $name;
     }
 
     /**
      * Greets the user.
      */
-    public function greet(): string {
+    public function greet() {
         return "Hello, " . $this->name;
     }
 
@@ -787,7 +1645,7 @@ class Utility {
 }
 
 interface Processable {
-    public function process(array $data): bool;
+    public function process($data);
 }
 ?>'''
     
@@ -800,237 +1658,57 @@ use MyProject\\Helpers\\NewLogger; // Added use
 /**
  * An enhanced utility class. (Docstring changed)
  */
-#[AnAttribute] // Attribute unchanged
-#[NewAttribute("beta")] // Attribute added
 class Utility implements Processable { // Implements added
-    private string $name;
-    #[Versioned("2.0")] // Attribute added to property
-    public string $description; // Property added
-    public const VERSION = "1.1"; // Constant value changed
-    final public const AUTHOR = "Jules"; // New constant added
+    private $name;
+    public $description; // Property added
+    const VERSION = "1.1"; // Constant value changed
+    const AUTHOR = "Jules"; // New constant added
 
-    // Constructor signature changed, property promoted
-    public function __construct(private string $name, string $description = "Default") {
+    // Constructor signature changed
+    public function __construct($name, $description = "Default") {
+        $this->name = $name;
         $this->description = $description;
     }
 
     /**
      * Greets the user with a title. (Docstring changed)
      */
-    // greet signature changed, return type added
-    public function greet(string $title): string {
+    // greet signature changed
+    public function greet($title) {
         // Logic changed
         return "Hello, " . $title . " " . $this->name . "!";
     }
 
     // Method removed: doSomethingInternal
 
-    public function process(array $data): bool { // Method from interface
+    public function process($data) { // Method from interface
         NewLogger::log("Processing data");
         return true;
     }
 
-    public static function newStaticMethod(): void {} // New method
+    public static function newStaticMethod() {} // New method
 }
 
 interface Processable { // Unchanged interface
-    public function process(array $data): bool;
+    public function process($data);
 }
 
 trait HelperTrait {
-    public function help(): string { return "I am helping!"; }
+    public function help() { return "I am helping!"; }
 }
 ?>'''
     
     print("\nAnalyzing advanced PHP changes (test_advanced.php):")
-    # Simulate phpparser being available for this test run, if it's None
-    original_phpparser_status = phpparser
-    if phpparser is None:
-        print("(Simulating phpparser availability for test by creating a mock)")
-        # Create a minimal mock of phpparser and php_ast to allow test execution
-        # This is very basic and won't actually parse, but prevents NameErrors
-        class MockNameNode: # Helper for things that should have a .name attribute
-            def __init__(self, name_val):
-                self.name = name_val
-
-        class MockAstNode:
-            def __init__(self, name=None, lineno=0, end_lineno=0, children=None, **kwargs):
-                # If name is a string, wrap it in MockNameNode for consistent access
-                self.name = MockNameNode(name) if isinstance(name, str) else name
-                self.lineno = lineno
-                self.end_lineno = end_lineno
-                self.children = children if children is not None else []
-                self._mock_type = kwargs.pop('_mock_type', 'Node') # Store a mock type
-
-                # Handle specific structures like 'params' or 'body' more carefully
-                popped_params = kwargs.pop('params', None)
-                if popped_params is not None:
-                    if isinstance(popped_params, list): # if it's a list of param definitions
-                        # Each item in popped_params should represent a parameter.
-                        # Let's assume for simplicity params attribute holds a list of MockAstNode params
-                        self.params = [MockAstNode(**p) if isinstance(p, dict) else p for p in popped_params]
-                    elif isinstance(popped_params, MockAstNode): # if it's already a node
-                        self.params = popped_params
-                    else: # If it's something else, assign directly (or wrap if needed)
-                        self.params = MockAstNode(_mock_type='ParametersNode', params_list=popped_params)
-
-
-                popped_body = kwargs.pop('body', None)
-                if popped_body is not None:
-                    if isinstance(popped_body, list): # e.g. for functions/methods, list of statements
-                        self.body = MockAstNode(children=popped_body, _mock_type='BodyNode')
-                    elif isinstance(popped_body, MockAstNode): # if it's already a node
-                        self.body = popped_body
-                    else:
-                        self.body = MockAstNode(_mock_type='BodyNode', content=popped_body)
-
-
-                if 'props' in kwargs: # For PropertyDeclaration
-                    self.props = [MockAstNode(**p) if isinstance(p, dict) else p for p in kwargs.pop('props')]
-                if 'consts' in kwargs: # For ConstantDeclaration
-                    self.consts = [MockAstNode(**c) if isinstance(c, dict) else c for c in kwargs.pop('consts')]
-                if 'uses' in kwargs: # For UseDeclarations
-                    self.uses = [MockAstNode(**u) if isinstance(u, dict) else u for u in kwargs.pop('uses')]
-
-
-                for k,v in kwargs.items():
-                    setattr(self, k, v)
-
-            # Make isinstance work somewhat with _mock_type
-            def __instancecheck__(self, instance):
-                 return getattr(instance, '_mock_type', None) == self._mock_type
-
-
-        MOCK_PHP_AST_TYPES = {}
-
-        def create_mock_ast_type(type_name):
-            class_attributes = {'_mock_type': type_name}
-            # Define __isinstance__ for the dynamically created class
-            def custom_isinstance(self, instance):
-                # Check if instance has _mock_type and if it matches this class's type_name
-                return getattr(instance, '_mock_type', None) == type_name
-
-            # For some reason, directly assigning __isinstance__ doesn't work as expected for isinstance()
-            # Instead, we'll rely on checking node._mock_type directly in parsing logic for mocks.
-            # However, this structure is useful for type creation.
-            NewType = type(type_name, (MockAstNode,), class_attributes)
-            MOCK_PHP_AST_TYPES[type_name] = NewType
-            return NewType
-
-        # Define mock AST node types that are checked with isinstance
-        # These will now be actual classes inheriting from MockAstNode
-        MockNamespace = create_mock_ast_type('Namespace')
-        MockUseDeclarations = create_mock_ast_type('UseDeclarations')
-        MockFunctionDeclaration = create_mock_ast_type('FunctionDeclaration')
-        MockClassDeclaration = create_mock_ast_type('ClassDeclaration')
-        MockInterfaceDeclaration = create_mock_ast_type('InterfaceDeclaration')
-        MockTraitDeclaration = create_mock_ast_type('TraitDeclaration')
-        MockConstantDeclaration = create_mock_ast_type('ConstantDeclaration')
-        MockMethodDeclaration = create_mock_ast_type('MethodDeclaration')
-        MockPropertyDeclaration = create_mock_ast_type('PropertyDeclaration')
-        MockClassConstantDeclaration = create_mock_ast_type('ClassConstantDeclaration')
-        # Add other types as needed by the parser logic for isinstance checks
-
-        # The global mock_php_ast object will provide these types
-        mock_php_ast_global = type('MockPhpAstGlobal', (), {
-            **MOCK_PHP_AST_TYPES, # Unpack all defined mock types
-            'Node': MockAstNode, # Generic base
-            'Parameters': create_mock_ast_type('Parameters'), # For function params
-            'dump': lambda x: f"mock_dump:{str(x)}" if not isinstance(x, MockAstNode) else f"mock_dump_node:{getattr(x.name, 'name', 'UnnamedNode') if hasattr(x, 'name') and x.name else getattr(x, '_mock_type', 'Node')}"
-        })
-
-
-        class MockPhpParser:
-            def parse(self, content):
-                # This mock needs to return a tree of MockAstNode instances
-                # that roughly match what the PHPAnalyzer expects.
-                # This is highly simplified.
-                root_children = []
-                if "namespace MyProject\\Utils;" in content:
-                    ns_children = []
-                    if "class Utility" in content:
-                        utility_methods = []
-                        method_defaults = {
-                            'visibility': 'public', 'is_static': False, 'is_abstract': False, 'is_final': False,
-                            'attributes': [], 'doc_comment': None, 'return_type': None
-                        }
-                        if "function __construct" in content:
-                             utility_methods.append(MockMethodDeclaration(name="__construct", params=[], body=[], **method_defaults))
-                        if "function greet" in content:
-                             utility_methods.append(MockMethodDeclaration(name="greet", params=[], body=[], **method_defaults))
-
-                        class_defaults = {
-                            'extends': None, 'implements': [], 'attributes': [], 'doc_comment': None,
-                            'is_abstract': False, 'is_final': False
-                        }
-                        property_defaults = {
-                            'type': None, 'visibility': 'public', 'is_static': False, 'default_value': None,
-                            'attributes': [], 'doc_comment': None
-                        }
-                        const_defaults = {
-                            'value': 'mock_value', 'visibility': 'public', 'doc_comment': None
-                        }
-
-                        # Simplified: Assume Utility class has some properties and constants for broader mock coverage
-                        utility_properties = [
-                            # props expects a list of nodes, each representing a property item
-                            MockPropertyDeclaration(name='name', props=[MockAstNode(name='name', default=None)], **property_defaults)
-                        ]
-                        utility_constants = [
-                            # consts expects a list of nodes, each representing a constant item
-                            MockClassConstantDeclaration(name='VERSION', consts=[MockAstNode(name='VERSION', value='1.0')], **const_defaults)
-                        ]
-
-                        class_body_children = utility_methods + utility_properties + utility_constants
-                        class_body = MockAstNode(children=class_body_children)
-                        ns_children.append(MockClassDeclaration(name="Utility", body=class_body, **class_defaults))
-
-                    root_children.append(MockNamespace(name="MyProject\\Utils", children=ns_children))
-
-                if "trait HelperTrait" in content:
-                     root_children.append(MockTraitDeclaration(name="HelperTrait", children=[]))
-
-                return MockAstNode(children=root_children)
-
-        # Temporarily assign mocks
-        globals()['phpparser'] = MockPhpParser()
-        globals()['php_ast'] = mock_php_ast_global
-
-
     advanced_events = analyzer.analyze_file_changes("test_advanced.php", php_before_advanced, php_after_advanced)
 
-    # Restore original phpparser status
-    if original_phpparser_status is None:
-        globals()['phpparser'] = None
-        globals()['php_ast'] = None # Also restore php_ast
-        # No easy way to un-import php_ast if it was mocked, but phpparser = None handles it
-
     print(f"Advanced PHP events detected: {len(advanced_events)}")
-    if not advanced_events:
-        print("NOTE: No advanced events detected. This might be due to the phpparser not being available or the mock being too simple, causing fallback to regex.")
-    else:
-        print("Expected events (examples, actual events depend on full mock/parser):")
-        print("  - php_use_statement_removed, php_use_statement_added")
-        print("  - php_docstring_changed (for class Utility)")
-        print("  - php_attribute_added (for class Utility, property description)")
-        print("  - php_inheritance_changed (Utility implements Processable)")
-        print("  - node_added (for property description, const AUTHOR, method newStaticMethod, trait HelperTrait)")
-        print("  - php_constant_value_changed (for VERSION)")
-        print("  - php_node_signature_changed (for Utility::__construct, Utility::greet)")
-        print("  - php_return_type_changed (for Utility::greet)")
-        print("  - php_node_logic_changed (for Utility::greet)")
-        print("  - node_removed (for method doSomethingInternal)")
+    for event in advanced_events[:10]:  # Show first 10 events
+        print(f"  - {event['event_type']}: {event['node_id']} - {event['details']}")
+    if len(advanced_events) > 10:
+        print(f"  ... and {len(advanced_events) - 10} more events")
 
-    for event in advanced_events[:15]: # Print first 15 events
-        details = event.get('details', '')
-        if len(details) > 100: # Truncate long details for display
-            details = details[:97] + "..."
-        print(f"  - {event['event_type']}: {event['node_id']} - {details}")
-    if len(advanced_events) > 15:
-        print(f"  ... and {len(advanced_events) - 15} more events.")
-
-    print("\n--- BASIC PHP ANALYSIS TEST (Fallback if phpparser not found) ---")
-    # This test will use the regex fallback if phpparser is truly None
+    print("\n--- BASIC PHP ANALYSIS TEST (Fallback if phply not found) ---")
+    # This test will use the regex fallback if phply is not available
     php_before_basic = '''<?php
 function simple_hello() { echo "Hi"; }
 class OldClass {}
@@ -1041,10 +1719,14 @@ class NewClass {} // Renamed
 function simple_goodbye() { echo "Bye"; } // Added
 ?>'''
     basic_events = analyzer.analyze_file_changes("test_basic_fallback.php", php_before_basic, php_after_basic)
-    print(f"Basic PHP events detected (potentially fallback): {len(basic_events)}")
+    print(f"Basic PHP events detected: {len(basic_events)}")
     for event in basic_events:
         print(f"  - {event['event_type']}: {event['node_id']} - {event['details']}")
-    if not phpparser:
-        print("(Running with regex fallback as phpparser is not available)")
+    
+    # Show which parser was actually used
+    if tree_sitter_available:
+        print("(Parsed using Tree-sitter - modern parser)")
+    elif phply_available:
+        print("(Parsed using phply - legacy parser)")
     else:
-        print("(Running with phpparser as it seems available/mocked)")
+        print("(Parsed using regex fallback - basic parsing)")
