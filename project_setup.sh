@@ -2,6 +2,8 @@
 # ==============================================================================
 # Comprehensive Semantic VCS (SVCS) - Project Setup Script
 # ==============================================================================
+# NOTE: This script was used to initialize a complete Python project structure
+# and should not be confuced with the installation of the svcs package.
 #
 # This script initializes a complete, professional Python project structure and
 # integrates the SVCS semantic analysis tool.

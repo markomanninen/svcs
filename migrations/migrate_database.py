@@ -8,7 +8,7 @@ import os
 
 def migrate_database():
     """Add AI analysis fields to the semantic_events table"""
-    db_path = ".svcs/history.db"
+    db_path = "../.svcs/history.db"
     
     if not os.path.exists(db_path):
         print("❌ No database found, skipping migration")
