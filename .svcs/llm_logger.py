@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -10,7 +11,20 @@ class LLMLogger:
             # Find the current git project root and use its .svcs/logs directory
             log_dir = self._find_project_svcs_logs()
         self.log_dir = Path(log_dir)
-        self.log_dir.mkdir(parents=True, exist_ok=True)
+        self._ensure_log_dir()
+    
+    def _ensure_log_dir(self):
+        """Safely ensure the log directory exists."""
+        try:
+            self.log_dir.mkdir(parents=True, exist_ok=True)
+        except (OSError, PermissionError) as e:
+            # If we can't create the directory (read-only filesystem, permissions, etc.)
+            # fall back to a temp directory or disable logging
+            import tempfile
+            fallback_dir = Path(tempfile.gettempdir()) / "svcs_logs"
+            fallback_dir.mkdir(exist_ok=True)
+            self.log_dir = fallback_dir
+            print(f"Warning: Could not create SVCS logs in {self.log_dir}, using fallback: {fallback_dir}", file=sys.stderr)
     
     def _find_project_svcs_logs(self):
         """Find the .svcs/logs directory for the current git project."""
@@ -23,8 +37,13 @@ class LLMLogger:
             git_root = Path(result.stdout.strip())
             return git_root / ".svcs" / "logs"
         except (subprocess.CalledProcessError, FileNotFoundError):
-            # Fallback to current directory if not in a git repo
-            return Path(".svcs/logs")
+            # Fallback: try global SVCS directory if available
+            global_svcs = Path.home() / ".svcs" / "logs"
+            if global_svcs.parent.exists():
+                return global_svcs
+            # Last resort: temp directory
+            import tempfile
+            return Path(tempfile.gettempdir()) / "svcs_logs"
     
     def log_inference(self, component: str, prompt: str, response: str, model: str = "gemini", metadata: dict = None):
         """Log LLM inference with structured data for audit purposes."""
@@ -63,5 +82,20 @@ class LLMLogger:
         with open(error_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
 
-# Global logger instance
-llm_logger = LLMLogger()
+# Global logger instance - lazy initialization to avoid startup issues
+_logger_instance = None
+
+def get_llm_logger():
+    """Get or create the global LLM logger instance."""
+    global _logger_instance
+    if _logger_instance is None:
+        _logger_instance = LLMLogger()
+    return _logger_instance
+
+# Create a proxy object that defers initialization
+class LazyLLMLogger:
+    def __getattr__(self, name):
+        return getattr(get_llm_logger(), name)
+
+# For backward compatibility
+llm_logger = LazyLLMLogger()
