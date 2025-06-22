@@ -51,9 +51,14 @@ interface DemoInterface {
 }
 
 trait DemoTrait {
-    protected function helperMethod() {
+    protected function helperMethod(): bool {
         return true;
+    }
+    
+    protected function newTraitMethod(string $data): array {
+        return explode(',', $data);
     }
 }
 
-define('DEMO_CONSTANT', 'initial_value');
+define('DEMO_CONSTANT', 'updated_value');
+define('NEW_CONSTANT', 42);
