@@ -1,0 +1,7 @@
+# SVCS Web Dashboard Dependencies
+Flask>=2.3.0
+Flask-CORS>=4.0.0
+
+# Optional: For enhanced web features
+# Werkzeug>=2.3.0  # Included with Flask
+# Jinja2>=3.1.0    # Included with Flask

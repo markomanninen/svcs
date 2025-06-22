@@ -482,6 +482,33 @@ python3 svcs_web.py
 - Quality metrics visualization
 - Developer activity heatmaps
 
+### **Interactive Web Dashboard** 🆕
+
+Launch a full-featured web interface for exploring SVCS data:
+
+```bash
+# Quick start
+./start_dashboard.sh
+
+# Manual start
+source .svcs/venv/bin/activate
+pip install Flask Flask-CORS
+python3 svcs_web_server.py
+```
+
+**Access**: Open `http://127.0.0.1:8080` in your browser
+
+**Features**:
+- 🔍 **Semantic Search**: Advanced filtering and quick pattern searches
+- 📝 **Git Integration**: View changed files, diffs, and commit summaries
+- 📈 **Evolution Tracking**: Track specific functions/classes over time
+- 🎯 **Pattern Analysis**: AI-detected performance, architecture, and quality patterns
+- 📋 **System Logs**: Monitor LLM inference and error logs
+- 🗂️ **Project Management**: Multi-project support and statistics
+- 📊 **Analytics**: Quality trends and comprehensive reporting
+
+See `docs/INTERACTIVE_DASHBOARD_GUIDE.md` for detailed usage instructions.
+
 ### **Analytics & Quality Reports**
 
 ```bash

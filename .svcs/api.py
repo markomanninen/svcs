@@ -241,11 +241,11 @@ def search_events_advanced(
     
     # Confidence filtering
     if min_confidence is not None:
-        query_parts.append("(e.confidence IS NULL OR e.confidence >= ?)")
+        query_parts.append("e.confidence IS NOT NULL AND e.confidence >= ?")
         params.append(min_confidence)
     
     if max_confidence is not None:
-        query_parts.append("(e.confidence IS NULL OR e.confidence <= ?)")
+        query_parts.append("e.confidence IS NOT NULL AND e.confidence <= ?")
         params.append(max_confidence)
     
     # Date filtering with enhanced parsing
@@ -539,7 +539,81 @@ def get_filtered_evolution(
         until_date: End date for evolution history
         min_confidence: Minimum confidence for AI events
     """
-    pass  # Implementation will be added
+    conn = _get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Build the query
+        query = """
+            SELECT 
+                e.event_id, e.commit_hash, e.event_type, e.node_id, e.location, e.details,
+                e.layer, e.layer_description, e.confidence, e.reasoning, e.impact,
+                c.author, c.timestamp
+            FROM semantic_events e
+            JOIN commits c ON e.commit_hash = c.commit_hash
+            WHERE e.node_id = ?
+        """
+        params = [node_id]
+        
+        # Add filters
+        if event_types:
+            placeholders = ','.join(['?' for _ in event_types])
+            query += f" AND e.event_type IN ({placeholders})"
+            params.extend(event_types)
+        
+        if since_date:
+            # Parse date using existing function
+            date_str = _parse_relative_date(since_date)
+            if date_str:
+                # Convert to timestamp for comparison
+                import datetime
+                try:
+                    dt = datetime.datetime.strptime(date_str, '%Y-%m-%d')
+                    timestamp = int(dt.timestamp())
+                    query += " AND c.timestamp >= ?"
+                    params.append(timestamp)
+                except ValueError:
+                    pass  # Skip invalid dates
+        
+        if until_date:
+            date_str = _parse_relative_date(until_date)
+            if date_str:
+                import datetime
+                try:
+                    dt = datetime.datetime.strptime(date_str, '%Y-%m-%d')
+                    timestamp = int(dt.timestamp())
+                    query += " AND c.timestamp <= ?"
+                    params.append(timestamp)
+                except ValueError:
+                    pass  # Skip invalid dates
+        
+        if min_confidence is not None:
+            query += " AND (e.confidence IS NULL OR e.confidence >= ?)"
+            params.append(min_confidence)
+        
+        query += " ORDER BY c.timestamp DESC"
+        
+        cursor.execute(query, params)
+        results = cursor.fetchall()
+        
+        events = []
+        for row in results:
+            event_dict = dict(row)
+            # Add readable date
+            if event_dict['timestamp']:
+                import datetime
+                event_dict['readable_date'] = datetime.datetime.fromtimestamp(
+                    event_dict['timestamp']
+                ).strftime('%Y-%m-%d %H:%M:%S')
+            events.append(event_dict)
+        
+        return events
+        
+    except Exception as e:
+        print(f"Error in get_filtered_evolution: {e}")
+        return []
+    finally:
+        conn.close()
 
 # --- Git Integration Functions for Changed Files and Diffs ---
 
