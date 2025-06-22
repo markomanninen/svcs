@@ -661,3 +661,17 @@ cat .svcs/logs/layer5b_semantic_analysis_$(date +%Y-%m-%d).jsonl | tail -1 | jq 
 ---
 
 **SVCS provides semantic understanding of code evolution by combining traditional version control with AI-powered analysis.**
+
+
+➜  svcs git:(main) python svcs_discuss.py 
+Welcome to the SVCS Conversational Assistant.
+Ask questions about your code's history. Type 'exit' or 'quit' to end.
+You: What performance optimizations were detected recently?
+
+Assistant:
+I found no performance optimizations in the last 7 days.  Would you like to broaden the search to a longer
+timeframe, or perhaps look at a different type of change?                                                 
+--------------------
+You: Show me recent performance optimizations
+exit 
+

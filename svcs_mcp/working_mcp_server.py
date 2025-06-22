@@ -23,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 try:
     from svcs_mcp_server_simple import GlobalSVCSDatabase, ProjectManager, SVCSQueryEngine
     from svcs_mcp.semantic_analyzer import GlobalSemanticAnalyzer
+    from svcs_mcp.cli import SVCSDatabase as CLIDatabase
     COMPONENTS_AVAILABLE = True
 except ImportError as e:
     print(f"Warning: Could not import components: {e}")
@@ -33,6 +34,7 @@ if COMPONENTS_AVAILABLE:
     db = GlobalSVCSDatabase()
     project_manager = ProjectManager(db)
     query_engine = SVCSQueryEngine(db)
+    cli_db = CLIDatabase()  # Use CLI database for methods that need author data
     semantic_analyzer = GlobalSemanticAnalyzer(db)
 else:
     db = None
@@ -97,6 +99,82 @@ async def handle_list_tools() -> List[Tool]:
                     "limit": {"type": "number", "description": "Max results (default 10)"}
                 }
             }
+        ),
+        Tool(
+            name="search_events_advanced",
+            description="Advanced search with comprehensive filtering options",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string", "description": "Project path"},
+                    "author": {"type": "string", "description": "Author filter (optional)"},
+                    "event_types": {"type": "array", "items": {"type": "string"}, "description": "Event type filters (optional)"},
+                    "location_pattern": {"type": "string", "description": "Location pattern filter (optional)"},
+                    "layers": {"type": "array", "items": {"type": "string"}, "description": "Layer filters (optional)"},
+                    "min_confidence": {"type": "number", "description": "Minimum confidence threshold (optional)"},
+                    "since_date": {"type": "string", "description": "Date filter (YYYY-MM-DD or 'N days ago') (optional)"},
+                    "limit": {"type": "number", "description": "Max results (default 20)"},
+                    "order_by": {"type": "string", "description": "Order by field (optional)"},
+                    "order_desc": {"type": "boolean", "description": "Descending order (default true)"}
+                },
+                "required": ["project_path"]
+            }
+        ),
+        Tool(
+            name="get_recent_activity",
+            description="Get recent project activity with filtering options",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string", "description": "Project path"},
+                    "days": {"type": "number", "description": "Number of days back (default 7)"},
+                    "layers": {"type": "array", "items": {"type": "string"}, "description": "Layer filters (optional)"},
+                    "author": {"type": "string", "description": "Author filter (optional)"},
+                    "limit": {"type": "number", "description": "Max results (default 15)"}
+                },
+                "required": ["project_path"]
+            }
+        ),
+        Tool(
+            name="search_semantic_patterns",
+            description="Search for specific AI-detected semantic patterns",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string", "description": "Project path"},
+                    "pattern_type": {"type": "string", "description": "Pattern type (performance, architecture, error_handling, etc.)"},
+                    "min_confidence": {"type": "number", "description": "Minimum confidence threshold (default 0.7)"},
+                    "since_date": {"type": "string", "description": "Date filter (YYYY-MM-DD or 'N days ago') (optional)"},
+                    "limit": {"type": "number", "description": "Max results (default 10)"}
+                },
+                "required": ["project_path", "pattern_type"]
+            }
+        ),
+        Tool(
+            name="get_filtered_evolution",
+            description="Get filtered evolution history for a specific node/function",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string", "description": "Project path"},
+                    "node_id": {"type": "string", "description": "Node ID (e.g., func:function_name)"},
+                    "event_types": {"type": "array", "items": {"type": "string"}, "description": "Event type filters (optional)"},
+                    "since_date": {"type": "string", "description": "Date filter (YYYY-MM-DD or 'N days ago') (optional)"},
+                    "min_confidence": {"type": "number", "description": "Minimum confidence threshold (default 0.0)"}
+                },
+                "required": ["project_path", "node_id"]
+            }
+        ),
+        Tool(
+            name="debug_query_tools",
+            description="Diagnostic information for debugging query issues",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string", "description": "Project path"}
+                },
+                "required": ["project_path"]
+            }
         )
     ]
 
@@ -109,6 +187,13 @@ async def handle_call_tool(name: str, arguments: Dict[str, Any]) -> List[types.T
             type="text",
             text="❌ SVCS components not available. Please check installation."
         )]
+    
+    def get_project_id_from_path(project_path: str) -> str:
+        """Helper function to get project_id from project_path."""
+        project = db.get_project_by_path(project_path)
+        if not project:
+            raise Exception(f"Project not found: {project_path}")
+        return project['project_id']
     
     try:
         if name == "register_project":
@@ -309,6 +394,119 @@ async def handle_call_tool(name: str, arguments: Dict[str, Any]) -> List[types.T
                 return [types.TextContent(
                     type="text",
                     text=f"❌ Error executing query_semantic_events: {str(e)}"
+                )]
+        
+        elif name == "search_events_advanced":
+            project_path = arguments.get("project_path")
+            
+            kwargs = {}
+            if arguments.get("author"):
+                kwargs["author"] = arguments.get("author")
+            if arguments.get("event_types"):
+                kwargs["event_types"] = arguments.get("event_types")
+            if arguments.get("location_pattern"):
+                kwargs["location_pattern"] = arguments.get("location_pattern")
+            if arguments.get("layers"):
+                kwargs["layers"] = arguments.get("layers")
+            if arguments.get("min_confidence") is not None:
+                kwargs["min_confidence"] = arguments.get("min_confidence")
+            if arguments.get("since_date"):
+                kwargs["since_date"] = arguments.get("since_date")
+            if arguments.get("limit"):
+                kwargs["limit"] = arguments.get("limit")
+            if arguments.get("order_by"):
+                kwargs["order_by"] = arguments.get("order_by")
+            if arguments.get("order_desc") is not None:
+                kwargs["order_desc"] = arguments.get("order_desc")
+            
+            try:
+                result = cli_db.search_events_advanced(project_path, **kwargs)
+                return [types.TextContent(type="text", text=result)]
+                
+            except Exception as e:
+                return [types.TextContent(
+                    type="text",
+                    text=f"❌ Error executing search_events_advanced: {str(e)}"
+                )]
+        
+        elif name == "get_recent_activity":
+            project_path = arguments.get("project_path")
+            
+            kwargs = {}
+            if arguments.get("days"):
+                kwargs["days"] = arguments.get("days")
+            if arguments.get("layers"):
+                kwargs["layers"] = arguments.get("layers")
+            if arguments.get("author"):
+                kwargs["author"] = arguments.get("author")
+            if arguments.get("limit"):
+                kwargs["limit"] = arguments.get("limit")
+            
+            try:
+                result = cli_db.get_recent_activity(project_path, **kwargs)
+                return [types.TextContent(type="text", text=result)]
+                
+            except Exception as e:
+                return [types.TextContent(
+                    type="text",
+                    text=f"❌ Error executing get_recent_activity: {str(e)}"
+                )]
+        
+        elif name == "search_semantic_patterns":
+            project_path = arguments.get("project_path")
+            pattern_type = arguments.get("pattern_type")
+            
+            kwargs = {}
+            if arguments.get("min_confidence") is not None:
+                kwargs["min_confidence"] = arguments.get("min_confidence")
+            if arguments.get("since_date"):
+                kwargs["since_date"] = arguments.get("since_date")
+            if arguments.get("limit"):
+                kwargs["limit"] = arguments.get("limit")
+            
+            try:
+                result = cli_db.search_semantic_patterns(project_path, pattern_type, **kwargs)
+                return [types.TextContent(type="text", text=result)]
+                
+            except Exception as e:
+                return [types.TextContent(
+                    type="text",
+                    text=f"❌ Error executing search_semantic_patterns: {str(e)}"
+                )]
+        
+        elif name == "get_filtered_evolution":
+            project_path = arguments.get("project_path")
+            node_id = arguments.get("node_id")
+            
+            kwargs = {}
+            if arguments.get("event_types"):
+                kwargs["event_types"] = arguments.get("event_types")
+            if arguments.get("since_date"):
+                kwargs["since_date"] = arguments.get("since_date")
+            if arguments.get("min_confidence") is not None:
+                kwargs["min_confidence"] = arguments.get("min_confidence")
+            
+            try:
+                result = cli_db.get_filtered_evolution(project_path, node_id, **kwargs)
+                return [types.TextContent(type="text", text=result)]
+                
+            except Exception as e:
+                return [types.TextContent(
+                    type="text",
+                    text=f"❌ Error executing get_filtered_evolution: {str(e)}"
+                )]
+        
+        elif name == "debug_query_tools":
+            project_path = arguments.get("project_path")
+            
+            try:
+                result = cli_db.debug_query_tools(project_path)
+                return [types.TextContent(type="text", text=result)]
+                
+            except Exception as e:
+                return [types.TextContent(
+                    type="text",
+                    text=f"❌ Error executing debug_query_tools: {str(e)}"
                 )]
         
         else:

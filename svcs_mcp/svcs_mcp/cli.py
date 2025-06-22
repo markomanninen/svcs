@@ -9,7 +9,6 @@ Provides easy commands for managing SVCS projects:
 - svcs list - List all registered projects
 """
 
-import json
 import os
 import sqlite3
 import subprocess
@@ -20,20 +19,17 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import click
-import yaml
 
-# Import the git hook manager
-try:
-    from .git_hooks import GitHookManager
-except ImportError:
-    # Handle direct execution
-    import sys
-    sys.path.append(os.path.dirname(__file__))
-    from git_hooks import GitHookManager
+from .git_hooks import GitHookManager
 
 # Global SVCS directory and database
 SVCS_HOME = Path.home() / ".svcs"
 GLOBAL_DB = SVCS_HOME / "global.db"
+
+
+def get_git_hook_manager() -> GitHookManager:
+    """Get a configured GitHookManager instance."""
+    return GitHookManager(SVCS_HOME)
 
 
 class SVCSDatabase:
@@ -152,6 +148,382 @@ class SVCSDatabase:
         except Exception:
             return None
     
+    def search_events_advanced(self, project_path: str, **kwargs) -> str:
+        """Advanced search with comprehensive filtering options."""
+        try:
+            conn = self.get_connection()
+            if not conn:
+                return "❌ Error: SVCS database not found"
+            
+            # Normalize path to resolve symlinks (e.g., /tmp -> /private/tmp on macOS)
+            project_path = str(Path(project_path).resolve())
+            
+            # Get project ID
+            cursor = conn.cursor()
+            cursor.execute("SELECT project_id FROM projects WHERE path = ? AND status = 'active'", (project_path,))
+            project_row = cursor.fetchone()
+            if not project_row:
+                return f"❌ Error: Project not registered: {project_path}"
+            
+            project_id = project_row[0]
+            
+            # Build query with JOIN to get author information
+            query = """
+                SELECT se.*, c.author 
+                FROM semantic_events se
+                LEFT JOIN commits c ON se.commit_hash = c.commit_hash AND se.project_id = c.project_id
+                WHERE se.project_id = ?
+            """
+            params = [project_id]
+            
+            # Apply filters
+            if kwargs.get('event_types'):
+                placeholders = ','.join(['?' for _ in kwargs['event_types']])
+                query += f" AND se.event_type IN ({placeholders})"
+                params.extend(kwargs['event_types'])
+            
+            if kwargs.get('author'):
+                query += " AND c.author = ?"
+                params.append(kwargs['author'])
+                
+            if kwargs.get('since_date'):
+                # Parse date - could be "YYYY-MM-DD" or "N days ago"
+                since_date = kwargs['since_date']
+                if 'days ago' in since_date:
+                    days = int(since_date.split()[0])
+                    timestamp = int((datetime.now() - timedelta(days=days)).timestamp())
+                else:
+                    # Parse YYYY-MM-DD format
+                    date_obj = datetime.strptime(since_date, '%Y-%m-%d')
+                    timestamp = int(date_obj.timestamp())
+                query += " AND se.created_at > ?"
+                params.append(timestamp)
+            
+            if kwargs.get('location_pattern'):
+                query += " AND se.location LIKE ?"
+                params.append(f"%{kwargs['location_pattern']}%")
+                
+            if kwargs.get('min_confidence'):
+                query += " AND se.confidence >= ?"
+                params.append(kwargs['min_confidence'])
+            
+            # Order and limit
+            order_by = kwargs.get('order_by', 'se.created_at')
+            order_desc = kwargs.get('order_desc', True)
+            limit = kwargs.get('limit', 20)
+            
+            query += f" ORDER BY {order_by} {'DESC' if order_desc else 'ASC'} LIMIT ?"
+            params.append(limit)
+            
+            cursor.execute(query, params)
+            events = cursor.fetchall()
+            conn.close()
+            
+            if not events:
+                return "🔍 Advanced Search Results: No events found matching the criteria"
+            
+            result = f"🔍 Advanced Search Results ({len(events)} events):\n\n"
+            for event in events:
+                result += f"• **{event[3]}** ({event[7]})\n"  # event_type, layer
+                result += f"  - Location: `{event[5]}`\n"     # location
+                result += f"  - Author: {event[13] or 'Unknown'}\n"  # author from JOIN
+                result += f"  - Commit: {event[2][:8]}...\n"  # commit_hash
+                result += f"  - Date: {datetime.fromtimestamp(event[12]).strftime('%Y-%m-%d %H:%M:%S')}\n"  # created_at
+                if event[6]:  # details
+                    result += f"  - Details: {event[6]}\n"
+                result += "\n"
+            
+            return result
+        except Exception as e:
+            return f"❌ Error in advanced search: {str(e)}"
+    
+    def get_recent_activity(self, project_path: str, **kwargs) -> str:
+        """Get recent project activity with filtering options."""
+        try:
+            conn = self.get_connection()
+            if not conn:
+                return "❌ Error: SVCS database not found"
+            
+            # Normalize path to resolve symlinks (e.g., /tmp -> /private/tmp on macOS)
+            project_path = str(Path(project_path).resolve())
+            
+            # Get project ID
+            cursor = conn.cursor()
+            cursor.execute("SELECT project_id FROM projects WHERE path = ? AND status = 'active'", (project_path,))
+            project_row = cursor.fetchone()
+            if not project_row:
+                return f"❌ Error: Project not registered: {project_path}"
+            
+            project_id = project_row[0]
+            
+            # Get parameters
+            days = kwargs.get('days', 7)
+            limit = kwargs.get('limit', 15)
+            author = kwargs.get('author')
+            layers = kwargs.get('layers', [])
+            
+            # Build query with JOIN to get author information
+            since_timestamp = int((datetime.now() - timedelta(days=days)).timestamp())
+            query = """
+                SELECT se.*, c.author 
+                FROM semantic_events se
+                LEFT JOIN commits c ON se.commit_hash = c.commit_hash AND se.project_id = c.project_id
+                WHERE se.project_id = ? AND se.created_at > ?
+            """
+            params = [project_id, since_timestamp]
+            
+            if author:
+                query += " AND c.author = ?"
+                params.append(author)
+                
+            if layers:
+                placeholders = ','.join(['?' for _ in layers])
+                query += f" AND se.layer IN ({placeholders})"
+                params.extend(layers)
+            
+            query += " ORDER BY se.created_at DESC LIMIT ?"
+            params.append(limit)
+            
+            cursor.execute(query, params)
+            events = cursor.fetchall()
+            conn.close()
+            
+            if not events:
+                return f"📈 Recent Activity (last {days} days): No activity found"
+            
+            result = f"📈 Recent Activity (last {days} days, {len(events)} events):\n\n"
+            for event in events:
+                result += f"• **{event[3]}** ({event[7]})\n"  # event_type, layer
+                result += f"  - Location: `{event[5]}`\n"     # location
+                result += f"  - Author: {event[13] or 'Unknown'}\n"  # author from JOIN
+                result += f"  - Commit: {event[2][:8]}...\n"  # commit_hash
+                result += f"  - Date: {datetime.fromtimestamp(event[12]).strftime('%Y-%m-%d %H:%M:%S')}\n"  # created_at
+                result += "\n"
+            
+            return result
+        except Exception as e:
+            return f"❌ Error getting recent activity: {str(e)}"
+    
+    def search_semantic_patterns(self, project_path: str, pattern_type: str, **kwargs) -> str:
+        """Search for specific AI-detected semantic patterns."""
+        try:
+            conn = self.get_connection()
+            if not conn:
+                return "❌ Error: SVCS database not found"
+            
+            # Normalize path to resolve symlinks (e.g., /tmp -> /private/tmp on macOS)
+            project_path = str(Path(project_path).resolve())
+            
+            # Get project ID
+            cursor = conn.cursor()
+            cursor.execute("SELECT project_id FROM projects WHERE path = ? AND status = 'active'", (project_path,))
+            project_row = cursor.fetchone()
+            if not project_row:
+                return f"❌ Error: Project not registered: {project_path}"
+            
+            project_id = project_row[0]
+            
+            # Get parameters
+            min_confidence = kwargs.get('min_confidence', 0.7)
+            limit = kwargs.get('limit', 10)
+            since_date = kwargs.get('since_date')
+            
+            # Build query with JOIN to get author information
+            query = """
+                SELECT se.*, c.author 
+                FROM semantic_events se
+                LEFT JOIN commits c ON se.commit_hash = c.commit_hash AND se.project_id = c.project_id
+                WHERE se.project_id = ? 
+                AND (se.event_type LIKE ? OR se.details LIKE ?)
+                AND se.confidence >= ?
+            """
+            params = [project_id, f"%{pattern_type}%", f"%{pattern_type}%", min_confidence]
+            
+            if since_date:
+                if 'days ago' in since_date:
+                    days = int(since_date.split()[0])
+                    timestamp = int((datetime.now() - timedelta(days=days)).timestamp())
+                else:
+                    date_obj = datetime.strptime(since_date, '%Y-%m-%d')
+                    timestamp = int(date_obj.timestamp())
+                query += " AND se.created_at > ?"
+                params.append(timestamp)
+            
+            query += " ORDER BY se.confidence DESC, se.created_at DESC LIMIT ?"
+            params.append(limit)
+            
+            cursor.execute(query, params)
+            events = cursor.fetchall()
+            conn.close()
+            
+            if not events:
+                return f"🔍 Semantic Pattern Search: No '{pattern_type}' patterns found"
+            
+            result = f"🔍 Semantic Pattern Search: '{pattern_type}' ({len(events)} matches):\n\n"
+            for event in events:
+                result += f"• **{event[3]}** (confidence: {event[9]:.2f})\n"  # event_type, confidence
+                result += f"  - Location: `{event[5]}`\n"     # location
+                result += f"  - Author: {event[13] or 'Unknown'}\n"  # author from JOIN
+                result += f"  - Commit: {event[2][:8]}...\n"  # commit_hash
+                result += f"  - Date: {datetime.fromtimestamp(event[12]).strftime('%Y-%m-%d %H:%M:%S')}\n"  # created_at
+                if event[6]:  # details
+                    result += f"  - Details: {event[6]}\n"
+                result += "\n"
+            
+            return result
+        except Exception as e:
+            return f"❌ Error searching semantic patterns: {str(e)}"
+    
+    def get_filtered_evolution(self, project_path: str, node_id: str, **kwargs) -> str:
+        """Get filtered evolution history for a specific node/function."""
+        try:
+            conn = self.get_connection()
+            if not conn:
+                return "❌ Error: SVCS database not found"
+            
+            # Normalize path to resolve symlinks (e.g., /tmp -> /private/tmp on macOS)
+            project_path = str(Path(project_path).resolve())
+            
+            # Get project ID
+            cursor = conn.cursor()
+            cursor.execute("SELECT project_id FROM projects WHERE path = ? AND status = 'active'", (project_path,))
+            project_row = cursor.fetchone()
+            if not project_row:
+                return f"❌ Error: Project not registered: {project_path}"
+            
+            project_id = project_row[0]
+            
+            # Get parameters
+            event_types = kwargs.get('event_types', [])
+            min_confidence = kwargs.get('min_confidence', 0.0)
+            since_date = kwargs.get('since_date')
+            
+            # Build query with JOIN to get author information
+            query = """
+                SELECT se.*, c.author 
+                FROM semantic_events se
+                LEFT JOIN commits c ON se.commit_hash = c.commit_hash AND se.project_id = c.project_id
+                WHERE se.project_id = ?
+                AND (se.location LIKE ? OR se.details LIKE ? OR se.node_id LIKE ?)
+                AND se.confidence >= ?
+            """
+            params = [project_id, f"%{node_id}%", f"%{node_id}%", f"%{node_id}%", min_confidence]
+            
+            if event_types:
+                placeholders = ','.join(['?' for _ in event_types])
+                query += f" AND se.event_type IN ({placeholders})"
+                params.extend(event_types)
+            
+            if since_date:
+                if 'days ago' in since_date:
+                    days = int(since_date.split()[0])
+                    timestamp = int((datetime.now() - timedelta(days=days)).timestamp())
+                else:
+                    date_obj = datetime.strptime(since_date, '%Y-%m-%d')
+                    timestamp = int(date_obj.timestamp())
+                query += " AND se.created_at > ?"
+                params.append(timestamp)
+            
+            query += " ORDER BY se.created_at ASC"
+            
+            cursor.execute(query, params)
+            events = cursor.fetchall()
+            conn.close()
+            
+            if not events:
+                return f"📜 Evolution History: No events found for '{node_id}'"
+            
+            result = f"📜 Evolution History for '{node_id}' ({len(events)} events):\n\n"
+            for i, event in enumerate(events, 1):
+                result += f"{i}. **{event[3]}** ({event[7]})\n"  # event_type, layer
+                result += f"   - Location: `{event[5]}`\n"     # location
+                result += f"   - Author: {event[13] or 'Unknown'}\n"  # author from JOIN
+                result += f"   - Commit: {event[2][:8]}...\n"  # commit_hash
+                result += f"   - Date: {datetime.fromtimestamp(event[12]).strftime('%Y-%m-%d %H:%M:%S')}\n"  # created_at
+                if event[6]:  # details
+                    result += f"   - Details: {event[6]}\n"
+                result += "\n"
+            
+            return result
+        except Exception as e:
+            return f"❌ Error getting filtered evolution: {str(e)}"
+    
+    def debug_query_tools(self, project_path: str) -> str:
+        """Diagnostic information for debugging query issues."""
+        try:
+            conn = self.get_connection()
+            if not conn:
+                return "❌ Error: SVCS database not found"
+            
+            # Normalize path to resolve symlinks (e.g., /tmp -> /private/tmp on macOS)
+            project_path = str(Path(project_path).resolve())
+            
+            cursor = conn.cursor()
+            
+            # Check project registration
+            cursor.execute("SELECT project_id, name FROM projects WHERE path = ? AND status = 'active'", (project_path,))
+            project_row = cursor.fetchone()
+            if not project_row:
+                return f"❌ Debug: Project not registered: {project_path}"
+            
+            project_id, project_name = project_row
+            
+            # Get basic stats
+            cursor.execute("SELECT COUNT(*) FROM semantic_events WHERE project_id = ?", (project_id,))
+            total_events = cursor.fetchone()[0]
+            
+            # Get event types
+            cursor.execute("""
+                SELECT event_type, COUNT(*) FROM semantic_events 
+                WHERE project_id = ? GROUP BY event_type
+            """, (project_id,))
+            event_types = cursor.fetchall()
+            
+            # Get layers
+            cursor.execute("""
+                SELECT layer, COUNT(*) FROM semantic_events 
+                WHERE project_id = ? GROUP BY layer
+            """, (project_id,))
+            layers = cursor.fetchall()
+            
+            # Get authors from commits
+            cursor.execute("""
+                SELECT c.author, COUNT(se.event_id) 
+                FROM commits c
+                LEFT JOIN semantic_events se ON c.commit_hash = se.commit_hash AND c.project_id = se.project_id
+                WHERE c.project_id = ? AND c.author IS NOT NULL
+                GROUP BY c.author
+            """, (project_id,))
+            authors = cursor.fetchall()
+            
+            conn.close()
+            
+            result = f"🔧 Debug Information for '{project_name}':\n\n"
+            result += f"Project ID: {project_id}\n"
+            result += f"Path: {project_path}\n"
+            result += f"Total Events: {total_events}\n\n"
+            
+            if event_types:
+                result += "Event Types:\n"
+                for event_type, count in event_types:
+                    result += f"  - {event_type}: {count}\n"
+                result += "\n"
+            
+            if layers:
+                result += "Layers:\n"
+                for layer, count in layers:
+                    result += f"  - {layer}: {count}\n"
+                result += "\n"
+            
+            if authors:
+                result += "Authors:\n"
+                for author, count in authors:
+                    result += f"  - {author}: {count} events\n"
+            
+            return result
+        except Exception as e:
+            return f"❌ Error in debug query: {str(e)}"
+
     def get_project_statistics(self, project_path: str) -> str:
         """Get project statistics."""
         try:
@@ -242,7 +614,7 @@ def init(name: str, path: str):
         click.echo(result)
         
         # Install git hooks using the global hook manager
-        hook_manager = GitHookManager()
+        hook_manager = get_git_hook_manager()
         
         # Ensure global hook system is installed
         if not hook_manager.global_hook_script.exists():
@@ -270,6 +642,7 @@ def init(name: str, path: str):
         }
         
         with open(local_svcs / 'config.yaml', 'w') as f:
+            import yaml
             yaml.dump(config, f)
         
         click.echo(f"📝 Created local config: {local_svcs / 'config.yaml'}")
@@ -299,16 +672,12 @@ def remove(path: str):
             click.echo(f"🗑️ Removed local config: {local_svcs}")
         
         # Uninstall git hooks
-        hook_manager = GitHookManager()
+        hook_manager = get_git_hook_manager()
         click.echo("🔗 Removing git hooks...")
         if hook_manager.uninstall_project_hooks(path):
             click.echo("✅ Git hooks removed successfully")
         else:
             click.echo("⚠️ Warning: Some git hooks failed to remove", err=True)
-        
-    except Exception as e:
-        click.echo(f"❌ Error: {e}", err=True)
-        sys.exit(1)
         
     except Exception as e:
         click.echo(f"❌ Error: {e}", err=True)
@@ -349,7 +718,7 @@ def status(path: str, quiet: bool):
         registered = False
     
     # Check git hook status
-    hook_manager = GitHookManager()
+    hook_manager = get_git_hook_manager()
     hook_status = hook_manager.get_project_hook_status(path)
     
     if not quiet:
@@ -361,15 +730,12 @@ def status(path: str, quiet: bool):
                 'custom_script': '⚠️',
                 'other_symlink': '🔗'
             }.get(status, '❓')
-            
             click.echo(f"  {hook_name}: {status_icon} {status}")
     
     # Check global hook system
     if not quiet:
-        if hook_manager.global_hook_script.exists():
-            click.echo(f"\n🌐 Global Hook: ✅ {hook_manager.global_hook_script}")
-        else:
-            click.echo(f"\n🌐 Global Hook: ❌ Not installed")
+        global_hook_status = "✅ installed" if hook_manager.global_hook_script.exists() else "❌ not installed"
+        click.echo(f"\n🌐 Global Hook: {global_hook_status}")
     
     # Exit code for scripting
     if registered and all(s == 'svcs_installed' for s in hook_status.values()):
@@ -389,15 +755,149 @@ def list():
         sys.exit(1)
 
 
+@main.command()
+@click.option('--project', default='.', type=click.Path(exists=True), help='Project path')
+@click.option('--event-types', multiple=True, help='Filter by event types (use multiple times for multiple types)')
+@click.option('--author', help='Filter by author')
+@click.option('--since', help='Filter since date (YYYY-MM-DD or "N days ago")')
+@click.option('--location', help='Filter by location pattern')
+@click.option('--min-confidence', type=float, help='Minimum confidence threshold')
+@click.option('--limit', type=int, default=20, help='Maximum results')
+@click.option('--order-by', default='created_at', help='Order by field')
+@click.option('--desc/--asc', default=True, help='Sort order')
+def search(project, event_types, author, since, location, min_confidence, limit, order_by, desc):
+    """Advanced search for semantic events with filtering options."""
+    project_path = os.path.abspath(project)
+    
+    try:
+        kwargs = {
+            'event_types': event_types if event_types else None,
+            'author': author,
+            'since_date': since,
+            'location_pattern': location,
+            'min_confidence': min_confidence,
+            'limit': limit,
+            'order_by': order_by,
+            'order_desc': desc
+        }
+        # Remove None values
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+        
+        result = db.search_events_advanced(project_path, **kwargs)
+        click.echo(result)
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        sys.exit(1)
+
+
+@main.command()
+@click.option('--project', default='.', type=click.Path(exists=True), help='Project path')
+@click.option('--days', type=int, default=7, help='Number of days back')
+@click.option('--author', help='Filter by author')
+@click.option('--layers', multiple=True, help='Filter by layers')
+@click.option('--limit', type=int, default=15, help='Maximum results')
+def recent(project, days, author, layers, limit):
+    """Get recent project activity with filtering options."""
+    project_path = os.path.abspath(project)
+    
+    try:
+        kwargs = {
+            'days': days,
+            'author': author,
+            'layers': list(layers) if layers else None,
+            'limit': limit
+        }
+        # Remove None values
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+        
+        result = db.get_recent_activity(project_path, **kwargs)
+        click.echo(result)
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        sys.exit(1)
+
+
+@main.command()
+@click.argument('pattern_type')
+@click.option('--project', default='.', type=click.Path(exists=True), help='Project path')
+@click.option('--min-confidence', type=float, default=0.7, help='Minimum confidence threshold')
+@click.option('--since', help='Filter since date (YYYY-MM-DD or "N days ago")')
+@click.option('--limit', type=int, default=10, help='Maximum results')
+def patterns(pattern_type: str, project, min_confidence, since, limit):
+    """Search for specific AI-detected semantic patterns.
+    
+    PATTERN_TYPE: Type of pattern to search for (e.g., 'performance', 'architecture')
+    """
+    project_path = os.path.abspath(project)
+    
+    try:
+        kwargs = {
+            'min_confidence': min_confidence,
+            'since_date': since,
+            'limit': limit
+        }
+        # Remove None values
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+        
+        result = db.search_semantic_patterns(project_path, pattern_type, **kwargs)
+        click.echo(result)
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        sys.exit(1)
+
+
+@main.command()
+@click.argument('node_id')
+@click.option('--project', default='.', type=click.Path(exists=True), help='Project path')
+@click.option('--event-types', multiple=True, help='Filter by event types (use multiple times for multiple types)')
+@click.option('--min-confidence', type=float, default=0.0, help='Minimum confidence threshold')
+@click.option('--since', help='Filter since date (YYYY-MM-DD or "N days ago")')
+def evolution(node_id: str, project, event_types, min_confidence, since):
+    """Get filtered evolution history for a specific node/function.
+    
+    NODE_ID: Identifier for the node/function (e.g., 'func:function_name')
+    """
+    project_path = os.path.abspath(project)
+    
+    try:
+        kwargs = {
+            'event_types': event_types if event_types else None,
+            'min_confidence': min_confidence,
+            'since_date': since
+        }
+        # Remove None values
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+        
+        result = db.get_filtered_evolution(project_path, node_id, **kwargs)
+        click.echo(result)
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        sys.exit(1)
+
+
+@main.command()
+@click.option('--project', default='.', type=click.Path(exists=True), help='Project path')
+def debug(project):
+    """Diagnostic information for debugging query issues."""
+    project_path = os.path.abspath(project)
+    
+    try:
+        result = db.debug_query_tools(project_path)
+        click.echo(result)
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        sys.exit(1)
+
+
 @main.command() 
-@click.argument('path', default='.', type=click.Path(exists=True))
-def stats(path: str):
+@click.argument('project_path', default='.', type=click.Path(exists=True))
+def stats(project_path: str):
     """Show semantic evolution statistics for a project."""
-    path = os.path.abspath(path)
+    project_path = os.path.abspath(project_path)
     
     try:
         result = call_mcp_tool('get_project_statistics', {
-            'path': path
+            'path': project_path
         })
         click.echo(result)
     except Exception as e:
@@ -487,7 +987,44 @@ def call_mcp_tool(tool_name: str, args: Dict) -> str:
     elif tool_name == "get_project_statistics":
         return db.get_project_statistics(args['path'])
     elif tool_name == "query_semantic_evolution":
-        return f"� Semantic evolution query: {args['query']}\n\n🚧 Natural language querying will be available when MCP server is running."
+        # Direct GenAI integration for natural language queries
+        try:
+            import google.generativeai as genai
+            import os
+            
+            api_key = os.getenv("GOOGLE_API_KEY")
+            if not api_key:
+                return "❌ Error: GOOGLE_API_KEY environment variable not set.\nPlease get a key from https://aistudio.google.com/app/apikey and run 'export GOOGLE_API_KEY=...'"
+            
+            genai.configure(api_key=api_key)
+            
+            # Get project info
+            project_path = args['project_path']
+            query = args['query']
+            
+            # Create a simple AI query system
+            model = genai.GenerativeModel('gemini-1.5-pro-latest')
+            
+            # Get recent activity as context
+            recent_events = db.get_recent_activity(project_path, days=7, limit=10)
+            
+            prompt = f"""You are an SVCS semantic analysis assistant. A developer is asking about their codebase evolution.
+
+Project path: {project_path}
+Developer query: {query}
+
+Recent activity (last 7 days):
+{recent_events}
+
+Based on the recent activity, provide a helpful response about the codebase evolution. If the query is about specific functions or changes, refer to the activity data. If you need more specific data, suggest using the CLI commands like 'svcs search', 'svcs recent', or 'svcs patterns'."""
+
+            response = model.generate_content(prompt)
+            return f"🤖 SVCS AI Assistant:\n\n{response.text}"
+            
+        except ImportError:
+            return "❌ Error: google-generativeai library not installed.\nPlease run: pip install google-generativeai"
+        except Exception as e:
+            return f"❌ Error in AI query: {str(e)}"
     else:
         return f"🚧 Tool '{tool_name}' not yet implemented"
 
