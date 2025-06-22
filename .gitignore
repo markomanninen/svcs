@@ -3,8 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# SVCS Tool Directory
-.svcs/
+# SVCS - Track config but ignore logs, cache, and databases
+.svcs/logs/
+.svcs/cache/
+.svcs/*.db
+.svcs/*.sqlite
+.svcs/*.sqlite3
 
 # Virtual Environment
 venv/
