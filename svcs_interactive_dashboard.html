@@ -307,6 +307,9 @@
                 <button class="nav-item" onclick="showSection('analytics')">
                     📊 Analytics
                 </button>
+                <button class="nav-item" onclick="showSection('maintenance')">
+                    🔧 Database Maintenance
+                </button>
             </div>
 
             <div class="content-area">
@@ -521,6 +524,41 @@
                     <div id="analytics-results" class="result-container" style="display: none;">
                         <h3>Analytics Results</h3>
                         <div id="analytics-output" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- Database Maintenance Section -->
+                <div id="maintenance" class="tool-section">
+                    <h2>🔧 Database Maintenance</h2>
+                    <p>Clean up orphaned data and maintain database integrity.</p>
+
+                    <div class="form-group">
+                        <label for="prune-project-path">Project Path (optional):</label>
+                        <input type="text" id="prune-project-path" placeholder="Leave empty to prune all projects" 
+                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <small style="color: #666; font-size: 12px;">Specify a project path to prune only that project, or leave empty to prune all projects</small>
+                    </div>
+
+                    <div class="quick-actions">
+                        <button class="btn" onclick="pruneDatabase()">🧹 Prune Orphaned Data</button>
+                        <button class="btn btn-secondary" onclick="showPruneHelp()">❓ What is Pruning?</button>
+                    </div>
+
+                    <div id="prune-help" class="info-box" style="display: none; margin: 20px 0; padding: 15px; background: #e9f4ff; border-left: 4px solid #007bff; border-radius: 4px;">
+                        <h4>About Database Pruning</h4>
+                        <p>Pruning removes semantic data for commits that no longer exist in your git history. This can happen when:</p>
+                        <ul style="margin-left: 20px;">
+                            <li>Commits are rebased, squashed, or force-pushed</li>
+                            <li>Branches are deleted</li>
+                            <li>History is rewritten with git filter-branch</li>
+                        </ul>
+                        <p><strong>Warning:</strong> This operation permanently removes orphaned semantic data.</p>
+                        <p><strong>Recommendation:</strong> Make sure you have a backup of your database before running this operation.</p>
+                    </div>
+
+                    <div id="maintenance-results" class="result-container" style="display: none;">
+                        <h3>Maintenance Results</h3>
+                        <div id="maintenance-output" class="result-content"></div>
                     </div>
                 </div>
             </div>
@@ -991,6 +1029,73 @@
                     'Export Data', 'Data export initiated. Check your downloads folder.');
             } catch (error) {
                 showError('analytics-results', error.message);
+            }
+        }
+
+        // Maintenance functions
+        function showPruneHelp() {
+            const helpDiv = document.getElementById('prune-help');
+            helpDiv.style.display = helpDiv.style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function pruneDatabase() {
+            const projectPath = document.getElementById('prune-project-path').value.trim();
+            
+            showLoading('maintenance-results');
+            
+            try {
+                const result = await fetch('/api/prune_database', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        project_path: projectPath || null
+                    })
+                });
+                
+                const data = await result.json();
+                
+                if (data.success) {
+                    const resultData = data.data;
+                    let output = '';
+                    
+                    if (resultData.error) {
+                        output = `<p style="color: red;">❌ ${resultData.error}</p>`;
+                    } else if (resultData.message) {
+                        output = `<h4>${resultData.message}</h4>`;
+                        
+                        if (resultData.project_results) {
+                            // Global prune results
+                            output += `<p><strong>Total Pruned Commits:</strong> ${resultData.total_pruned_commits || 0}</p>`;
+                            output += `<p><strong>Total Deleted Events:</strong> ${resultData.total_deleted_events || 0}</p>`;
+                            
+                            if (resultData.project_results.length > 0) {
+                                output += '<h5>Project Details:</h5><ul>';
+                                resultData.project_results.forEach(project => {
+                                    output += `<li><strong>${project.path}</strong>: ${project.pruned_commits} commits, ${project.deleted_events} events deleted</li>`;
+                                });
+                                output += '</ul>';
+                            }
+                        } else {
+                            // Single project prune results
+                            output += `<p><strong>Project:</strong> ${projectPath || 'single project'}</p>`;
+                            output += `<p><strong>Pruned Count:</strong> ${resultData.pruned_count || 0}</p>`;
+                            output += `<p><strong>Deleted Events:</strong> ${resultData.deleted_events || 0}</p>`;
+                        }
+                        
+                        if ((resultData.total_pruned_commits || resultData.pruned_count || 0) === 0) {
+                            output += '<p style="color: green;">✅ No orphaned data found. Database is clean!</p>';
+                        }
+                    }
+                    
+                    showResults('maintenance-results', 'maintenance-output', 
+                        'Database Prune Results', output);
+                } else {
+                    showError('maintenance-results', data.error || 'Prune operation failed');
+                }
+            } catch (error) {
+                showError('maintenance-results', error.message);
             }
         }
 

@@ -20,6 +20,9 @@ from flask_cors import CORS
 # Add .svcs to path for API imports
 sys.path.insert(0, '.svcs')
 
+# Add svcs_mcp path for core database engine
+sys.path.insert(0, 'svcs_mcp')
+
 try:
     from api import (
         search_events_advanced,
@@ -34,6 +37,8 @@ try:
         get_commit_summary,
         get_full_log
     )
+    # Import core database engine for prune functionality
+    from svcs_mcp_server_simple import GlobalSVCSDatabase
 except ImportError as e:
     print(f"Error importing SVCS API: {e}")
     print("Please ensure you're running this from the SVCS root directory with .svcs/api.py available")
@@ -574,6 +579,30 @@ def api_export_data():
             'error': str(e)
         }), 500
 
+@app.route('/api/prune_database', methods=['POST'])
+def api_prune_database():
+    """Prune orphaned data from the SVCS database."""
+    try:
+        data = request.get_json() or {}
+        project_path = data.get('project_path')  # Optional - if not provided, prunes all projects
+        dry_run = data.get('dry_run', True)  # Default to dry run for safety
+        
+        db = GlobalSVCSDatabase()
+        
+        # Perform the prune operation using the correct method
+        result = db.prune_orphaned_data(project_path=project_path)
+        
+        return jsonify({
+            'success': True,
+            'data': result
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 @app.route('/health')
 def health_check():
     """Health check endpoint."""
@@ -604,6 +633,10 @@ def main():
     print("  GET  /           - Interactive dashboard")
     print("  GET  /health     - Health check")
     print("  POST /api/*      - SVCS API endpoints")
+    print("    /api/search_events        - Advanced semantic search")
+    print("    /api/search_patterns      - Search semantic patterns")
+    print("    /api/get_commit_*         - Git commit information")
+    print("    /api/prune_database       - Clean orphaned data")
     print()
     print("Press Ctrl+C to stop the server")
     

@@ -84,6 +84,19 @@ http://127.0.0.1:8080
 - **Export Data**: Download SVCS data for external analysis
 - **Report Generation**: Create comprehensive analytics reports
 
+### 🔧 **Database Maintenance**
+- **Orphaned Data Cleanup**: Remove semantic data for commits no longer in git history
+- **Project-Specific Pruning**: Clean up data for specific projects
+- **Global Cleanup**: Prune orphaned data across all projects
+- **Safety Features**: Clear warnings and informational help text
+
+**Why Prune?** Orphaned data occurs when:
+- Commits are rebased, squashed, or force-pushed
+- Branches are deleted
+- Git history is rewritten (filter-branch, etc.)
+
+**Warning**: Pruning permanently removes orphaned semantic data. Ensure you have backups before running.
+
 ## 🔧 API Endpoints
 
 The dashboard provides a REST API for programmatic access:
@@ -109,6 +122,7 @@ The dashboard provides a REST API for programmatic access:
 
 ### System
 - `POST /api/get_logs` - View system logs
+- `POST /api/prune_database` - Clean orphaned data from database
 - `GET /health` - Health check
 
 ## 📱 Usage Examples
@@ -136,6 +150,19 @@ The dashboard provides a REST API for programmatic access:
 2. **Filter by Date** → Focus on recent optimizations
 3. **Git Integration** → Examine specific performance commits
 4. **Evolution** → Track performance-critical functions
+
+### Database Maintenance
+1. **Database Maintenance** → Navigate to maintenance section
+2. **Project Path** → Enter specific project path (optional)
+3. **Learn About Pruning** → Click "What is Pruning?" for help
+4. **Prune Data** → Click "Prune Orphaned Data" to clean up
+5. **Review Results** → See how many orphaned commits/events were removed
+
+**Maintenance Scenarios**:
+- After rebasing or squashing commits
+- Following branch deletions or history rewrites
+- Regular cleanup to optimize database size
+- Before important backups or migrations
 
 ## 🎨 User Interface
 

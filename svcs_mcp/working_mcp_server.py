@@ -212,6 +212,17 @@ async def handle_list_tools() -> List[Tool]:
                 },
                 "required": ["project_path", "commit_hash"]
             }
+        ),
+        Tool(
+            name="prune_orphaned_data",
+            description="Remove semantic data for commits no longer in Git history (after rebase, reset, etc.)",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string", "description": "Project path (optional, defaults to all projects)"},
+                    "dry_run": {"type": "boolean", "description": "Show what would be pruned without actually doing it", "default": False}
+                }
+            }
         )
     ]
 
@@ -687,6 +698,62 @@ async def handle_call_tool(name: str, arguments: Dict[str, Any]) -> List[types.T
                 return [types.TextContent(
                     type="text",
                     text=f"❌ Error getting commit summary for {commit_hash}: {str(e)}"
+                )]
+        
+        elif name == "prune_orphaned_data":
+            project_path = arguments.get("project_path")
+            dry_run = arguments.get("dry_run", False)
+            
+            try:
+                if dry_run:
+                    # For dry run, we'll use a simplified approach
+                    if project_path:
+                        # Get project ID
+                        project_id = get_project_id_from_path(project_path)
+                        
+                        # Use the database prune method
+                        result = db.prune_orphaned_data(project_path)
+                        
+                        if "error" in result:
+                            return [types.TextContent(
+                                type="text",
+                                text=f"❌ Error: {result['error']}"
+                            )]
+                        
+                        result_text = f"🔍 Dry run: Would prune data as shown above\n"
+                        result_text += f"📊 Found: {result.get('pruned_count', 0)} orphaned commits"
+                        
+                        return [types.TextContent(type="text", text=result_text)]
+                    else:
+                        return [types.TextContent(
+                            type="text",
+                            text="🔍 Dry run: Global prune not yet implemented in dry-run mode. Use project-specific prune instead."
+                        )]
+                else:
+                    # Actual prune operation using the database method
+                    result = db.prune_orphaned_data(project_path)
+                    
+                    if "error" in result:
+                        return [types.TextContent(
+                            type="text",
+                            text=f"❌ Error: {result['error']}"
+                        )]
+                    
+                    if project_path:
+                        result_text = f"🧹 {result['message']}\n"
+                        result_text += f"📊 Pruned commits: {result.get('pruned_count', 0)}\n"
+                        result_text += f"📊 Deleted events: {result.get('deleted_events', 0)}"
+                    else:
+                        result_text = f"🧹 {result['message']}\n"
+                        result_text += f"📊 Total pruned commits: {result.get('total_pruned_commits', 0)}\n"
+                        result_text += f"📊 Total deleted events: {result.get('total_deleted_events', 0)}"
+                    
+                    return [types.TextContent(type="text", text=result_text)]
+                    
+            except Exception as e:
+                return [types.TextContent(
+                    type="text",
+                    text=f"❌ Error during prune operation: {str(e)}"
                 )]
         
         else:

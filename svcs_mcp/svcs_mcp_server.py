@@ -402,6 +402,24 @@ async def handle_list_tools() -> list[types.Tool]:
                 },
                 "required": ["project_path", "query"]
             }
+        ),
+        types.Tool(
+            name="prune_orphaned_data",
+            description="Remove semantic data for commits no longer in Git history (after rebase, reset, etc.)",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "project_path": {
+                        "type": "string",
+                        "description": "Project path (optional, defaults to all projects)"
+                    },
+                    "dry_run": {
+                        "type": "boolean",
+                        "description": "Show what would be pruned without actually doing it",
+                        "default": False
+                    }
+                }
+            }
         )
     ]
 
@@ -554,6 +572,15 @@ async def handle_call_tool(name: str, arguments: dict | None) -> list[types.Text
             result = f"🔍 Query: '{query}'\n"
             result += f"Project: {project['name']}\n\n"
             result += "🚧 Semantic evolution querying will be integrated with the existing SVCS conversational interface in the next phase."
+            
+            return [types.TextContent(type="text", text=result)]
+        
+        elif name == "prune_orphaned_data":
+            project_path = arguments.get("project_path")
+            dry_run = arguments.get("dry_run", False)
+            
+            # Use the existing database prune method
+            result = db.prune_orphaned_data(project_path) if not dry_run else f"🔍 Dry run: Would prune orphaned data from {project_path or 'all projects'}"
             
             return [types.TextContent(type="text", text=result)]
         

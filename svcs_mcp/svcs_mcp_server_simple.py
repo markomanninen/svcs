@@ -323,6 +323,136 @@ class GlobalSVCSDatabase:
                 "layers": layers
             }
 
+    def prune_orphaned_data(self, project_path: str = None) -> Dict[str, Any]:
+        """Remove data for commits that no longer exist in git history."""
+        import subprocess
+        import os
+        from pathlib import Path
+        
+        try:
+            if project_path:
+                # Get project ID first
+                project_id = self.get_project_id_by_path(project_path)
+                if not project_id:
+                    return {"error": f"Project not registered: {project_path}"}
+                
+                # Change to project directory to run git commands
+                original_cwd = os.getcwd()
+                try:
+                    os.chdir(project_path)
+                    
+                    # Get valid commit hashes from git
+                    cmd = ["git", "log", "--format=%H"]
+                    result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+                    git_hashes = set(result.stdout.strip().split('\n')) if result.stdout.strip() else set()
+                    
+                    # Get commit hashes from database for this project
+                    with self.get_connection() as conn:
+                        db_hashes = set()
+                        cursor = conn.execute(
+                            "SELECT DISTINCT commit_hash FROM semantic_events WHERE project_id = ?",
+                            (project_id,)
+                        )
+                        for row in cursor.fetchall():
+                            db_hashes.add(row[0])
+                        
+                        # Find orphaned hashes
+                        orphaned_hashes = db_hashes - git_hashes
+                        
+                        if not orphaned_hashes:
+                            return {"message": "No orphaned data found", "pruned_count": 0}
+                        
+                        # Remove orphaned data
+                        pruned_count = 0
+                        for commit_hash in orphaned_hashes:
+                            cursor = conn.execute(
+                                "DELETE FROM semantic_events WHERE project_id = ? AND commit_hash = ?",
+                                (project_id, commit_hash)
+                            )
+                            pruned_count += cursor.rowcount
+                        
+                        conn.commit()
+                        
+                        return {
+                            "message": f"Successfully pruned data for {len(orphaned_hashes)} orphaned commit(s)",
+                            "pruned_count": len(orphaned_hashes),
+                            "deleted_events": pruned_count
+                        }
+                        
+                finally:
+                    os.chdir(original_cwd)
+                    
+            else:
+                # Global prune across all projects
+                with self.get_connection() as conn:
+                    # Get all projects
+                    projects = conn.execute("SELECT project_id, path FROM projects").fetchall()
+                    
+                    total_pruned = 0
+                    total_deleted_events = 0
+                    project_results = []
+                    
+                    for project_id, path in projects:
+                        if not Path(path).exists():
+                            continue
+                            
+                        try:
+                            original_cwd = os.getcwd()
+                            os.chdir(path)
+                            
+                            # Get valid commit hashes from git
+                            cmd = ["git", "log", "--format=%H"]
+                            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+                            git_hashes = set(result.stdout.strip().split('\n')) if result.stdout.strip() else set()
+                            
+                            # Get commit hashes from database for this project
+                            db_hashes = set()
+                            cursor = conn.execute(
+                                "SELECT DISTINCT commit_hash FROM semantic_events WHERE project_id = ?",
+                                (project_id,)
+                            )
+                            for row in cursor.fetchall():
+                                db_hashes.add(row[0])
+                            
+                            # Find and remove orphaned hashes
+                            orphaned_hashes = db_hashes - git_hashes
+                            deleted_events = 0
+                            
+                            for commit_hash in orphaned_hashes:
+                                cursor = conn.execute(
+                                    "DELETE FROM semantic_events WHERE project_id = ? AND commit_hash = ?",
+                                    (project_id, commit_hash)
+                                )
+                                deleted_events += cursor.rowcount
+                            
+                            if orphaned_hashes:
+                                total_pruned += len(orphaned_hashes)
+                                total_deleted_events += deleted_events
+                                project_results.append({
+                                    "project_id": project_id,
+                                    "path": path,
+                                    "pruned_commits": len(orphaned_hashes),
+                                    "deleted_events": deleted_events
+                                })
+                                
+                        except subprocess.CalledProcessError:
+                            # Skip projects where git commands fail
+                            continue
+                        finally:
+                            os.chdir(original_cwd)
+                    
+                    conn.commit()
+                    
+                    return {
+                        "message": f"Global prune completed. Pruned {total_pruned} orphaned commits across {len(project_results)} projects",
+                        "total_pruned_commits": total_pruned,
+                        "total_deleted_events": total_deleted_events,
+                        "project_results": project_results
+                    }
+                    
+        except Exception as e:
+            return {"error": f"Prune operation failed: {str(e)}"}
+
 
 class ProjectManager:
     """Manages git hooks and project registration."""

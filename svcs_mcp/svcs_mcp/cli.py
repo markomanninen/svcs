@@ -568,6 +568,115 @@ class SVCSDatabase:
         except Exception as e:
             return f"❌ Error getting statistics: {str(e)}"
 
+    def prune_orphaned_data(self, project_path: str = None) -> str:
+        """Remove semantic data for commits no longer in Git history."""
+        try:
+            import subprocess
+            import sqlite3
+            
+            conn = self.get_connection()
+            if not conn:
+                return "❌ No SVCS database found. Please run 'svcs init' first."
+            
+            cursor = conn.cursor()
+            
+            if project_path:
+                # Normalize path to resolve symlinks
+                project_path = str(Path(project_path).resolve())
+                
+                # Get project ID
+                cursor.execute("SELECT project_id FROM projects WHERE path = ? AND status = 'active'", (project_path,))
+                project_row = cursor.fetchone()
+                if not project_row:
+                    conn.close()
+                    return f"❌ Project not registered: {project_path}"
+                
+                project_id = project_row[0]
+                
+                # Get valid commit hashes for this specific project's git repository
+                try:
+                    result = subprocess.run(
+                        ["git", "rev-list", "--all"], 
+                        cwd=project_path,
+                        capture_output=True, 
+                        text=True, 
+                        check=True
+                    )
+                    git_hashes = set(result.stdout.strip().split('\n')) if result.stdout.strip() else set()
+                except subprocess.CalledProcessError:
+                    conn.close()
+                    return f"❌ Error accessing git repository at {project_path}"
+                
+                # Get database commit hashes for this project
+                cursor.execute("SELECT DISTINCT commit_hash FROM semantic_events WHERE project_id = ?", (project_id,))
+                db_hashes = {row[0] for row in cursor.fetchall()}
+                
+                # Find orphaned hashes
+                orphaned_hashes = db_hashes - git_hashes
+                
+                if not orphaned_hashes:
+                    conn.close()
+                    return f"✅ No orphaned data found for project: {project_path}"
+                
+                # Remove orphaned data
+                with conn:
+                    for hash_val in orphaned_hashes:
+                        cursor.execute("DELETE FROM semantic_events WHERE project_id = ? AND commit_hash = ?", (project_id, hash_val))
+                        cursor.execute("DELETE FROM commits WHERE project_id = ? AND commit_hash = ?", (project_id, hash_val))
+                
+                conn.close()
+                return f"✅ Successfully pruned data for {len(orphaned_hashes)} orphaned commit(s) in project: {project_path}"
+            else:
+                # Global prune - check all projects
+                cursor.execute("SELECT project_id, path FROM projects WHERE status = 'active'")
+                projects = cursor.fetchall()
+                
+                total_pruned = 0
+                results = []
+                
+                for project_id, path in projects:
+                    try:
+                        # Get valid commit hashes for this project's git repository
+                        result = subprocess.run(
+                            ["git", "rev-list", "--all"], 
+                            cwd=path,
+                            capture_output=True, 
+                            text=True, 
+                            check=True
+                        )
+                        git_hashes = set(result.stdout.strip().split('\n')) if result.stdout.strip() else set()
+                        
+                        # Get database commit hashes for this project
+                        cursor.execute("SELECT DISTINCT commit_hash FROM semantic_events WHERE project_id = ?", (project_id,))
+                        db_hashes = {row[0] for row in cursor.fetchall()}
+                        
+                        # Find orphaned hashes
+                        orphaned_hashes = db_hashes - git_hashes
+                        
+                        if orphaned_hashes:
+                            # Remove orphaned data
+                            for hash_val in orphaned_hashes:
+                                cursor.execute("DELETE FROM semantic_events WHERE project_id = ? AND commit_hash = ?", (project_id, hash_val))
+                                cursor.execute("DELETE FROM commits WHERE project_id = ? AND commit_hash = ?", (project_id, hash_val))
+                            
+                            total_pruned += len(orphaned_hashes)
+                            results.append(f"  - {path}: {len(orphaned_hashes)} orphaned commit(s)")
+                    except subprocess.CalledProcessError:
+                        results.append(f"  - {path}: ⚠️  Git repository not accessible")
+                
+                conn.commit()
+                conn.close()
+                
+                if total_pruned > 0:
+                    result_text = f"✅ Successfully pruned data for {total_pruned} orphaned commit(s) across {len(projects)} project(s):\n"
+                    result_text += "\n".join(results)
+                    return result_text
+                else:
+                    return "✅ No orphaned data found across all registered projects."
+                    
+        except Exception as e:
+            return f"❌ Error during prune operation: {str(e)}"
+
 
 # Global database instance
 db = SVCSDatabase()
@@ -1027,6 +1136,55 @@ Based on the recent activity, provide a helpful response about the codebase evol
             return f"❌ Error in AI query: {str(e)}"
     else:
         return f"🚧 Tool '{tool_name}' not yet implemented"
+
+
+@main.command()
+@click.option('--project', help='Project path to prune (default: current directory)')
+@click.option('--dry-run', is_flag=True, help='Show what would be pruned without actually doing it')
+def prune(project, dry_run):
+    """Remove semantic data for orphaned commits (after rebase, reset, etc.)."""
+    try:
+        import sys
+        import os
+        
+        # Single project only - the API works in project context
+        project_path = project or os.getcwd()
+        
+        if dry_run:
+            click.echo(f"🔍 Dry run: Would prune orphaned data from {project_path}")
+            # TODO: Implement dry-run logic for single project
+            return
+        
+        # Check if project has SVCS database
+        svcs_db_path = os.path.join(project_path, '.svcs', 'history.db')
+        if not os.path.exists(svcs_db_path):
+            click.echo(f"❌ No SVCS database found in {project_path}")
+            click.echo("Run 'svcs init' to initialize SVCS for this project.")
+            return
+        
+        # Add the main SVCS directory to path to access the .svcs module
+        svcs_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        svcs_module_path = os.path.join(svcs_root, '.svcs')
+        sys.path.insert(0, svcs_module_path)
+        
+        # Import the API module from .svcs directory
+        import api as svcs_api
+        
+        # Change to project directory for prune operation
+        original_cwd = os.getcwd()
+        try:
+            os.chdir(project_path)
+            removed = svcs_api.prune_orphaned_data()
+            
+            if removed > 0:
+                click.echo(f"🧹 Removed {removed} orphaned semantic records from {project_path}")
+            else:
+                click.echo(f"✨ No orphaned data found in {project_path}")
+        finally:
+            os.chdir(original_cwd)
+                
+    except Exception as e:
+        click.echo(f"❌ Error during prune: {str(e)}")
 
 
 if __name__ == '__main__':

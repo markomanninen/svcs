@@ -12,6 +12,7 @@ SVCS tracks semantic meaning in code changes beyond traditional line-by-line dif
 - [Installation](#-installation)
 - [Quick Start](#-quick-start)
 - [Usage Guide](#-usage-guide)
+- [Database Maintenance](#-database-maintenance)
 - [Module Documentation](#-module-documentation)
 - [MCP Server Interface](#-mcp-server-interface)
 - [Development Setup](#-development-setup)
@@ -556,6 +557,7 @@ python3 svcs_web_server.py
 - 📋 **System Logs**: Monitor LLM inference and error logs
 - 🗂️ **Project Management**: Multi-project support and statistics
 - 📊 **Analytics**: Quality trends and comprehensive reporting
+- 🔧 **Database Maintenance**: Clean orphaned data and optimize storage
 
 See `docs/INTERACTIVE_DASHBOARD_GUIDE.md` for detailed usage instructions.
 
@@ -572,7 +574,45 @@ python3 svcs_quality.py
 python3 svcs_ci.py --pr-analysis --target=main
 ```
 
-## 📚 **Module Documentation**
+## � **Database Maintenance**
+
+SVCS includes comprehensive database maintenance tools to keep your semantic data clean and optimized.
+
+### **Orphaned Data Cleanup**
+
+When git history is modified (rebasing, squashing, force-pushing), some semantic data may become "orphaned" - linked to commits that no longer exist. SVCS provides multiple ways to clean this up:
+
+#### **Interactive Dashboard** (Recommended)
+- Navigate to "🔧 Database Maintenance" in the web interface
+- Choose specific project or global cleanup
+- Visual results with detailed statistics
+- Built-in help and safety information
+
+#### **Command Line Interface**
+```bash
+# Clean all projects
+python3 svcs.py prune
+
+# Clean specific project
+python3 svcs.py prune /path/to/project
+```
+
+#### **MCP Server Integration**
+```
+> prune orphaned data for /path/to/project
+> clean up database for all projects
+```
+
+### **Safety & Best Practices**
+
+- **Always backup** your database before pruning: `cp ~/.svcs/global.db ~/.svcs/global.db.backup`
+- **Coordinate with team** on shared repositories
+- **Regular maintenance** - prune after major rebases or history changes
+- **Monitor results** - review what was cleaned to ensure nothing important was lost
+
+For comprehensive maintenance documentation, see [`docs/DATABASE_MAINTENANCE_GUIDE.md`](docs/DATABASE_MAINTENANCE_GUIDE.md).
+
+## �📚 **Module Documentation**
 
 ### **Core Analysis Engine**
 
@@ -580,7 +620,7 @@ python3 svcs_ci.py --pr-analysis --target=main
 - Rich terminal output with filtering capabilities
 - Event type and layer-based queries
 - Author and time-based filtering
-- Database maintenance operations
+- Database maintenance operations (prune, stats, debug)
 
 #### **`svcs_discuss.py` - Conversational AI Interface**
 - Natural language query processing
@@ -653,6 +693,10 @@ Modern AI-integrated interface for multiple projects:
 - `get_commit_diff` - Get git diff for a commit (optionally filtered to specific file)
 - `get_commit_summary` - Comprehensive commit information including metadata, files, and semantic events
 
+#### **Database Maintenance** 🆕
+- `prune_orphaned_data` - Remove semantic data for commits no longer in git history
+- `debug_query_tools` - Diagnostic information for database debugging
+
 ### **Practical Usage**
 
 In any MCP-compatible IDE (VS Code, Cursor, etc.):
@@ -674,6 +718,11 @@ In any MCP-compatible IDE (VS Code, Cursor, etc.):
 > show me the diff for commit abc123
 > summarize commit abc123
 > show diff for file.py in commit abc123
+
+# Database maintenance
+> prune orphaned data for /path/to/project
+> clean up database for all projects
+> debug database for this project
 ```
 
 ### **Project Management CLI**
@@ -684,6 +733,10 @@ svcs init --name "My Project" /path/to/project     # Register and setup
 svcs list                                          # List all projects
 svcs status /path/to/project                       # Check project status
 svcs remove /path/to/project                       # Unregister project
+
+# Database maintenance
+svcs prune /path/to/project                        # Clean orphaned data for specific project
+svcs prune                                         # Clean orphaned data for all projects
 ```
 
 ## 🔧 **Development Setup**
