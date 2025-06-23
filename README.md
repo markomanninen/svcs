@@ -52,13 +52,13 @@ Modern AI agents (GitHub Copilot, Claude, GPT) excel at immediate code analysis 
 | ✅ Suggest improvements | ✅ **+ Learn from past decisions** |
 | ✅ Detect code smells | ✅ **+ Identify improvement trends** |
 | ❌ No historical context | ✅ **Rich semantic history** |
-| ❌ No team learning | ✅ **Organizational code intelligence** |
+| ❌ No team learning | ✅ **Rich semantic insights** |
 
 ### **The SVCS Advantage**
 
 1. **Semantic Memory**: Your codebase remembers why changes were made
 2. **Pattern Recognition**: Identify successful architectural decisions over time
-3. **Team Intelligence**: Learn from collective coding wisdom
+3. **Personal Code Intelligence**: Learn from your own coding evolution
 4. **AI Enhancement**: Provide LLM agents with rich context for better assistance
 5. **Educational Tool**: Deep insights into programming evolution and best practices
 
@@ -70,10 +70,45 @@ SVCS + MCP provides rich semantic context to AI assistants, enabling them to und
 ### **📚 Code Learning & Investigation**
 - **Programming Skill Development**: Track your coding evolution and identify improvement patterns
 - **Code Archaeology**: Investigate complex bugs by tracing when complexity was introduced
-- **Team Knowledge Transfer**: New developers learn from semantic evolution patterns
+- **Personal Knowledge Base**: Build semantic understanding of your codebase evolution
 
 ### **🔗 Git Integration**
 Every semantic event links to its exact git commit, enabling complete traceability. Query specific commits, view diffs, and understand the relationship between semantic changes and actual code changes.
+
+### **🤝 Team Collaboration** (Planned - Git-Integrated)
+SVCS will integrate directly with git's team workflow for natural semantic collaboration:
+
+#### **Feature Branch → PR → Merge Workflow**
+1. **Developer creates feature branch** → inherits semantic context from main branch
+2. **Commits with semantic analysis** → analysis stored as git notes attached to commits  
+3. **Pushes feature branch** → git notes automatically included, semantic data available for review
+4. **Code review enhanced** → reviewers can query semantic changes: `svcs diff-branches main..feature/auth`
+5. **PR merge to main** → semantic data automatically merges, team gets integrated semantic history
+6. **Team pulls main** → everyone automatically receives shared semantic intelligence
+
+#### **SVCS-Enhanced Code Review**
+```bash
+# Reviewer queries semantic impact of PR:
+svcs search --branch feature/user-auth --event-type "security_improvement"
+svcs semantic-impact feature/user-auth    # Show semantic changes this PR introduces
+svcs merge-preview feature/user-auth      # Preview semantic impact of merge
+
+# Compare semantic evolution between branches:
+svcs diff-branches main..feature/user-auth
+# + Added: class:AuthService (security enhancement)
+# + Added: function:validateToken (error handling improvement)  
+# ~ Modified: class:UserController (performance optimization)
+```
+
+#### **Team Semantic Intelligence**
+```bash
+# After merge, query collective team intelligence:
+svcs team-activity --since "1 week"       # Recent semantic changes across team
+svcs cross-developer-evolution class:AuthService  # Track class evolution across developers
+svcs search --author "Alice" --event-type "performance_optimization"
+```
+
+**Benefits**: Semantic data follows exact same workflow as source code through git's collaboration mechanisms - no separate infrastructure needed, works with any git hosting platform.
 
 ### **🏢 Enterprise Applications**
 - **Code Review Enhancement**: Find exemplary refactoring examples for training
@@ -84,7 +119,7 @@ Every semantic event links to its exact git commit, enabling complete traceabili
 ### **💡 Research & Analytics**
 - **Pattern Recognition**: Identify successful architectural decisions over time
 - **Code Metrics**: Track "semantic velocity" and architectural coherence
-- **Cross-Project Learning**: Share architectural wisdom across teams
+- **Multi-Project Insights**: Compare evolution patterns across your personal projects
 
 ## 🧠 5-Layer Analysis Architecture
 
@@ -215,7 +250,36 @@ Add to your VS Code `settings.json`:
 
 ## 🚀 **Quick Start**
 
-### **1. Register a Project**
+### **Option A: Repository-Local SVCS** (Recommended for New Projects)
+
+**Git-integrated team collaboration with repository-local storage:**
+
+```bash
+# Navigate to your git project
+cd your-project
+
+# Initialize repository-local SVCS (includes git hooks)
+python3 svcs_local_cli.py init
+
+# Make changes and commit (automatic semantic analysis)
+echo "def new_function(): pass" >> code.py
+git add code.py
+git commit -m "Add new function"
+# 🔍 SVCS: Analyzing semantic changes...
+# ✅ SVCS: Stored 2 semantic events
+# 📝 SVCS: Semantic data saved as git notes
+
+# View semantic evolution
+python3 svcs_local_cli.py events --limit 5
+
+# Sync semantic data with team (push/pull git notes)
+python3 svcs_local_cli.py notes sync
+git push origin main  # Semantic notes automatically included
+```
+
+### **Option B: Global SVCS** (Legacy/Existing Projects)
+
+**Traditional global database approach:**
 
 ```bash
 # Navigate to your git project
@@ -225,7 +289,7 @@ cd your-project
 svcs init --name "My Project" .
 ```
 
-### **2. Make Changes and Commit**
+### **2. Make Changes and Commit** (Both Architectures)
 
 ```bash
 # Create test files in different languages
@@ -242,8 +306,19 @@ git commit -m "Add hello function in multiple languages"
 
 ### **3. Query Your Code Evolution**
 
-Use any MCP-compatible IDE or the CLI:
+**Repository-Local SVCS:**
+```bash
+# View semantic events for current branch
+python3 svcs_local_cli.py events --limit 10
 
+# View git notes with semantic data
+python3 svcs_local_cli.py notes show
+
+# Check repository status
+python3 svcs_local_cli.py status
+```
+
+**Global SVCS:**
 ```bash
 # Via MCP tools in VS Code/Cursor:
 > list svcs projects
@@ -259,7 +334,7 @@ python3 svcs_discuss.py  # Requires GOOGLE_API_KEY
 ### **Core SVCS CLI (`svcs`)**
 
 ```bash
-# Project management
+# Project management (Global architecture)
 svcs init --name "My Project" .              # Register project
 svcs list                                    # List projects
 svcs stats                                   # Project statistics
@@ -275,6 +350,31 @@ svcs search --min-confidence=0.8             # High-confidence AI insights
 # Database maintenance
 svcs cleanup --show-stats                    # Show database status
 svcs prune --all-projects                    # Clean orphaned data
+```
+
+### **Repository-Local SVCS CLI (`svcs-local`)**
+
+**New git-integrated team collaboration interface:**
+
+```bash
+# Repository initialization and management
+svcs-local init                              # Initialize SVCS for current repository
+svcs-local status                            # Show repository SVCS status
+svcs-local remove                            # Remove SVCS from repository
+
+# Semantic analysis and events
+svcs-local events --limit 10                 # List semantic events for current branch
+svcs-local events --branch feature/auth      # Events for specific branch
+svcs-local analyze --commit abc123           # Manually analyze a commit
+
+# Git notes team collaboration
+svcs-local notes sync                        # Sync semantic notes to remote
+svcs-local notes fetch                       # Fetch semantic notes from remote
+svcs-local notes show --commit abc123        # View semantic note for commit
+
+# Migration from global architecture
+svcs-local migrate list                      # List projects for migration
+svcs-local migrate migrate                   # Migrate current project to local
 ```
 
 ### **Conversational Interface (`svcs_discuss.py`)**
@@ -434,6 +534,7 @@ For comprehensive maintenance documentation, see [`docs/DATABASE_MAINTENANCE_GUI
 
 #### **`svcs_multilang.py` - Advanced Language Extension Framework**
 - **Production-ready multi-language semantic analysis** with robust fallback systems
+- **Python**: Complete support (.py, .pyx, .pyi) - Functions, classes, async/await, decorators, comprehensions
 - **PHP**: Complete modern support (PHP 7.4+/8.x) with Tree-sitter parser + phply legacy fallback
 - **JavaScript/TypeScript**: AST-based analysis with esprima parser + intelligent regex fallback
 - **Extensible architecture**: Easy addition of new language analyzers with standardized interface
@@ -640,19 +741,113 @@ This project originated from the "Time Crystal VCS" concept - a science fiction-
 - VS Code Claude 4 Preview agent (main coding)
 - A code contribution from OpenAI O3 (debug persistent click cli --event-types parsing problem)
 
-### **Planned Improvements**
+## 🔮 **Future Development**
+
+### **Current Limitations**
+
+SVCS is currently designed as a **single-user system**:
+- Local database (`~/.svcs/global.db`) stores data only on your machine
+- No built-in sharing or synchronization capabilities
+- Projects are managed locally per user
+- No team collaboration features yet implemented
+
+### **Current Limitations**
+
+SVCS is currently in transition between architectures:
+- **Global Architecture** (current): Local database (`~/.svcs/global.db`) for single-user operation
+- **Repository-Local Architecture** (new): Git-integrated team collaboration with repository-local storage
+
+The new repository-local architecture has been implemented and is ready for testing:
+- Repository-local semantic database (`.svcs/semantic.db`)
+- Git notes integration for team sharing
+- Branch-aware semantic analysis
+- Repository-specific git hooks
+
+### **Migration to Git-Integrated Team Features**
+
+✅ **Implemented**: Repository-local architecture with git notes integration
+- Repository-local database storage in `.svcs/semantic.db`
+- Semantic data stored as git notes attached to commits
+- Branch-aware semantic analysis and tracking
+- Repository-specific git hooks for automatic analysis
+- Team collaboration through git push/pull workflow
+- Migration tools from global to repository-local storage
+
+🚧 **In Progress**: Integration with existing SVCS components
+- Connecting to existing semantic analyzer modules
+- Updating MCP server for repository-local mode
+- Web dashboard integration for local repositories
+
+### **Planned Git-Integrated Team Features**
+
+We're designing **git-native team collaboration** that integrates with existing git workflows:
+
+#### **Git-Integrated Team Collaboration** (Planned)
+- **Git Notes Integration**: Semantic analysis stored as git notes attached to commits
+- **Automatic Sync**: Semantic data travels with commits via push/pull operations  
+- **Branch-Aware Analysis**: Semantic evolution tracked per git branch
+- **Merge Integration**: Semantic data automatically merges when branches merge
+- **Natural Team Workflow**: No separate servers needed - works with any git hosting
+
+#### **Technical Roadmap** (In Progress)
+
+✅ **Phase 1 - Core Architecture** (Completed):
+```bash
+# Implemented repository-local CLI commands
+svcs-local init                         # Initialize SVCS for repository
+svcs-local status                       # Show repository status and branch info
+svcs-local events --branch main --limit 10  # Branch-specific semantic events
+svcs-local notes sync                   # Sync semantic data via git notes
+svcs-local notes fetch                  # Fetch team's semantic data
+svcs-local migrate list                 # List projects for migration from global DB
+```
+
+🚧 **Phase 2 - Integration** (In Progress):
+```bash
+# Planned integration with existing SVCS components
+svcs-local search --event-type "security_improvement"  # Advanced semantic search
+svcs-local diff-branches main..feature    # Compare semantic evolution between branches
+svcs-local team-activity --since "1 week" # Team's semantic changes across branches
+svcs-local merge-preview feature/auth     # Preview semantic impact of branch merge
+```
+
+📋 **Phase 3 - Team Features** (Planned):
+- Full MCP server integration with repository-local mode
+- Web dashboard for repository-local semantic data
+- Advanced branch comparison and merge preview
+- Team activity analytics and collaboration insights
+
+#### **Git-Native Team Workflow** (Planned)
+1. **Developer commits** → semantic analysis stored as git notes
+2. **Push branch** → git notes automatically included  
+3. **Teammates pull** → get commits + semantic analysis automatically
+4. **Branch merges** → semantic events transfer to target branch
+5. **Team collaboration** → everyone sees shared semantic evolution
+
+#### **Architecture Goals**
+- **Git-Native**: Leverages git's existing collaboration mechanisms
+- **Zero Infrastructure**: No separate servers needed, works with GitHub/GitLab/etc.
+- **Automatic Sync**: Semantic data follows same workflow as source code
+- **Branch Aware**: Understands git branches and merge relationships
+
+### **Technical Improvements**
 - **Enhanced Language Support**: Full semantic analysis for more languages (Go, Rust, Java, C++, etc.)
 - **Cross-Language Analysis**: Detection of architectural changes spanning multiple languages  
 - **Real-time Analysis**: File-watching based analysis for immediate feedback
-- **Distributed Architecture**: Support for large-scale, multi-repository analysis
 - **Advanced AI Integration**: Support for multiple LLM providers and local models
 - **Visual Interfaces**: Rich IDE extensions and web-based exploration tools
+
+### **Development Credits**
+
+This project has been developed with substantial AI assistance:
+- VS Code Claude 4 Preview agent (main coding)
+- A code contribution from OpenAI O3 (debug persistent click cli --event-types parsing problem)
 
 ### **Research Areas**
 - Semantic change impact prediction across application layers
 - Code evolution pattern recognition and recommendation systems
 - Automated refactoring suggestions based on semantic analysis
-- Cross-project learning and pattern transfer
+- Git-integrated semantic data synchronization and branch-aware analysis
 
 ## 🆘 Troubleshooting
 

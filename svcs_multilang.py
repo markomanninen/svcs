@@ -37,6 +37,9 @@ except ImportError:
 
 from typing import Dict, List, Any, Optional
 from abc import ABC, abstractmethod
+import os
+import sys
+from pathlib import Path
 
 class LanguageAnalyzer(ABC):
     """Abstract base class for language-specific analyzers."""
@@ -1489,17 +1492,313 @@ class JavaScriptAnalyzer(LanguageAnalyzer):
         
         return events
 
+
+class PythonAnalyzer(LanguageAnalyzer):
+    """Semantic analyzer for Python code using the existing SVCS Python analyzer."""
+
+    def __init__(self):
+        """Initialize the Python analyzer and try to import the existing parser."""
+        self.parser_available = False
+        self.parse_code_func = None
+        
+        # Try to import the existing Python parser from .svcs directory
+        try:
+            # Look for .svcs directory in current working directory or project root
+            possible_paths = [
+                Path.cwd() / ".svcs",
+                Path.cwd().parent / ".svcs",
+                Path(__file__).parent / ".svcs"
+            ]
+            
+            for svcs_path in possible_paths:
+                if svcs_path.exists() and (svcs_path / "parser.py").exists():
+                    sys.path.insert(0, str(svcs_path))
+                    try:
+                        from parser import parse_code
+                        self.parse_code_func = parse_code
+                        self.parser_available = True
+                        break
+                    except ImportError:
+                        continue
+                        
+        except Exception:
+            pass  # Graceful fallback if parser is not available
+
+    def parse_code(self, content: str) -> Dict[str, Any]:
+        """Parse Python code and extract semantic elements."""
+        if not self.parser_available or not self.parse_code_func:
+            # Fallback to basic parsing
+            return self._parse_basic(content)
+        
+        try:
+            # Use the existing comprehensive parser
+            nodes, deps = self.parse_code_func(content)
+            return {
+                'nodes': nodes,
+                'dependencies': deps,
+                'content': content
+            }
+        except Exception:
+            # Fallback on error
+            return self._parse_basic(content)
+
+    def _parse_basic(self, content: str) -> Dict[str, Any]:
+        """Basic fallback parsing using AST."""
+        try:
+            import ast
+            tree = ast.parse(content)
+            
+            # Extract basic information
+            functions = {}
+            classes = {}
+            imports = set()
+            
+            for node in ast.walk(tree):
+                if isinstance(node, ast.FunctionDef):
+                    functions[f"func:{node.name}"] = {
+                        'name': node.name,
+                        'lineno': node.lineno,
+                        'args': [arg.arg for arg in node.args.args],
+                        'source': ast.get_source_segment(content, node) or ""
+                    }
+                elif isinstance(node, ast.AsyncFunctionDef):
+                    functions[f"func:{node.name}"] = {
+                        'name': node.name,
+                        'lineno': node.lineno,
+                        'args': [arg.arg for arg in node.args.args],
+                        'async': True,
+                        'source': ast.get_source_segment(content, node) or ""
+                    }
+                elif isinstance(node, ast.ClassDef):
+                    classes[f"class:{node.name}"] = {
+                        'name': node.name,
+                        'lineno': node.lineno,
+                        'bases': [ast.get_source_segment(content, base) or str(base) for base in node.bases],
+                        'source': ast.get_source_segment(content, node) or ""
+                    }
+                elif isinstance(node, (ast.Import, ast.ImportFrom)):
+                    if isinstance(node, ast.Import):
+                        for alias in node.names:
+                            imports.add(alias.name)
+                    else:  # ImportFrom
+                        if node.module:
+                            imports.add(node.module)
+            
+            return {
+                'nodes': {**functions, **classes},
+                'dependencies': imports,
+                'content': content
+            }
+            
+        except Exception:
+            return {
+                'nodes': {},
+                'dependencies': set(),
+                'content': content
+            }
+
+    def detect_changes(self, before: Dict[str, Any], after: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Detect semantic changes between two parsed Python code versions."""
+        if not self.parser_available:
+            return self._detect_basic_changes(before, after)
+        
+        # Use the comprehensive change detection logic
+        return self._detect_comprehensive_changes(before, after)
+
+    def _detect_basic_changes(self, before: Dict[str, Any], after: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Basic change detection fallback."""
+        events = []
+        
+        before_nodes = before.get('nodes', {})
+        after_nodes = after.get('nodes', {})
+        before_deps = before.get('dependencies', set())
+        after_deps = after.get('dependencies', set())
+        
+        # Check dependency changes
+        added_deps = after_deps - before_deps
+        removed_deps = before_deps - after_deps
+        
+        if added_deps:
+            events.append({
+                'event_type': 'dependency_added',
+                'node_id': 'module',
+                'location': 'python_file',
+                'details': f'Added dependencies: {", ".join(sorted(added_deps))}'
+            })
+        
+        if removed_deps:
+            events.append({
+                'event_type': 'dependency_removed',
+                'node_id': 'module',
+                'location': 'python_file',
+                'details': f'Removed dependencies: {", ".join(sorted(removed_deps))}'
+            })
+        
+        # Check node changes
+        all_node_ids = set(before_nodes.keys()) | set(after_nodes.keys())
+        
+        for node_id in all_node_ids:
+            if node_id not in before_nodes:
+                events.append({
+                    'event_type': 'node_added',
+                    'node_id': node_id,
+                    'location': 'python_file',
+                    'details': f'Added {node_id}'
+                })
+            elif node_id not in after_nodes:
+                events.append({
+                    'event_type': 'node_removed',
+                    'node_id': node_id,
+                    'location': 'python_file',
+                    'details': f'Removed {node_id}'
+                })
+            elif before_nodes[node_id].get('source') != after_nodes[node_id].get('source'):
+                events.append({
+                    'event_type': 'node_logic_changed',
+                    'node_id': node_id,
+                    'location': 'python_file',
+                    'details': f'Modified {node_id}'
+                })
+        
+        return events
+
+    def _detect_comprehensive_changes(self, before: Dict[str, Any], after: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Comprehensive change detection using the existing analyzer logic."""
+        events = []
+        
+        before_nodes = before.get('nodes', {})
+        after_nodes = after.get('nodes', {})
+        before_deps = before.get('dependencies', set())
+        after_deps = after.get('dependencies', set())
+        
+        # Dependency changes
+        added_deps = after_deps - before_deps
+        removed_deps = before_deps - after_deps
+        
+        if added_deps:
+            events.append({
+                'event_type': 'dependency_added',
+                'node_id': 'module',
+                'location': 'python_file',
+                'details': f'Added: {", ".join(sorted(added_deps))}'
+            })
+        
+        if removed_deps:
+            events.append({
+                'event_type': 'dependency_removed',
+                'node_id': 'module',
+                'location': 'python_file',
+                'details': f'Removed: {", ".join(sorted(removed_deps))}'
+            })
+        
+        # Node-level changes (simplified version of the comprehensive analyzer)
+        all_node_ids = set(before_nodes.keys()) | set(after_nodes.keys())
+        
+        for node_id in all_node_ids:
+            details_before = before_nodes.get(node_id)
+            details_after = after_nodes.get(node_id)
+            
+            if not details_before:
+                events.append({
+                    'event_type': 'node_added',
+                    'node_id': node_id,
+                    'location': 'python_file',
+                    'details': f'Added {node_id}'
+                })
+                continue
+                
+            if not details_after:
+                events.append({
+                    'event_type': 'node_removed',
+                    'node_id': node_id,
+                    'location': 'python_file',
+                    'details': f'Removed {node_id}'
+                })
+                continue
+                
+            if details_before.get("source") == details_after.get("source"):
+                continue
+            
+            # Check for specific types of changes
+            modification_events = []
+            
+            # Signature changes
+            sig_before = details_before.get("signature")
+            sig_after = details_after.get("signature")
+            if sig_before and sig_before != sig_after:
+                modification_events.append({
+                    "event_type": "node_signature_changed",
+                    "details": f"Signature changed from {sig_before} to {sig_after}"
+                })
+            
+            # Decorator changes
+            decorators_before = details_before.get("decorators", set())
+            decorators_after = details_after.get("decorators", set())
+            if decorators_before != decorators_after:
+                added = decorators_after - decorators_before
+                removed = decorators_before - decorators_after
+                if added:
+                    modification_events.append({
+                        "event_type": "decorator_added",
+                        "details": f"Added decorators: {', '.join(sorted(added))}"
+                    })
+                if removed:
+                    modification_events.append({
+                        "event_type": "decorator_removed",
+                        "details": f"Removed decorators: {', '.join(sorted(removed))}"
+                    })
+            
+            # Async changes
+            async_before = details_before.get("async_features", {})
+            async_after = details_after.get("async_features", {})
+            if async_before.get("async_def") != async_after.get("async_def"):
+                if async_after.get("async_def"):
+                    modification_events.append({
+                        "event_type": "function_made_async",
+                        "details": "Function converted to async"
+                    })
+                else:
+                    modification_events.append({
+                        "event_type": "function_made_sync",
+                        "details": "Function converted from async to sync"
+                    })
+            
+            # Add events for this node
+            if modification_events:
+                for event in modification_events:
+                    events.append({
+                        'node_id': node_id,
+                        'location': 'python_file',
+                        **event
+                    })
+            else:
+                events.append({
+                    'event_type': 'node_logic_changed',
+                    'node_id': node_id,
+                    'location': 'python_file',
+                    'details': 'The implementation of this node has changed.'
+                })
+        
+        return events
+
+
 class MultiLanguageAnalyzer:
     """Main multi-language analyzer that delegates to language-specific analyzers."""
     
     def __init__(self):
         self.analyzers = {
+            # Python files
+            '.py': PythonAnalyzer(),
+            '.pyx': PythonAnalyzer(),  # Cython files
+            '.pyi': PythonAnalyzer(),  # Python stub files
+            # PHP files
             '.php': PHPAnalyzer(),
             '.phtml': PHPAnalyzer(),  # HTML-embedded PHP
             '.php3': PHPAnalyzer(),   # PHP 3.x files
             '.php4': PHPAnalyzer(),   # PHP 4.x files
             '.php5': PHPAnalyzer(),   # PHP 5.x files
             '.phps': PHPAnalyzer(),   # PHP source files
+            # JavaScript/TypeScript files
             '.js': JavaScriptAnalyzer(),
             '.ts': JavaScriptAnalyzer(),  # TypeScript uses similar patterns
         }
