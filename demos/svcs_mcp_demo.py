@@ -19,7 +19,7 @@ def demo_svcs_mcp():
     
     # Import our MCP server components
     try:
-        from svcs_mcp_server import GlobalSVCSDatabase, ProjectManager, SVCSQueryEngine
+        from svcs_core import GlobalSVCSDatabase, ProjectManager, SVCSQueryEngine
         print("✅ Successfully imported MCP server components")
     except Exception as e:
         print(f"❌ Import error: {e}")

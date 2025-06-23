@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 try:
-    from svcs_mcp_server_simple import GlobalSVCSDatabase, ProjectManager, SVCSQueryEngine
+    from svcs_core import GlobalSVCSDatabase, ProjectManager, SVCSQueryEngine
     from svcs_mcp.semantic_analyzer import GlobalSemanticAnalyzer
     from svcs_mcp.cli import SVCSDatabase as CLIDatabase
     COMPONENTS_AVAILABLE = True
@@ -321,6 +321,12 @@ async def handle_call_tool(name: str, arguments: Dict[str, Any]) -> List[types.T
         elif name == "get_project_statistics":
             project_id = arguments.get("project_id")
             
+            if not project_id:
+                return [types.TextContent(
+                    type="text",
+                    text="❌ Error: project_id parameter is required"
+                )]
+            
             try:
                 # Handle partial project IDs
                 if len(project_id) < 36:  # Not a full UUID
@@ -374,7 +380,7 @@ async def handle_call_tool(name: str, arguments: Dict[str, Any]) -> List[types.T
             project_path = arguments.get("project_path")
             
             # Use the improved process_commit function
-            from svcs_mcp_server_simple import process_commit
+            from svcs_core import process_commit
             
             try:
                 # This will trigger the full semantic analysis with debug output

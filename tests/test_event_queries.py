@@ -13,7 +13,7 @@ sys.path.insert(0, str(script_dir))
 sys.path.insert(0, str(script_dir.parent / ".svcs"))
 
 # Import MCP tools
-from svcs_mcp_server_simple import GlobalSVCSDatabase
+from svcs_core import GlobalSVCSDatabase
 
 def test_event_queries():
     """Test event queries and database content."""

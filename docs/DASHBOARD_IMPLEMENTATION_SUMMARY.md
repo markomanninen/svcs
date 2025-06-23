@@ -114,7 +114,7 @@ python3 svcs_web_server.py
 ### Multi-Modal Access
 - **CLI**: Traditional command-line interface (`svcs.py`)
 - **Conversational**: Natural language interface (`svcs_discuss.py`)
-- **MCP**: AI tool integration (`working_mcp_server.py`)
+- **MCP**: AI tool integration (`mcp_server.py`)
 - **Web**: Interactive dashboard (new!)
 
 ## 🔧 Architecture Benefits

@@ -28,7 +28,7 @@ def test_complete_semantic_analysis():
     # Test imports
     print("\n1️⃣  Testing Component Imports...")
     try:
-        from svcs_mcp_server_simple import GlobalSVCSDatabase
+        from svcs_core import GlobalSVCSDatabase
         print("✅ GlobalSVCSDatabase imported")
         
         from svcs_complete_5layer import SVCSComplete5LayerAnalyzer

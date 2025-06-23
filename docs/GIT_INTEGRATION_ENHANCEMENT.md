@@ -22,7 +22,7 @@ Successfully implemented comprehensive git integration for SVCS, bridging the ga
      - Associated semantic events
      - Counts and statistics
 
-## 🤖 **New MCP Server Tools** (in `working_mcp_server.py`)
+## 🤖 **New MCP Server Tools** (in `mcp_server.py`)
 
 1. **`get_commit_changed_files`**
    - MCP tool wrapper for the API function

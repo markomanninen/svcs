@@ -52,7 +52,7 @@ Issues = "https://github.com/svcs/svcs-mcp/issues"
 
 [project.scripts]
 svcs = "svcs_mcp.cli:main"
-svcs-mcp-server = "svcs_mcp.server:main"
+svcs-mcp-server = "svcs_mcp.server:server_main"
 
 [tool.setuptools.packages.find]
 where = ["."]

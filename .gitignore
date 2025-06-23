@@ -9,6 +9,7 @@ __pycache__/
 .svcs/*.db
 .svcs/*.sqlite
 .svcs/*.sqlite3
+.svcs/*.yaml
 
 # Virtual Environment
 venv/

@@ -38,7 +38,7 @@ try:
         get_full_log
     )
     # Import core database engine for prune functionality
-    from svcs_mcp_server_simple import GlobalSVCSDatabase
+    from svcs_core import GlobalSVCSDatabase
 except ImportError as e:
     print(f"Error importing SVCS API: {e}")
     print("Please ensure you're running this from the SVCS root directory with .svcs/api.py available")

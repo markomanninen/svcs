@@ -475,7 +475,7 @@ REPO_PATH=$(git rev-parse --show-toplevel)
 python3 -c "
 import sys
 sys.path.append('{}')
-from svcs_mcp_server_simple import process_commit
+from svcs_core import process_commit
 process_commit('$REPO_PATH')
 " 2>/dev/null || true
 '''.format(str(Path(__file__).parent))
@@ -937,7 +937,7 @@ REPO_PATH=$(git rev-parse --show-toplevel)
 python3 -c "
 import sys
 sys.path.append('{}')
-from svcs_mcp_server_simple import process_commit
+from svcs_core import process_commit
 process_commit('$REPO_PATH')
 " 2>/dev/null || true
 '''.format(str(Path(__file__).parent))

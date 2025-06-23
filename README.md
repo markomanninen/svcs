@@ -414,7 +414,7 @@ Add to your VS Code `settings.json`:
     "servers": {
       "svcs": {
         "command": "python3",
-        "args": ["/path/to/svcs/svcs_mcp/working_mcp_server.py"],
+        "args": ["/path/to/svcs/svcs_mcp/mcp_server.py"],
         "env": {}
       }
     }

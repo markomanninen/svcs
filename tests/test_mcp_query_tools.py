@@ -12,7 +12,7 @@ script_dir = Path(__file__).parent
 sys.path.insert(0, str(script_dir))
 
 # Import MCP tools
-from svcs_mcp_server_simple import GlobalSVCSDatabase
+from svcs_core import GlobalSVCSDatabase
 
 def test_mcp_query_tools():
     """Test MCP query tools exactly as the user would use them."""

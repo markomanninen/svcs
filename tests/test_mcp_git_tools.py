@@ -18,7 +18,7 @@ async def test_mcp_git_tools():
     print("=" * 50)
     
     try:
-        from working_mcp_server import handle_call_tool
+        from mcp_server import handle_call_tool
         print("✅ Successfully imported MCP server")
     except ImportError as e:
         print(f"❌ Failed to import MCP server: {e}")

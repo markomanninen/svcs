@@ -12,7 +12,7 @@ script_dir = Path(__file__).parent
 sys.path.insert(0, str(script_dir))
 
 # Import MCP tools
-from svcs_mcp_server_simple import GlobalSVCSDatabase, process_commit
+from svcs_core import GlobalSVCSDatabase, process_commit
 
 def test_mcp_tools():
     """Test the MCP tools to ensure they provide comprehensive debug output."""

@@ -44,11 +44,11 @@ except ImportError as e:
         SEMANTIC_ANALYSIS_AVAILABLE = False
 
 try:
-    from svcs_mcp_server_simple import GlobalSVCSDatabase
+    from svcs_core import GlobalSVCSDatabase
 except ImportError:
     # Fallback import path
     sys.path.insert(0, str(Path(__file__).parent.parent))
-    from svcs_mcp_server_simple import GlobalSVCSDatabase
+    from svcs_core import GlobalSVCSDatabase
 
 
 class GlobalSemanticAnalyzer:

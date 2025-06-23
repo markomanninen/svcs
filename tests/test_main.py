@@ -3,7 +3,7 @@ import os
 # Add src to path to allow importing main
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
-from main import greet
+from tests.commit_before_example import greet
 
 def test_greet_default():
     """Tests the greet function with no arguments."""

@@ -10,7 +10,7 @@ from pathlib import Path
 # Add paths
 sys.path.insert(0, str(Path(__file__).parent))
 
-from working_mcp_server import handle_call_tool
+from mcp_server import handle_call_tool
 
 async def test_mcp_tools():
     """Test MCP tools functionality."""

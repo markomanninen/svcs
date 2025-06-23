@@ -9,7 +9,7 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "svcs_mcp"))
 
-from svcs_mcp_server_simple import GlobalSVCSDatabase, ProjectManager, SVCSQueryEngine
+from svcs_core import GlobalSVCSDatabase, ProjectManager, SVCSQueryEngine
 
 def test_cli():
     """Test CLI functionality."""
