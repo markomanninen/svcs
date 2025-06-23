@@ -1,0 +1,68 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-23T17:47:49.352553",
+  "semantic_events": [
+    {
+      "event_type": "node_added",
+      "node_id": "class:TestClass",
+      "location": "test_python_semantic.py",
+      "details": "Added class:TestClass",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "HEAD",
+      "created_at": 1750690069
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:method",
+      "location": "test_python_semantic.py",
+      "details": "Added func:method",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "HEAD",
+      "created_at": 1750690069
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:simple_function",
+      "location": "test_python_semantic.py",
+      "details": "Added func:simple_function",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "HEAD",
+      "created_at": 1750690069
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:__init__",
+      "location": "test_python_semantic.py",
+      "details": "Added func:__init__",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "HEAD",
+      "created_at": 1750690069
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:async_function",
+      "location": "test_python_semantic.py",
+      "details": "Added func:async_function",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "HEAD",
+      "created_at": 1750690069
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "HEAD"
+}
