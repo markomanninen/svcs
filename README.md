@@ -26,12 +26,13 @@ SVCS tracks semantic meaning in code changes beyond traditional line-by-line dif
 - **🧠 5-Layer Semantic Analysis** - From AST parsing to optional AI understanding
 - **🤖 Model Context Protocol (MCP) Server** - Modern AI integration architecture
 - **🌍 Multi-Language Support** - Python (complete), PHP (modern with Tree-sitter), JavaScript/TypeScript (AST-based)
-- **💬 Conversational Interface** - Natural language queries about code evolution
+- **� Git-Integrated Team Architecture** - Repository-local semantic data with git notes for collaboration
+- **🌿 Branch-Aware Analysis** - Track semantic changes across branches with comparison tools
+- **⚡ Real-Time Git Hooks** - Automatic semantic analysis on commit, merge, and branch switch
+- **�💬 Conversational Interface** - Natural language queries about code evolution
 - **📊 Analytics & Visualization** - Web dashboard and quality insights
 - **🔧 CI/CD Integration** - Automated quality gates and PR analysis
-- **⚡ Global Project Management** - Track multiple projects from one interface
-- **🗂️ Smart Project Cleanup** - Soft/hard delete with database maintenance
-- **🔄 Project Recovery** - Reactivate inactive projects with preserved history
+- **🗂️ Multi-Repository Management** - Track multiple projects with unified interface
 
 ## 🚀 **Why SVCS? Value Proposition**
 
