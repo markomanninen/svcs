@@ -1495,6 +1495,11 @@ class MultiLanguageAnalyzer:
     def __init__(self):
         self.analyzers = {
             '.php': PHPAnalyzer(),
+            '.phtml': PHPAnalyzer(),  # HTML-embedded PHP
+            '.php3': PHPAnalyzer(),   # PHP 3.x files
+            '.php4': PHPAnalyzer(),   # PHP 4.x files
+            '.php5': PHPAnalyzer(),   # PHP 5.x files
+            '.phps': PHPAnalyzer(),   # PHP source files
             '.js': JavaScriptAnalyzer(),
             '.ts': JavaScriptAnalyzer(),  # TypeScript uses similar patterns
         }

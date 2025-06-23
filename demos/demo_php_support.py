@@ -20,7 +20,8 @@ def demonstrate_php_support():
     events = get_full_log()
     
     # Filter PHP events
-    php_events = [e for e in events if e['location'].endswith('.php')]
+    php_extensions = ('.php', '.phtml', '.php3', '.php4', '.php5', '.phps')
+    php_events = [e for e in events if e['location'].endswith(php_extensions)]
     
     if not php_events:
         print("❌ No PHP events found. Make sure to commit some PHP files!")
@@ -36,9 +37,9 @@ def demonstrate_php_support():
 
     detailed_event_types = {
         "PHP Structure Changes": [
-            "node_added", "node_removed",
-            "php_namespace_changed", # Assuming this might be an event type
-            "php_use_statement_added", "php_use_statement_removed"
+            "node_added", "node_removed",  # For namespaces, classes, functions, etc.
+            "php_use_statement_added", "php_use_statement_removed",
+            "php_global_code_changed"
         ],
         "PHP Function/Method Changes": [
             "php_node_signature_changed", "php_return_type_changed",
@@ -48,9 +49,8 @@ def demonstrate_php_support():
         ],
         "PHP Class/Interface/Trait Changes": [
             "php_inheritance_changed", "php_interface_extends_changed",
-            "php_trait_usage_changed", # Placeholder for future
             "php_abstract_modifier_changed", "php_final_modifier_changed"
-            # node_added/removed for methods/properties are covered by general structure
+            # Note: node_added/removed for methods/properties are covered by general structure
         ],
         "PHP Property Changes": [
             "php_typed_property_changed", "php_property_default_value_changed",

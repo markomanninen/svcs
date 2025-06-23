@@ -1396,10 +1396,11 @@ def process_commit(repo_path: str):
         total_events = 0
         all_file_events = []
         
+        # Support multiple file types including PHP and JavaScript
+        supported_extensions = ['.py', '.php', '.phtml', '.php3', '.php4', '.php5', '.phps', '.js', '.ts']
+        
         # Analyze each changed file
         for file_path in changed_files:
-            # Support multiple file types including PHP and JavaScript
-            supported_extensions = ['.py', '.php', '.js', '.ts', '.phtml', '.php3', '.php4', '.php5', '.phps']
             if not any(file_path.endswith(ext) for ext in supported_extensions):
                 console.print(f"[dim]⏭️  Skipping {file_path} (unsupported file type)[/dim]")
                 continue

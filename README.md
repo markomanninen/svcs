@@ -328,7 +328,7 @@ SVCS employs a multi-layer analysis system:
 | Language | Extensions | Support Level | Parser Technology | Features |
 |----------|------------|---------------|-------------------|----------|
 | **Python** | `.py`, `.pyw`, `.pyi` | **Complete** | Native AST | Full AST analysis, 31+ semantic event types, decorators, async/await, generators, comprehensions, type annotations |
-| **PHP** | `.php` | **Modern** | Tree-sitter (primary) + phply (fallback) | Modern PHP 7.4+/8.x features (enums, attributes, typed properties), legacy PHP 5.x-7.3 support, classes, interfaces, traits, methods, properties, namespaces, inheritance tracking |
+| **PHP** | `.php`, `.phtml`, `.php3`, `.php4`, `.php5`, `.phps` | **Modern** | Tree-sitter (primary) + phply (fallback) | Modern PHP 7.4+/8.x features (enums, attributes, typed properties), legacy PHP 5.x-7.3 support, classes, interfaces, traits, methods, properties, namespaces, inheritance tracking |
 | **JavaScript** | `.js` | **AST-based** | esprima AST parser + regex fallback | ES6+ classes, arrow functions, async/await, inheritance changes, method signatures, constructor parameters, import/export tracking |
 | **TypeScript** | `.ts` | **AST-based** | esprima AST parser + regex fallback | Same as JavaScript with TypeScript syntax support |
 
