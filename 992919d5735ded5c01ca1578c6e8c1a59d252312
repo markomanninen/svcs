@@ -1,0 +1,47 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-23T17:35:47.359972",
+  "semantic_events": [
+    {
+      "event_type": "internal_call_added",
+      "node_id": "func:_run_core_analysis",
+      "location": ".svcs/svcs_complete_5layer.py",
+      "details": "Now calls: analyze_changes",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750624659,
+      "commit_hash": "992919d5735ded5c01ca1578c6e8c1a59d252312"
+    },
+    {
+      "event_type": "internal_call_removed",
+      "node_id": "func:_run_core_analysis",
+      "location": ".svcs/svcs_complete_5layer.py",
+      "details": "No longer calls: analyze_python_changes",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750624659,
+      "commit_hash": "992919d5735ded5c01ca1578c6e8c1a59d252312"
+    },
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "class:SVCSComplete5LayerAnalyzer",
+      "location": ".svcs/svcs_complete_5layer.py",
+      "details": "The implementation of this node has changed.",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750624659,
+      "commit_hash": "992919d5735ded5c01ca1578c6e8c1a59d252312"
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "992919d5735ded5c01ca1578c6e8c1a59d252312"
+}
