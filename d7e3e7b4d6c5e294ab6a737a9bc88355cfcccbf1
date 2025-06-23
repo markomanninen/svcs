@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-23T17:32:46.303381",
+  "semantic_events": [
+    {
+      "event_type": "manual_analysis",
+      "node_id": "placeholder",
+      "location": "manual",
+      "details": "Manual analysis of commit d7e3e7b4",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Manually triggered analysis",
+      "commit_hash": "d7e3e7b4d6c5e294ab6a737a9bc88355cfcccbf1"
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "d7e3e7b4d6c5e294ab6a737a9bc88355cfcccbf1"
+}
