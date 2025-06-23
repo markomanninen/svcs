@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-23T17:35:47.461146",
+  "semantic_events": [
+    {
+      "event_type": "file_content_changed",
+      "node_id": "file:test_enhanced_js.js",
+      "location": "test_enhanced_js.js",
+      "details": "Non-code or top-level script change detected.",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750624771,
+      "commit_hash": "75c0c0049d526304c2f08b5299c1da96ef5ea04b"
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "75c0c0049d526304c2f08b5299c1da96ef5ea04b"
+}
