@@ -17,7 +17,7 @@ def analyze_changes(filepath, before_content, after_content):
         return []
 
     # Check if this is a multi-language supported file
-    if filepath.endswith(('.php', '.js', '.ts')):
+    if filepath.endswith(('.php', '.phtml', '.php3', '.php4', '.php5', '.phps', '.js', '.ts')):
         return analyze_multilang_changes(filepath, before_content, after_content)
     
     # Default to Python analysis
