@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-23T18:06:42.897278",
+  "semantic_events": [
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:test_workflow_feature.py",
+      "location": "test_workflow_feature.py",
+      "details": "File test_workflow_feature.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "d95d965bbc202f1ef6d80d88e4402fdf227b02fb",
+      "created_at": 1750691202
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "d95d965bbc202f1ef6d80d88e4402fdf227b02fb"
+}
