@@ -74,10 +74,35 @@ http://127.0.0.1:8080
 - **Error Logs**: Debug SVCS operation issues
 - **Real-time Viewing**: Monitor system activity as it happens
 
-### 🗂️ **Project Management**
+### 🗂️ **Project Management** (Enhanced)
 - **Multi-Project Support**: Manage multiple SVCS-tracked projects
 - **Project Statistics**: View comprehensive analytics per project
 - **Registration**: Add new projects to SVCS tracking
+- **Project Removal Options**:
+  - **Soft Delete (Unregister)**: Remove project from active tracking while preserving all semantic data for potential recovery
+  - **Hard Delete (Purge)**: Permanently remove project and ALL associated semantic data (irreversible)
+- **Cleanup Management**: 
+  - View inactive projects and their storage usage
+  - Database statistics and optimization insights
+  - Smart recommendations for cleanup actions
+- **Safety Features**:
+  - Multiple confirmation dialogs for destructive operations
+  - Clear explanations of what each action does
+  - Recovery guidance for accidentally removed projects
+  - Built-in help system explaining project management options
+
+**Project Management Workflow**:
+1. **View Projects**: Click "📋 List Projects" to see all registered projects
+2. **Get Cleanup Info**: Click "🧹 Cleanup Info" to see inactive projects and database stats
+3. **Safe Removal**: Use "⚠️ Unregister Project" to remove from tracking but keep data
+4. **Complete Removal**: Use "🗑️ Purge Project" only when certain - includes double confirmation
+5. **Recovery**: Re-register a previously unregistered project with "➕ Register Project"
+
+**Warning Signs to Purge**:
+- Project directory no longer exists
+- Project moved to archive/backup storage
+- Confirmed no future need for semantic history
+- Database cleanup showing significant wasted storage
 
 ### 📊 **Analytics & Reporting**
 - **Quality Analysis**: Track code quality trends over time

@@ -102,35 +102,94 @@ class GlobalSVCSDatabase:
             conn.commit()
     
     def register_project(self, name: str, path: str) -> str:
-        """Register a new project and return project_id."""
-        project_id = str(uuid.uuid4())
-        created_at = int(datetime.now().timestamp())
-        
+        """Register a new project or reactivate an existing one."""
         # Normalize path to resolve symlinks (e.g., /tmp -> /private/tmp on macOS)
         path = str(Path(path).resolve())
         
         with self.get_connection() as conn:
-            conn.execute("""
-                INSERT INTO projects (project_id, name, path, created_at)
-                VALUES (?, ?, ?, ?)
-            """, (project_id, name, path, created_at))
-            conn.commit()
-        
-        return project_id
-    
-    def unregister_project(self, path: str) -> bool:
-        """Unregister a project and cleanup its data."""
-        with self.get_connection() as conn:
-            # Get project_id first
+            # Check if project already exists
             cursor = conn.execute(
-                "SELECT project_id FROM projects WHERE path = ?", (path,)
+                "SELECT project_id, name, status FROM projects WHERE path = ?", (path,)
+            )
+            result = cursor.fetchone()
+            
+            if result:
+                project_id, existing_name, status = result
+                
+                if status == 'active':
+                    return f"✅ Project '{existing_name}' is already active at {path}"
+                else:
+                    # Reactivate inactive project
+                    conn.execute(
+                        "UPDATE projects SET status = 'active', name = ? WHERE path = ?",
+                        (name, path)
+                    )
+                    conn.commit()
+                    return f"✅ Reactivated project '{name}' (was: '{existing_name}') at {path}"
+            else:
+                # Create new project
+                project_id = str(uuid.uuid4())
+                created_at = int(datetime.now().timestamp())
+                
+                conn.execute("""
+                    INSERT INTO projects (project_id, name, path, created_at, status)
+                    VALUES (?, ?, ?, ?, 'active')
+                """, (project_id, name, path, created_at))
+                conn.commit()
+                return f"✅ Successfully registered new project '{name}' at {path}"
+    
+    def unregister_project(self, path: str) -> str:
+        """Unregister a project (soft delete - mark as inactive but keep data)."""
+        # Normalize path to resolve symlinks (e.g., /tmp -> /private/tmp on macOS)
+        path = str(Path(path).resolve())
+        
+        with self.get_connection() as conn:
+            # Check if project exists and is active
+            cursor = conn.execute(
+                "SELECT project_id, name, status FROM projects WHERE path = ?", (path,)
             )
             result = cursor.fetchone()
             
             if not result:
-                return False
+                return f"❌ Project not found: {path}"
             
-            project_id = result[0]
+            project_id, name, current_status = result
+            
+            if current_status == 'inactive':
+                return f"⚠️ Project '{name}' is already inactive"
+            
+            # Mark project as inactive (soft delete)
+            conn.execute(
+                "UPDATE projects SET status = 'inactive' WHERE project_id = ?", (project_id,)
+            )
+            
+            conn.commit()
+        
+        return f"✅ Project '{name}' unregistered (marked as inactive). Data preserved for recovery."
+
+    def purge_project(self, path: str) -> str:
+        """Completely remove a project and all its data (hard delete)."""
+        # Normalize path to resolve symlinks (e.g., /tmp -> /private/tmp on macOS)
+        path = str(Path(path).resolve())
+        
+        with self.get_connection() as conn:
+            # Get project info first
+            cursor = conn.execute(
+                "SELECT project_id, name FROM projects WHERE path = ?", (path,)
+            )
+            result = cursor.fetchone()
+            
+            if not result:
+                return f"❌ Project not found: {path}"
+            
+            project_id, name = result
+            
+            # Count data before deletion for feedback
+            cursor.execute("SELECT COUNT(*) FROM semantic_events WHERE project_id = ?", (project_id,))
+            event_count = cursor.fetchone()[0]
+            
+            cursor.execute("SELECT COUNT(*) FROM commits WHERE project_id = ?", (project_id,))
+            commit_count = cursor.fetchone()[0]
             
             # Delete semantic events
             conn.execute(
@@ -149,7 +208,7 @@ class GlobalSVCSDatabase:
             
             conn.commit()
         
-        return True
+        return f"🗑️ Project '{name}' completely purged ({event_count} events, {commit_count} commits deleted)"
     
     def get_project_by_path(self, path: str) -> Optional[Dict]:
         """Get project info by path."""

@@ -12,6 +12,7 @@ SVCS tracks semantic meaning in code changes beyond traditional line-by-line dif
 - [Installation](#-installation)
 - [Quick Start](#-quick-start)
 - [Usage Guide](#-usage-guide)
+- [Project Management & Cleanup](#-project-management--cleanup) 🆕
 - [Database Maintenance](#-database-maintenance)
 - [Module Documentation](#-module-documentation)
 - [MCP Server Interface](#-mcp-server-interface)
@@ -29,6 +30,33 @@ SVCS tracks semantic meaning in code changes beyond traditional line-by-line dif
 - **📊 Analytics & Visualization** - Web dashboard and quality insights
 - **🔧 CI/CD Integration** - Automated quality gates and PR analysis
 - **⚡ Global Project Management** - Track multiple projects from one interface
+- **🗂️ Smart Project Cleanup** - Soft/hard delete with database maintenance 🆕
+- **🔄 Project Recovery** - Reactivate inactive projects with preserved history 🆕
+
+## ✨ **New in 2025: Comprehensive Project Management** 🆕
+
+### **Intelligent Project Lifecycle**
+- **Soft Delete**: Mark projects inactive while preserving all data for recovery
+- **Hard Delete**: Permanently remove projects with confirmation safeguards  
+- **Smart Reactivation**: Automatically recover inactive projects with full history
+- **Database Cleanup**: Visual tools to identify and clean "database bloat"
+
+### **Enhanced Database Maintenance**
+- **Statistics Dashboard**: Monitor active vs inactive projects and storage usage
+- **Orphaned Data Cleanup**: Remove semantic data for commits no longer in git history
+- **Interactive Web Interface**: Visual database maintenance with detailed help
+- **Team-Safe Operations**: Coordination tools and backup recommendations
+
+### **Problem Solved: "Zillions of Test Projects"**
+```bash
+# Before: Stuck with endless test projects cluttering database
+# After: Clean, efficient project management
+
+svcs cleanup --show-stats              # See the problem
+svcs cleanup --show-inactive           # Identify cleanup candidates  
+svcs remove --purge /tmp/old-test*     # Clean permanent removal
+svcs cleanup --show-stats              # Verify the solution
+```
 
 ## 🚀 **Why SVCS? Value Proposition**
 
@@ -555,9 +583,21 @@ python3 svcs_web_server.py
 - 📈 **Evolution Tracking**: Track specific functions/classes over time
 - 🎯 **Pattern Analysis**: AI-detected performance, architecture, and quality patterns
 - 📋 **System Logs**: Monitor LLM inference and error logs
-- 🗂️ **Project Management**: Multi-project support and statistics
+- 🗂️ **Project Management**: 
+  - Multi-project support and statistics
+  - Project registration and unregistration
+  - **Soft Delete** (unregister): Remove from tracking, keep data for recovery
+  - **Hard Delete** (purge): Permanently remove all project data
+  - Cleanup utilities with inactive project detection
+  - Database statistics and optimization tools
 - 📊 **Analytics**: Quality trends and comprehensive reporting
 - 🔧 **Database Maintenance**: Clean orphaned data and optimize storage
+
+**Project Management Safety Features**:
+- **Confirmation dialogs** for destructive operations
+- **Clear distinction** between soft and hard delete options
+- **Recovery guidance** for accidentally removed projects
+- **Cleanup insights** showing inactive projects and wasted storage
 
 See `docs/INTERACTIVE_DASHBOARD_GUIDE.md` for detailed usage instructions.
 
@@ -603,12 +643,64 @@ python3 svcs.py prune /path/to/project
 > clean up database for all projects
 ```
 
-### **Safety & Best Practices**
+### **Safety & Best Practices** 🛡️
 
-- **Always backup** your database before pruning: `cp ~/.svcs/global.db ~/.svcs/global.db.backup`
-- **Coordinate with team** on shared repositories
-- **Regular maintenance** - prune after major rebases or history changes
+#### **Database Backup Strategy**
+```bash
+# Always backup before major operations
+cp ~/.svcs/global.db ~/.svcs/global.db.backup
+
+# Automated backup before purge operations
+svcs remove --purge /path/to/project  # Automatically prompts for confirmation
+```
+
+#### **Project Removal Guidelines**
+- **Use soft delete by default**: `svcs remove /path/to/project` preserves data
+- **Hard delete only when certain**: `svcs remove --purge` cannot be undone
+- **Review inactive projects**: Use `svcs cleanup --show-inactive` before purging
+- **Check database impact**: Use `svcs cleanup --show-stats` to see storage usage
+
+#### **Team Coordination**
+- **Communicate removals** to team members on shared repositories
+- **Document reasons** for permanent project deletions
+- **Coordinate maintenance** windows for large cleanup operations
+- **Share backup locations** with team for recovery scenarios
+
+#### **Regular Maintenance Schedule**
+```bash
+# Weekly: Check for inactive projects
+svcs cleanup --show-inactive
+
+# After major git operations (rebase, squash): Clean orphaned data
+svcs prune
+
+# Monthly: Review database statistics  
+svcs cleanup --show-stats
+
+# Quarterly: Backup and purge abandoned test projects
+cp ~/.svcs/global.db ~/.svcs/backup-$(date +%Y%m%d).db
+svcs cleanup --show-inactive  # Review candidates
+# Purge confirmed abandoned projects
+```
+
+#### **Recovery Procedures**
+```bash
+# Restore from backup
+cp ~/.svcs/global.db.backup ~/.svcs/global.db
+
+# Reactivate accidentally removed project
+svcs init --name "Recovered Project" /path/to/project
+
+# Verify data integrity after recovery
+svcs debug /path/to/project
+svcs stats /path/to/project
+```
+
+#### **Troubleshooting**
 - **Monitor results** - review what was cleaned to ensure nothing important was lost
+- **Check git integrity** - ensure git repository is in good state before pruning
+- **Verify hooks** - use `svcs status` to ensure git hooks are properly installed
+- **Database diagnostics** - use `svcs debug` for detailed project analysis
 
 For comprehensive maintenance documentation, see [`docs/DATABASE_MAINTENANCE_GUIDE.md`](docs/DATABASE_MAINTENANCE_GUIDE.md).
 
@@ -678,6 +770,7 @@ Modern AI-integrated interface for multiple projects:
 #### **Project Management**
 - `list_projects` - List all registered SVCS projects
 - `register_project` - Register new project for tracking
+- `unregister_project` - Soft delete project (mark inactive, preserve data) 🆕
 - `get_project_statistics` - Get semantic statistics for project
 
 #### **Semantic Analysis**
@@ -706,6 +799,7 @@ In any MCP-compatible IDE (VS Code, Cursor, etc.):
 > list svcs projects
 > show stats for /path/to/project
 > register this project with SVCS
+> unregister project /path/to/project              # Soft delete (NEW)
 
 # Semantic queries
 > find performance improvements in my project
@@ -725,18 +819,136 @@ In any MCP-compatible IDE (VS Code, Cursor, etc.):
 > debug database for this project
 ```
 
-### **Project Management CLI**
+## 🗂️ **Project Management & Cleanup**
+
+SVCS provides comprehensive project lifecycle management with intelligent cleanup capabilities to prevent database bloat from test projects and abandoned repositories.
+
+### **Project Management CLI** 🆕
+
+SVCS provides comprehensive project lifecycle management with both **soft delete** (recoverable) and **hard delete** (permanent) options:
 
 ```bash
-# Project lifecycle management
-svcs init --name "My Project" /path/to/project     # Register and setup
-svcs list                                          # List all projects
-svcs status /path/to/project                       # Check project status
-svcs remove /path/to/project                       # Unregister project
+# Project registration and setup
+svcs init --name "My Project" /path/to/project     # Register and setup git hooks
+svcs list                                          # List all active projects
+svcs status /path/to/project                       # Check project status and hooks
 
-# Database maintenance
+# Project removal options
+svcs remove /path/to/project                       # Soft delete: mark inactive, preserve data
+svcs remove --purge /path/to/project               # Hard delete: permanently remove all data
+
+# Database cleanup and maintenance
+svcs cleanup --show-stats                          # Show database statistics
+svcs cleanup --show-inactive                       # List inactive projects
 svcs prune /path/to/project                        # Clean orphaned data for specific project
 svcs prune                                         # Clean orphaned data for all projects
+```
+
+#### **🔄 Smart Project Removal System**
+
+**Soft Delete (Default - Recoverable)**:
+```bash
+svcs remove /path/to/project
+# ✅ Marks project as 'inactive' 
+# ✅ Preserves all semantic events and commit history
+# ✅ Removes local .svcs directory and git hooks
+# ✅ Can be recovered by re-registering the project
+```
+
+**Hard Delete (Permanent - Data Destruction)**:
+```bash
+svcs remove --purge /path/to/project
+# ⚠️  Requires confirmation prompt
+# 🗑️ Permanently deletes ALL project data from database
+# 🗑️ Removes semantic events, commits, and project registration
+# ❌ Cannot be undone - use with caution!
+```
+
+**Smart Reactivation**:
+```bash
+# Reactivate an inactive project
+svcs init --name "Reactivated Project" /path/to/inactive/project
+# ✅ Automatically detects inactive project
+# ✅ Reactivates with preserved data and history
+# ✅ Updates project name if desired
+# ✅ Reinstalls git hooks
+```
+
+#### **🧹 Database Cleanup & Maintenance**
+
+**View Database Status**:
+```bash
+# Get comprehensive database statistics
+svcs cleanup --show-stats
+# Shows:
+# • Active vs inactive projects
+# • Semantic events distribution  
+# • Storage usage breakdown
+# • Wasted storage from inactive projects
+
+# List inactive projects for cleanup
+svcs cleanup --show-inactive
+# Shows:
+# • Inactive project details
+# • Associated data counts
+# • Exact purge commands
+# • Total wasted storage statistics
+```
+
+**Cleanup Orphaned Data**:
+```bash
+# Clean data for commits no longer in git history
+svcs prune /path/to/project                        # Single project
+svcs prune                                         # All projects
+
+# Results show:
+# • Number of orphaned commits cleaned
+# • Projects processed
+# • Storage space recovered
+```
+
+#### **💡 Usage Examples**
+
+**Managing Test Projects**:
+```bash
+# Register test project
+svcs init --name "Test Project" /tmp/test-repo
+
+# Work with it, generate data...
+# git commit -m "test changes"
+
+# Clean removal when done testing
+svcs remove --purge /tmp/test-repo  # Permanent cleanup
+
+# Check database impact
+svcs cleanup --show-stats           # Verify cleanup
+```
+
+**Team Project Handoff**:
+```bash
+# Soft remove old developer's local setup
+svcs remove /path/to/shared/project
+
+# New developer setup
+svcs init --name "Team Project" /path/to/shared/project
+# ✅ Reactivates with full history preserved
+```
+
+**Database Spring Cleaning**:
+```bash
+# Review what can be cleaned
+svcs cleanup --show-inactive
+svcs cleanup --show-stats
+
+# Clean up abandoned test projects
+svcs remove --purge /path/to/old/test1
+svcs remove --purge /path/to/old/test2
+
+# Clean orphaned data from git operations
+svcs prune
+
+# Verify cleanup results
+svcs cleanup --show-stats
 ```
 
 ## 🔧 **Development Setup**

@@ -51,21 +51,45 @@ class SVCSDatabase:
             if not conn:
                 return "❌ Error: SVCS database not found. Is the MCP server initialized?"
             
-            project_id = str(uuid.uuid4())
-            created_at = int(datetime.now().timestamp())
-            
             # Normalize path to resolve symlinks (e.g., /tmp -> /private/tmp on macOS)
             path = str(Path(path).resolve())
             
             cursor = conn.cursor()
-            cursor.execute("""
-                INSERT INTO projects (project_id, name, path, created_at, status)
-                VALUES (?, ?, ?, ?, 'active')
-            """, (project_id, name, path, created_at))
-            conn.commit()
-            conn.close()
             
-            return f"✅ Successfully registered project '{name}'\nProject ID: {project_id[:8]}...\nPath: {path}"
+            # Check if project already exists (active or inactive)
+            cursor.execute("SELECT project_id, name, status FROM projects WHERE path = ?", (path,))
+            existing = cursor.fetchone()
+            
+            if existing:
+                project_id, existing_name, status = existing
+                if status == 'active':
+                    return f"❌ Project already registered as '{existing_name}' at {path}"
+                else:
+                    # Reactivate inactive project
+                    cursor.execute("""
+                        UPDATE projects SET 
+                        name = ?, 
+                        status = 'active',
+                        last_analyzed = ?
+                        WHERE path = ?
+                    """, (name, int(datetime.now().timestamp()), path))
+                    conn.commit()
+                    conn.close()
+                    return f"✅ Reactivated project '{name}' (was: '{existing_name}')\nProject ID: {project_id[:8]}...\nPath: {path}"
+            else:
+                # Create new project
+                project_id = str(uuid.uuid4())
+                created_at = int(datetime.now().timestamp())
+                
+                cursor.execute("""
+                    INSERT INTO projects (project_id, name, path, created_at, status)
+                    VALUES (?, ?, ?, ?, 'active')
+                """, (project_id, name, path, created_at))
+                conn.commit()
+                conn.close()
+                
+                return f"✅ Successfully registered project '{name}'\nProject ID: {project_id[:8]}...\nPath: {path}"
+                
         except Exception as e:
             return f"❌ Error registering project: {str(e)}"
     
@@ -676,6 +700,49 @@ class SVCSDatabase:
                     
         except Exception as e:
             return f"❌ Error during prune operation: {str(e)}"
+    
+    def purge_project(self, path: str) -> str:
+        """Permanently delete a project and all related data from the database."""
+        try:
+            conn = self.get_connection()
+            if not conn:
+                return "❌ Error: SVCS database not found"
+            
+            # Normalize path to resolve symlinks (e.g., /tmp -> /private/tmp on macOS)
+            path = str(Path(path).resolve())
+            
+            cursor = conn.cursor()
+            
+            # Get project info before deletion
+            cursor.execute("SELECT project_id, name FROM projects WHERE path = ?", (path,))
+            project_row = cursor.fetchone()
+            if not project_row:
+                return f"❌ Error: Project not found: {path}"
+            
+            project_id, project_name = project_row
+            
+            # Count related data before deletion
+            cursor.execute("SELECT COUNT(*) FROM semantic_events WHERE project_id = ?", (project_id,))
+            events_count = cursor.fetchone()[0]
+            
+            cursor.execute("SELECT COUNT(*) FROM commits WHERE project_id = ?", (project_id,))
+            commits_count = cursor.fetchone()[0]
+            
+            # Delete all related data in the correct order (foreign keys)
+            cursor.execute("DELETE FROM semantic_events WHERE project_id = ?", (project_id,))
+            cursor.execute("DELETE FROM commits WHERE project_id = ?", (project_id,))
+            cursor.execute("DELETE FROM projects WHERE project_id = ?", (project_id,))
+            
+            conn.commit()
+            conn.close()
+            
+            return f"🗑️ Successfully purged project '{project_name}'\n" \
+                   f"   • Deleted {events_count} semantic events\n" \
+                   f"   • Deleted {commits_count} commit records\n" \
+                   f"   • Removed project registration\n" \
+                   f"   • Path: {path}"
+        except Exception as e:
+            return f"❌ Error purging project: {str(e)}"
 
 
 # Global database instance
@@ -763,15 +830,38 @@ def init(name: str, path: str):
 
 @main.command()
 @click.argument('path', default='.', type=click.Path(exists=True))
-def remove(path: str):
-    """Remove SVCS from a project (unregister and remove hooks)."""
+@click.option('--purge', is_flag=True, help='Permanently delete all project data from database (cannot be undone)')
+def remove(path: str, purge: bool):
+    """Remove SVCS from a project (unregister and remove hooks).
+    
+    By default, this performs a 'soft delete' - the project is marked as inactive
+    but all data is preserved and can be recovered by re-registering.
+    
+    Use --purge to permanently delete ALL project data including semantic events
+    and commit history. This action cannot be undone!
+    """
     path = os.path.abspath(path)
     
     try:
-        result = call_mcp_tool('unregister_project', {
-            'path': path
-        })
-        click.echo(result)
+        if purge:
+            # Confirm destructive action
+            click.echo(f"⚠️  WARNING: This will permanently delete ALL data for project at {path}")
+            click.echo("   • All semantic events will be deleted")
+            click.echo("   • All commit history will be deleted") 
+            click.echo("   • Project registration will be removed")
+            click.echo("   • This action CANNOT be undone!")
+            
+            if not click.confirm("Are you absolutely sure you want to purge this project?"):
+                click.echo("❌ Operation cancelled")
+                return
+            
+            # Perform hard delete (purge)
+            result = db.purge_project(path)
+            click.echo(result)
+        else:
+            # Perform soft delete (unregister)
+            result = db.unregister_project(path)
+            click.echo(result)
         
         # Remove local .svcs directory if it exists
         local_svcs = Path(path) / '.svcs'
@@ -1186,6 +1276,141 @@ def prune(project, dry_run):
     except Exception as e:
         click.echo(f"❌ Error during prune: {str(e)}")
 
+
+@main.command()
+@click.option('--show-inactive', is_flag=True, help='Show inactive (soft-deleted) projects')
+@click.option('--show-stats', is_flag=True, help='Show database statistics')
+def cleanup(show_inactive: bool, show_stats: bool):
+    """Database cleanup utilities and inactive project management.
+    
+    Use this command to:
+    - View inactive projects that can be purged
+    - See database usage statistics
+    - Identify projects that can be safely removed
+    """
+    try:
+        if show_stats:
+            # Show database statistics
+            conn = db.get_connection()
+            if not conn:
+                click.echo("❌ Error: SVCS database not found")
+                return
+            
+            cursor = conn.cursor()
+            
+            # Get project counts
+            cursor.execute("SELECT COUNT(*) FROM projects WHERE status = 'active'")
+            active_projects = cursor.fetchone()[0]
+            
+            cursor.execute("SELECT COUNT(*) FROM projects WHERE status = 'inactive'")
+            inactive_projects = cursor.fetchone()[0]
+            
+            # Get event counts
+            cursor.execute("SELECT COUNT(*) FROM semantic_events")
+            total_events = cursor.fetchone()[0]
+            
+            # Get events from inactive projects
+            cursor.execute("""
+                SELECT COUNT(*) FROM semantic_events se 
+                JOIN projects p ON se.project_id = p.project_id 
+                WHERE p.status = 'inactive'
+            """)
+            inactive_events = cursor.fetchone()[0]
+            
+            # Get commit counts
+            cursor.execute("SELECT COUNT(*) FROM commits")
+            total_commits = cursor.fetchone()[0]
+            
+            cursor.execute("""
+                SELECT COUNT(*) FROM commits c 
+                JOIN projects p ON c.project_id = p.project_id 
+                WHERE p.status = 'inactive'
+            """)
+            inactive_commits = cursor.fetchone()[0]
+            
+            conn.close()
+            
+            click.echo("📊 SVCS Database Statistics:")
+            click.echo("=" * 40)
+            click.echo(f"Projects:")
+            click.echo(f"  • Active: {active_projects}")
+            click.echo(f"  • Inactive: {inactive_projects}")
+            click.echo(f"  • Total: {active_projects + inactive_projects}")
+            click.echo()
+            click.echo(f"Semantic Events:")
+            click.echo(f"  • From active projects: {total_events - inactive_events}")
+            click.echo(f"  • From inactive projects: {inactive_events}")
+            click.echo(f"  • Total: {total_events}")
+            click.echo()
+            click.echo(f"Commit Records:")
+            click.echo(f"  • From active projects: {total_commits - inactive_commits}")
+            click.echo(f"  • From inactive projects: {inactive_commits}")
+            click.echo(f"  • Total: {total_commits}")
+            
+            if inactive_projects > 0:
+                click.echo()
+                click.echo(f"💡 You have {inactive_projects} inactive projects using {inactive_events} events")
+                click.echo("   Use 'svcs cleanup --show-inactive' to see them")
+                click.echo("   Use 'svcs remove --purge <path>' to permanently delete them")
+        
+        if show_inactive:
+            # Show inactive projects
+            conn = db.get_connection()
+            if not conn:
+                click.echo("❌ Error: SVCS database not found")
+                return
+            
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT p.name, p.project_id, p.path, p.created_at,
+                       COUNT(se.event_id) as event_count,
+                       COUNT(c.commit_hash) as commit_count
+                FROM projects p
+                LEFT JOIN semantic_events se ON p.project_id = se.project_id
+                LEFT JOIN commits c ON p.project_id = c.project_id
+                WHERE p.status = 'inactive'
+                GROUP BY p.project_id, p.name, p.path, p.created_at
+                ORDER BY p.created_at DESC
+            """)
+            inactive_projects = cursor.fetchall()
+            conn.close()
+            
+            if not inactive_projects:
+                click.echo("✨ No inactive projects found")
+                return
+            
+            click.echo(f"🗑️ Inactive Projects ({len(inactive_projects)}):")
+            click.echo("=" * 50)
+            
+            total_wasted_events = 0
+            total_wasted_commits = 0
+            
+            for name, project_id, path, created_at, event_count, commit_count in inactive_projects:
+                click.echo(f"• **{name}**")
+                click.echo(f"  - ID: `{project_id[:8]}...`")
+                click.echo(f"  - Path: `{path}`")
+                click.echo(f"  - Created: {datetime.fromtimestamp(created_at).strftime('%Y-%m-%d %H:%M:%S')}")
+                click.echo(f"  - Events: {event_count}, Commits: {commit_count}")
+                click.echo(f"  - Purge: `svcs remove --purge '{path}'`")
+                click.echo()
+                
+                total_wasted_events += event_count
+                total_wasted_commits += commit_count
+            
+            click.echo(f"📈 Total wasted storage:")
+            click.echo(f"   • {total_wasted_events} semantic events")
+            click.echo(f"   • {total_wasted_commits} commit records")
+            click.echo()
+            click.echo("💡 To permanently delete a project and free up space:")
+            click.echo("   svcs remove --purge <project_path>")
+        
+        if not show_inactive and not show_stats:
+            click.echo("Use --show-stats or --show-inactive to see cleanup information")
+            click.echo("Run 'svcs cleanup --help' for more details")
+            
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()

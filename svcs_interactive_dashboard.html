@@ -145,8 +145,25 @@
             background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
         }
 
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #e0a800 0%, #d39e00 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+        }
+
         .btn-danger {
             background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
         }
 
         .result-container {
@@ -489,6 +506,7 @@
                     <div class="quick-actions">
                         <button class="btn" onclick="listProjects()">📋 List Projects</button>
                         <button class="btn" onclick="getProjectStats()">📊 Project Stats</button>
+                        <button class="btn" onclick="getCleanupInfo()">🧹 Cleanup Info</button>
                         <button class="btn btn-secondary" onclick="debugQuery()">🔧 Debug Tools</button>
                     </div>
 
@@ -502,7 +520,20 @@
                         <input type="text" id="project-name" class="form-control" placeholder="My Project">
                     </div>
 
-                    <button class="btn" onclick="registerProject()">➕ Register Project</button>
+                    <div class="quick-actions">
+                        <button class="btn" onclick="registerProject()">➕ Register Project</button>
+                        <button class="btn btn-warning" onclick="unregisterProject()">⚠️ Unregister Project</button>
+                        <button class="btn btn-danger" onclick="purgeProject()">🗑️ Purge Project</button>
+                    </div>
+
+                    <div id="project-removal-help" class="info-box" style="display: none; margin: 20px 0; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                        <h4>Project Removal Options</h4>
+                        <p><strong>Unregister:</strong> Removes the project from active tracking but keeps all semantic data. The project can be reactivated later.</p>
+                        <p><strong>Purge:</strong> Completely removes the project and all associated semantic data. This action cannot be undone.</p>
+                        <button class="btn btn-sm" onclick="toggleProjectRemovalHelp()">Hide Help</button>
+                    </div>
+
+                    <button class="btn btn-secondary btn-sm" onclick="toggleProjectRemovalHelp()">❓ Project Removal Help</button>
 
                     <div id="project-results" class="result-container" style="display: none;">
                         <h3>Project Results</h3>
@@ -658,6 +689,7 @@
 
         // SVCS API calls - Real implementation calling Flask backend
         async function callSVCSAPI(endpoint, params = {}) {
+            console.log(`Calling API endpoint: ${endpoint}`, params);
             try {
                 const response = await fetch(`/api/${endpoint}`, {
                     method: 'POST',
@@ -667,11 +699,14 @@
                     body: JSON.stringify(params)
                 });
                 
+                console.log(`API response status: ${response.status}`);
+                
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
                 const result = await response.json();
+                console.log(`API response:`, result);
                 
                 if (!result.success) {
                     throw new Error(result.error || 'API call failed');
@@ -978,6 +1013,86 @@
                 });
                 showResults('project-results', 'project-output', 
                     'Project Registration', result);
+            } catch (error) {
+                showError('project-results', error.message);
+            }
+        }
+
+        async function unregisterProject() {
+            console.log('unregisterProject function called');
+            const projectPath = document.getElementById('project-path').value;
+            console.log('Project path:', projectPath);
+            
+            if (!projectPath) {
+                showError('project-results', 'Please enter a project path');
+                return;
+            }
+            
+            // Confirmation dialog
+            if (!confirm(`Are you sure you want to unregister the project at "${projectPath}"?\n\nThis will remove it from active tracking but keep all semantic data. The project can be reactivated later.`)) {
+                console.log('User cancelled unregister operation');
+                return;
+            }
+            
+            console.log('Calling unregister API...');
+            showLoading('project-results');
+            
+            try {
+                const result = await callSVCSAPI('unregister_project', {
+                    project_path: projectPath
+                });
+                console.log('Unregister result:', result);
+                showResults('project-results', 'project-output', 
+                    'Project Unregistration', result);
+            } catch (error) {
+                console.error('Unregister error:', error);
+                showError('project-results', error.message);
+            }
+        }
+
+        async function purgeProject() {
+            const projectPath = document.getElementById('project-path').value;
+            
+            if (!projectPath) {
+                showError('project-results', 'Please enter a project path');
+                return;
+            }
+            
+            // Strong confirmation dialog
+            if (!confirm(`⚠️ WARNING: Are you sure you want to PERMANENTLY DELETE all data for the project at "${projectPath}"?\n\nThis action will:\n- Remove the project from tracking\n- Delete ALL semantic analysis data\n- This CANNOT be undone\n\nType "DELETE" in the next dialog to confirm.`)) {
+                return;
+            }
+            
+            const confirmText = prompt('Please type "DELETE" to confirm permanent deletion:');
+            if (confirmText !== 'DELETE') {
+                showError('project-results', 'Purge cancelled - confirmation text did not match');
+                return;
+            }
+            
+            showLoading('project-results');
+            
+            try {
+                const result = await callSVCSAPI('purge_project', {
+                    project_path: projectPath,
+                    confirm: true
+                });
+                showResults('project-results', 'project-output', 
+                    'Project Purged', result);
+            } catch (error) {
+                showError('project-results', error.message);
+            }
+        }
+
+        async function getCleanupInfo() {
+            showLoading('project-results');
+            
+            try {
+                const result = await callSVCSAPI('cleanup_projects', {
+                    show_inactive: true,
+                    show_stats: true
+                });
+                showResults('project-results', 'project-output', 
+                    'Cleanup Information', result);
             } catch (error) {
                 showError('project-results', error.message);
             }

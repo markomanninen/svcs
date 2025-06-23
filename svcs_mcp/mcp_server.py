@@ -62,6 +62,17 @@ async def handle_list_tools() -> List[Tool]:
             }
         ),
         Tool(
+            name="unregister_project",
+            description="Unregister a project (soft delete - mark as inactive but keep data)",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Project path"}
+                },
+                "required": ["path"]
+            }
+        ),
+        Tool(
             name="list_projects", 
             description="List all registered SVCS projects",
             inputSchema={"type": "object", "properties": {}}
@@ -298,6 +309,20 @@ async def handle_call_tool(name: str, arguments: Dict[str, Any]) -> List[types.T
             else:
                 result += f"⚠️ Git hooks installation failed"
                 
+            return [types.TextContent(type="text", text=result)]
+        
+        elif name == "unregister_project":
+            path = arguments.get("path")
+            
+            if not path:
+                return [types.TextContent(
+                    type="text",
+                    text="❌ Error: project path is required"
+                )]
+            
+            # Unregister project (soft delete)
+            result = db.unregister_project(path)
+            
             return [types.TextContent(type="text", text=result)]
         
         elif name == "list_projects":

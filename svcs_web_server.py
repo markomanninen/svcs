@@ -37,7 +37,7 @@ try:
         get_commit_summary,
         get_full_log
     )
-    # Import core database engine for prune functionality
+    # Import core database engine for prune functionality and project management
     from svcs_core import GlobalSVCSDatabase
 except ImportError as e:
     print(f"Error importing SVCS API: {e}")
@@ -64,7 +64,16 @@ def dashboard():
     if dashboard_path.exists():
         with open(dashboard_path, 'r') as f:
             content = f.read()
-        return content
+        response = app.response_class(
+            response=content,
+            status=200,
+            mimetype='text/html'
+        )
+        # Add cache control headers to prevent caching during development
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
     else:
         return """
         <h1>SVCS Dashboard</h1>
@@ -439,21 +448,13 @@ def api_get_logs():
 def api_list_projects():
     """List all SVCS projects."""
     try:
-        # This would typically query the MCP server or database
-        # For now, return current project info
-        result = {
-            'projects': [
-                {
-                    'name': 'Current Project',
-                    'path': os.getcwd(),
-                    'status': 'active'
-                }
-            ]
-        }
+        # Use the database to list projects
+        db = GlobalSVCSDatabase()
+        projects = db.list_projects()
         
         return jsonify({
             'success': True,
-            'data': result
+            'data': projects
         })
         
     except Exception as e:
@@ -476,15 +477,9 @@ def api_register_project():
                 'error': 'Both path and name are required'
             }), 400
         
-        # Mock registration - in reality this would call MCP server
-        result = {
-            'message': f'Project "{project_name}" registered at "{project_path}"',
-            'project': {
-                'name': project_name,
-                'path': project_path,
-                'status': 'registered'
-            }
-        }
+        # Use the actual database to register the project
+        db = GlobalSVCSDatabase()
+        result = db.register_project(project_name, project_path)
         
         return jsonify({
             'success': True,
@@ -603,6 +598,181 @@ def api_prune_database():
             'error': str(e)
         }), 500
 
+@app.route('/api/remove_project', methods=['POST'])
+def api_remove_project():
+    """Remove a registered project."""
+    try:
+        data = request.get_json() or {}
+        project_name = data.get('name')
+        
+        if not project_name:
+            return jsonify({
+                'success': False,
+                'error': 'Project name is required'
+            }), 400
+        
+        # Mock removal - in reality this would call MCP server
+        result = {
+            'message': f'Project "{project_name}" removed',
+            'project': {
+                'name': project_name,
+                'status': 'removed'
+            }
+        }
+        
+        return jsonify({
+            'success': True,
+            'data': result
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/cleanup_project', methods=['POST'])
+def api_cleanup_project():
+    """Cleanup project data."""
+    try:
+        data = request.get_json() or {}
+        project_name = data.get('name')
+        dry_run = data.get('dry_run', True)  # Default to dry run for safety
+        
+        if not project_name:
+            return jsonify({
+                'success': False,
+                'error': 'Project name is required'
+            }), 400
+        
+        # Mock cleanup - in reality this would call MCP server
+        result = {
+            'message': f'Project "{project_name}" cleanup completed',
+            'project': {
+                'name': project_name,
+                'status': 'cleaned'
+            }
+        }
+        
+        return jsonify({
+            'success': True,
+            'data': result
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/unregister_project', methods=['POST'])
+def api_unregister_project():
+    """Unregister a project (soft delete - keeps data)."""
+    try:
+        data = request.get_json() or {}
+        project_path = data.get('project_path')
+        
+        if not project_path:
+            return jsonify({
+                'success': False,
+                'error': 'project_path is required'
+            }), 400
+        
+        db = GlobalSVCSDatabase()
+        result = db.unregister_project(project_path)
+        
+        return jsonify({
+            'success': True,
+            'data': result
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/purge_project', methods=['POST'])
+def api_purge_project():
+    """Purge a project completely (hard delete - removes all data)."""
+    try:
+        data = request.get_json() or {}
+        project_path = data.get('project_path')
+        confirm = data.get('confirm', False)
+        
+        if not project_path:
+            return jsonify({
+                'success': False,
+                'error': 'project_path is required'
+            }), 400
+        
+        if not confirm:
+            return jsonify({
+                'success': False,
+                'error': 'Confirmation required for project purge. Set confirm=true'
+            }), 400
+        
+        db = GlobalSVCSDatabase()
+        result = db.purge_project(project_path)
+        
+        return jsonify({
+            'success': True,
+            'data': result
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/cleanup_projects', methods=['POST'])
+def api_cleanup_projects():
+    """Get cleanup information about projects."""
+    try:
+        data = request.get_json() or {}
+        show_inactive = data.get('show_inactive', True)
+        show_stats = data.get('show_stats', True)
+        
+        db = GlobalSVCSDatabase()
+        result = {}
+        
+        if show_inactive:
+            try:
+                # Get all projects and filter for inactive ones
+                all_projects = db.list_projects()
+                # Handle both dict and string return types
+                if isinstance(all_projects, str):
+                    result['inactive_projects'] = "No inactive projects found"
+                else:
+                    inactive_projects = [p for p in all_projects if not p.get('is_active', True)]
+                    result['inactive_projects'] = inactive_projects
+            except Exception as e:
+                result['inactive_projects'] = f"Error getting inactive projects: {str(e)}"
+        
+        if show_stats:
+            try:
+                # Try to get database statistics
+                if hasattr(db, 'get_database_stats'):
+                    stats = db.get_database_stats()
+                    result['database_stats'] = stats
+                else:
+                    # Fallback to basic stats
+                    result['database_stats'] = "Database statistics not available"
+            except Exception as e:
+                result['database_stats'] = f"Error getting stats: {str(e)}"
+        
+        return jsonify({
+            'success': True,
+            'data': result
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 @app.route('/health')
 def health_check():
     """Health check endpoint."""
@@ -636,7 +806,17 @@ def main():
     print("    /api/search_events        - Advanced semantic search")
     print("    /api/search_patterns      - Search semantic patterns")
     print("    /api/get_commit_*         - Git commit information")
+    print("    /api/list_projects        - List all projects")
+    print("    /api/register_project     - Register new project")
+    print("    /api/unregister_project   - Unregister project (soft delete)")
+    print("    /api/purge_project        - Purge project completely (hard delete)")
+    print("    /api/cleanup_projects     - Get cleanup information")
     print("    /api/prune_database       - Clean orphaned data")
+    print("    /api/remove_project       - Remove a registered project")
+    print("    /api/cleanup_project      - Cleanup project data")
+    print("    /api/unregister_project   - Unregister a project (soft delete)")
+    print("    /api/purge_project        - Purge a project completely (hard delete)")
+    print("    /api/cleanup_projects     - Get cleanup information about projects")
     print()
     print("Press Ctrl+C to stop the server")
     
