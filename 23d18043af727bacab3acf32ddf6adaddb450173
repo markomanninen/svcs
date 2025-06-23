@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-23T17:35:47.396437",
+  "semantic_events": [
+    {
+      "event_type": "variable_usage_changed",
+      "node_id": "global_scope",
+      "location": "test_enhanced_php.php",
+      "details": "Added variables: description",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750624677,
+      "commit_hash": "23d18043af727bacab3acf32ddf6adaddb450173"
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "23d18043af727bacab3acf32ddf6adaddb450173"
+}
