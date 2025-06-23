@@ -201,6 +201,60 @@ def cmd_analyze(args):
         print(f"❌ Analysis error: {e}")
 
 
+def cmd_compare(args):
+    """Compare semantic changes between two branches."""
+    try:
+        # Import the MCP server for branch comparison
+        sys.path.insert(0, str(Path(__file__).parent / "svcs_mcp"))
+        from svcs_repo_local_core import RepositoryLocalMCPServer
+        
+        # Initialize server and compare branches
+        import asyncio
+        async def compare():
+            server = RepositoryLocalMCPServer()
+            # Register repository first
+            await server.register_project(args.repo, "temp")
+            # Compare branches
+            result = await server.compare_branches(args.repo, args.branch1, args.branch2)
+            return result
+        
+        result = asyncio.run(compare())
+        
+        if "error" in result:
+            print(f"❌ Error: {result['error']}")
+            return
+        
+        print(f"🌿 Branch Comparison: {args.branch1} vs {args.branch2}")
+        print("=" * 60)
+        
+        summary = result.get("summary", {})
+        print(f"📊 Summary:")
+        print(f"   {args.branch1}: {summary.get(f'{args.branch1}_total_events', 0)} total events")
+        print(f"   {args.branch2}: {summary.get(f'{args.branch2}_total_events', 0)} total events")
+        print(f"   Differences: {summary.get('differences_count', 0)}")
+        
+        differences = result.get("differences", [])
+        if differences:
+            print(f"\n🔍 Semantic Differences:")
+            for diff in differences[:10]:  # Show top 10
+                event_type, node_id = diff["event"].split(":", 1)
+                count1 = diff[f"{args.branch1}_count"]
+                count2 = diff[f"{args.branch2}_count"]
+                change = diff["difference"]
+                direction = "+" if change > 0 else ""
+                
+                print(f"   📝 {event_type}: {node_id}")
+                print(f"      {args.branch1}: {count1} | {args.branch2}: {count2} | Change: {direction}{change}")
+            
+            if len(differences) > 10:
+                print(f"   ... and {len(differences) - 10} more differences")
+        else:
+            print(f"\n✅ No semantic differences found between branches")
+    
+    except Exception as e:
+        print(f"❌ Branch comparison failed: {e}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="SVCS Repository-Local CLI - Git-Integrated Team Collaboration",
@@ -254,6 +308,13 @@ def main():
     parser_analyze = subparsers.add_parser("analyze", help="Manually analyze a commit")
     parser_analyze.add_argument("--commit", "-c", type=str, help="Commit hash (default: HEAD)")
     parser_analyze.set_defaults(func=cmd_analyze)
+    
+    # Compare branches command
+    compare_parser = subparsers.add_parser('compare', help='Compare semantic changes between branches')
+    compare_parser.add_argument('branch1', help='First branch to compare')
+    compare_parser.add_argument('branch2', help='Second branch to compare') 
+    compare_parser.add_argument('--repo', default='.', help='Repository path (default: current directory)')
+    compare_parser.set_defaults(func=cmd_compare)
     
     args = parser.parse_args()
     
