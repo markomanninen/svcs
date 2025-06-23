@@ -13,8 +13,8 @@ class TestClass:
     def __init__(self, value):
         self.value = value
     
-    def method(self):
-        return self.value
+    def method(self, multiplier=1):
+        return self.value * multiplier
 
 async def async_function():
     """An async function."""
