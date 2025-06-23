@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-23T17:58:18.466516",
+  "semantic_events": [
+    {
+      "event_type": "node_added",
+      "node_id": "func:new_feature_function",
+      "location": "test_python_semantic.py",
+      "details": "Added func:new_feature_function",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "0bce46cc81600e36d6540077b0f3bf88866ab598",
+      "created_at": 1750690698
+    },
+    {
+      "node_id": "func:__init__",
+      "location": "test_python_semantic.py",
+      "event_type": "node_signature_changed",
+      "details": "Signature changed from (self, value) to (self, name)",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "0bce46cc81600e36d6540077b0f3bf88866ab598",
+      "created_at": 1750690698
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:experimental_method",
+      "location": "test_python_semantic.py",
+      "details": "Added func:experimental_method",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "0bce46cc81600e36d6540077b0f3bf88866ab598",
+      "created_at": 1750690698
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "class:ExperimentalClass",
+      "location": "test_python_semantic.py",
+      "details": "Added class:ExperimentalClass",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "0bce46cc81600e36d6540077b0f3bf88866ab598",
+      "created_at": 1750690698
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "0bce46cc81600e36d6540077b0f3bf88866ab598"
+}
