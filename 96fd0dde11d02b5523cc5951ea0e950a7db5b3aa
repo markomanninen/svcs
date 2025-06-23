@@ -1,0 +1,86 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-23T17:35:52.196455",
+  "semantic_events": [
+    {
+      "event_type": "attribute_access_changed",
+      "node_id": "func:init",
+      "location": "svcs_mcp/svcs_mcp/cli.py",
+      "details": "Attribute access patterns changed",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750669929,
+      "commit_hash": "96fd0dde11d02b5523cc5951ea0e950a7db5b3aa"
+    },
+    {
+      "event_type": "internal_call_added",
+      "node_id": "func:init",
+      "location": "svcs_mcp/svcs_mcp/cli.py",
+      "details": "Now calls: datetime.now",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750669929,
+      "commit_hash": "96fd0dde11d02b5523cc5951ea0e950a7db5b3aa"
+    },
+    {
+      "event_type": "none_literal_usage_changed",
+      "node_id": "func:init",
+      "location": "svcs_mcp/svcs_mcp/cli.py",
+      "details": "None literals changed from 1 to 0",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750669929,
+      "commit_hash": "96fd0dde11d02b5523cc5951ea0e950a7db5b3aa"
+    },
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "class:GlobalSemanticAnalyzer",
+      "location": "svcs_mcp/svcs_mcp/semantic_analyzer.py",
+      "details": "The implementation of this node has changed.",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750669929,
+      "commit_hash": "96fd0dde11d02b5523cc5951ea0e950a7db5b3aa"
+    },
+    {
+      "event_type": "assignment_pattern_changed",
+      "node_id": "func:_analyze_file_change",
+      "location": "svcs_mcp/svcs_mcp/semantic_analyzer.py",
+      "details": "Assignment patterns changed",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750669929,
+      "commit_hash": "96fd0dde11d02b5523cc5951ea0e950a7db5b3aa"
+    },
+    {
+      "event_type": "string_literal_usage_changed",
+      "node_id": "func:_analyze_file_change",
+      "location": "svcs_mcp/svcs_mcp/semantic_analyzer.py",
+      "details": "added 8 new literals",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750669929,
+      "commit_hash": "96fd0dde11d02b5523cc5951ea0e950a7db5b3aa"
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "96fd0dde11d02b5523cc5951ea0e950a7db5b3aa"
+}
