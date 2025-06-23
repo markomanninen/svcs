@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-23T17:35:47.287333",
+  "semantic_events": [
+    {
+      "event_type": "file_content_changed",
+      "node_id": "file:test_enhanced_php.php",
+      "location": "test_enhanced_php.php",
+      "details": "Non-code or top-level script change detected.",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750624624,
+      "commit_hash": "97a8c15792af46d30d8bc1cab607ff1ba2d35809"
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "97a8c15792af46d30d8bc1cab607ff1ba2d35809"
+}
