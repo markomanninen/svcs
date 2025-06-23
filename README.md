@@ -12,7 +12,7 @@ SVCS tracks semantic meaning in code changes beyond traditional line-by-line dif
 - [Installation](#-installation)
 - [Quick Start](#-quick-start)
 - [Usage Guide](#-usage-guide)
-- [Project Management & Cleanup](#-project-management--cleanup) 🆕
+- [Project Management & Cleanup](#-project-management--cleanup)
 - [Database Maintenance](#-database-maintenance)
 - [Module Documentation](#-module-documentation)
 - [MCP Server Interface](#-mcp-server-interface)
@@ -30,33 +30,8 @@ SVCS tracks semantic meaning in code changes beyond traditional line-by-line dif
 - **📊 Analytics & Visualization** - Web dashboard and quality insights
 - **🔧 CI/CD Integration** - Automated quality gates and PR analysis
 - **⚡ Global Project Management** - Track multiple projects from one interface
-- **🗂️ Smart Project Cleanup** - Soft/hard delete with database maintenance 🆕
-- **🔄 Project Recovery** - Reactivate inactive projects with preserved history 🆕
-
-## ✨ **New in 2025: Comprehensive Project Management** 🆕
-
-### **Intelligent Project Lifecycle**
-- **Soft Delete**: Mark projects inactive while preserving all data for recovery
-- **Hard Delete**: Permanently remove projects with confirmation safeguards  
-- **Smart Reactivation**: Automatically recover inactive projects with full history
-- **Database Cleanup**: Visual tools to identify and clean "database bloat"
-
-### **Enhanced Database Maintenance**
-- **Statistics Dashboard**: Monitor active vs inactive projects and storage usage
-- **Orphaned Data Cleanup**: Remove semantic data for commits no longer in git history
-- **Interactive Web Interface**: Visual database maintenance with detailed help
-- **Team-Safe Operations**: Coordination tools and backup recommendations
-
-### **Problem Solved: "Zillions of Test Projects"**
-```bash
-# Before: Stuck with endless test projects cluttering database
-# After: Clean, efficient project management
-
-svcs cleanup --show-stats              # See the problem
-svcs cleanup --show-inactive           # Identify cleanup candidates  
-svcs remove --purge /tmp/old-test*     # Clean permanent removal
-svcs cleanup --show-stats              # Verify the solution
-```
+- **🗂️ Smart Project Cleanup** - Soft/hard delete with database maintenance
+- **🔄 Project Recovery** - Reactivate inactive projects with preserved history
 
 ## 🚀 **Why SVCS? Value Proposition**
 
@@ -90,244 +65,26 @@ Modern AI agents (GitHub Copilot, Claude, GPT) excel at immediate code analysis 
 ## 🎯 **Use Cases & Creative Applications**
 
 ### **🤖 AI Agent Enhancement**
+SVCS + MCP provides rich semantic context to AI assistants, enabling them to understand your project's evolution patterns and provide context-aware suggestions based on historical changes.
 
-**Problem**: AI assistants lack context about your project's evolution
-**Solution**: SVCS + MCP provides rich semantic context
+### **📚 Code Learning & Investigation**
+- **Programming Skill Development**: Track your coding evolution and identify improvement patterns
+- **Code Archaeology**: Investigate complex bugs by tracing when complexity was introduced
+- **Team Knowledge Transfer**: New developers learn from semantic evolution patterns
 
-```typescript
-// AI Agent with SVCS context:
-"Based on your codebase history, I see you've been transitioning from 
-procedural to functional patterns. The last 5 commits show increased 
-use of map/filter/reduce. For this new feature, I recommend continuing 
-this pattern with..."
-```
+### **🔗 Git Integration**
+Every semantic event links to its exact git commit, enabling complete traceability. Query specific commits, view diffs, and understand the relationship between semantic changes and actual code changes.
 
-**Creative Applications**:
-- **AI Pair Programming**: Agents understand your coding style evolution
-- **Intelligent Code Review**: Context-aware suggestions based on project patterns
-- **Architectural Guidance**: AI recommendations informed by successful past decisions
-- **Technical Debt Detection**: AI identifies recurring problematic patterns
+### **🏢 Enterprise Applications**
+- **Code Review Enhancement**: Find exemplary refactoring examples for training
+- **Technical Debt Management**: Track debt accumulation and improvement patterns  
+- **CI/CD Integration**: Semantic-aware testing and deployment risk assessment
+- **Quality Gates**: Block deployments based on semantic complexity spikes
 
-### **📚 Deep Learning About Programming**
-
-**Educational Use Cases**:
-
-1. **Programming Skill Development**
-   ```bash
-   # Discover your coding evolution
-   python3 svcs_discuss.py
-   > "How has my error handling improved over time?"
-   > "What design patterns have I adopted this year?"
-   > "Show me my most significant architectural decisions"
-   ```
-
-2. **Team Knowledge Transfer**
-   - New developers understand codebase evolution
-   - See how experienced developers approach problems
-   - Learn from successful refactoring patterns
-
-3. **Code Review Learning**
-   - Understand the *why* behind code changes
-   - See long-term impact of architectural decisions
-   - Learn from semantic patterns that improved code quality
-
-### **🔍 Code Archaeology & Investigation**
-
-**Forensic Analysis**:
-```bash
-# Investigate complex bugs
-python3 svcs.py log --node="func:authentication" --layer="5b"
-# Result: "3 months ago: simplified auth flow, removed edge case handling"
-
-# Understand performance regressions  
-python3 svcs_discuss.py
-> "What changes affected database performance in the last quarter?"
-```
-
-**Creative Applications**:
-- **Bug Origin Tracking**: Semantic analysis reveals when complexity was introduced
-- **Architecture Archaeology**: Understand how current architecture evolved
-- **Decision Archaeology**: Rediscover reasoning behind historical changes
-
-### **🔗 Full Git Traceability & Integration**
-
-**Every semantic event is linked to its exact git commit identifier**, enabling complete traceability:
-
-```bash
-# Find semantic events with commit hashes
-python3 svcs_mcp/cli.py query-events --limit 5
-# Shows: Event: node_added, Commit: 88e833c5...
-
-# Access the actual file changes
-git show 88e833c5
-# Shows: full diff of what changed in that commit
-
-# View commit context
-git log --oneline 88e833c5
-# Shows: commit message, author, date
-```
-
-**New: Programmatic Git Integration** 🆕
-
-SVCS now provides direct access to git changes through both the MCP server and conversational interface:
-
-```bash
-# Via MCP tools in VS Code/Cursor:
-> get changed files for commit 88e833c5
-> show me the diff for commit 88e833c5
-> summarize commit 88e833c5
-
-# Via conversational interface:
-python3 svcs_discuss.py
-> "What files were changed in commit 88e833c5?"
-> "Show me the actual diff for that commit"
-> "What were the exact code changes that led to the authentication refactoring?"
-```
-
-**Enhanced API Functions**:
-- `get_commit_changed_files(commit_hash)` - List of files changed in commit
-- `get_commit_diff(commit_hash, file_path=None)` - Git diff for commit (optionally filtered to specific file)
-- `get_commit_summary(commit_hash)` - Comprehensive commit information including metadata, files, and semantic events
-
-**Database Schema Linkage**:
-- Every `semantic_events` record contains a `commit_hash` field
-- Links directly to git commits for full historical context
-- Enables forensic analysis of how semantic changes relate to actual code changes
-- Supports advanced workflows like blame analysis and bisect operations
-
-### **🎓 Advanced Learning & Research**
-
-**Programming Education**:
-1. **Pattern Recognition**: Identify when and why design patterns emerge
-2. **Refactoring Studies**: Track successful code improvement strategies
-3. **Language Evolution**: See how teams adopt new language features
-4. **Best Practices Discovery**: Learn from semantic patterns that improve quality
-
-**Research Applications**:
-- **Code Evolution Studies**: Academic research on programming practices
-- **Team Dynamics**: How different developers contribute to semantic evolution
-- **Language Adoption**: Track migration patterns between technologies
-- **Quality Metrics**: Correlation between semantic changes and bug rates
-
-### **🏢 Enterprise & Team Applications**
-
-**Organizational Intelligence**:
-
-1. **Code Review Excellence**
-   ```bash
-   # Find exemplary refactoring examples
-   python3 svcs.py log --type="abstract_abstraction_improvement" --min-confidence=0.9
-   # Use findings to train junior developers
-   ```
-
-2. **Architecture Decision Records (ADR) Enhancement**
-   - Automatic detection of architectural changes
-   - Evidence-based architecture evolution tracking
-   - Long-term impact assessment of decisions
-
-3. **Technical Debt Management**
-   ```bash
-   # Identify debt accumulation patterns
-   python3 svcs_analytics.py --focus="maintainability_trends"
-   # Proactive debt reduction strategies
-   ```
-
-### **🔧 DevOps & CI/CD Innovation**
-
-**Intelligent Pipeline Integration**:
-
-1. **Semantic-Aware Testing**
-   - Trigger different test suites based on semantic change types
-   - Performance tests for changes marked as optimization
-   - Security tests for authentication/authorization changes
-
-2. **Deployment Risk Assessment**
-   ```bash
-   # Pre-deployment analysis
-   python3 svcs_ci.py --semantic-risk-assessment
-   # "High semantic complexity detected, recommend gradual rollout"
-   ```
-
-3. **Quality Gates 2.0**
-   - Block deployments with semantic complexity spikes
-   - Require documentation for architectural changes
-   - Enforce review requirements based on semantic impact
-
-### **💡 Creative & Experimental Applications**
-
-**Novel Use Cases**:
-
-1. **Code Storytelling**
-   ```bash
-   # Generate narrative documentation
-   python3 svcs_discuss.py
-   > "Tell the story of how our authentication system evolved"
-   # Creates narrative documentation automatically
-   ```
-
-2. **Semantic Code Metrics**
-   - Track "semantic velocity" (meaningful changes per sprint)
-   - Measure "architectural coherence" over time
-   - "Code wisdom index" (accumulation of best practices)
-
-3. **AI Training Data Generation**
-   - High-quality examples of code improvements
-   - Before/after semantic analysis for model training
-   - Real-world refactoring pattern datasets
-
-4. **Cross-Project Pattern Mining**
-   ```bash
-   # Discover successful patterns across projects
-   svcs_analytics.py --cross-project-patterns
-   # Share architectural wisdom across teams
-   ```
-
-### **🎯 Targeting Specific Problems**
-
-**Real-World Problem Solving**:
-
-1. **"Why is this code so complex?"**
-   - Trace semantic complexity accumulation
-   - Identify when complexity was introduced
-   - Learn from successful simplification patterns
-
-2. **"How do we maintain code quality?"**
-   - Track quality trends over time
-   - Identify developers/practices that improve quality
-   - Set up semantic quality gates
-
-3. **"Why do bugs keep appearing here?"**
-   - Semantic analysis reveals fragile code patterns
-   - Track correlation between change types and bugs
-   - Predictive quality analysis
-
-4. **"How do we onboard new developers?"**
-   - Show them semantic evolution patterns
-   - Demonstrate team coding standards through history
-   - Provide context for architectural decisions
-
-### **🔮 Future-Forward Applications**
-
-**Emerging Possibilities**:
-
-1. **AI Code Generation Enhancement**
-   - Generate code following project's semantic patterns
-   - Maintain architectural consistency automatically
-   - Learn from project-specific successful patterns
-
-2. **Semantic Code Search**
-   ```bash
-   # Find code by semantic meaning, not syntax
-   > "Find functions that handle error recovery"
-   > "Show me examples of performance optimization"
-   ```
-
-3. **Predictive Development**
-   - Predict which code areas need refactoring
-   - Suggest architectural improvements based on patterns
-   - Recommend team training based on semantic gaps
-
-**The fundamental insight**: SVCS transforms code history from a simple audit trail into a rich, queryable knowledge base that enhances both human understanding and AI capabilities.
+### **💡 Research & Analytics**
+- **Pattern Recognition**: Identify successful architectural decisions over time
+- **Code Metrics**: Track "semantic velocity" and architectural coherence
+- **Cross-Project Learning**: Share architectural wisdom across teams
 
 ## 🧠 5-Layer Analysis Architecture
 
@@ -430,6 +187,10 @@ pip install -r ../requirements.txt
 
 # Set up Google API key for Layer 5b AI features (optional)
 export GOOGLE_API_KEY="your_gemini_api_key_here"
+
+# Verify installation
+cd ..
+svcs --help
 ```
 
 ### **2. Configure MCP Server in VS Code**
@@ -489,39 +250,31 @@ Use any MCP-compatible IDE or the CLI:
 > show stats for my project
 
 # Via command line:
-python3 svcs.py log
+svcs search --limit=20
 python3 svcs_discuss.py  # Requires GOOGLE_API_KEY
 ```
 
 ## 📖 **Usage Guide**
 
-### **Core SVCS Module (`svcs.py`)**
-
-The main CLI interface for querying semantic history:
+### **Core SVCS CLI (`svcs`)**
 
 ```bash
-# View complete semantic history
-python3 svcs.py log
+# Project management
+svcs init --name "My Project" .              # Register project
+svcs list                                    # List projects
+svcs stats                                   # Project statistics
+svcs recent --days=7                         # Recent activity
 
-# Filter by author
-python3 svcs.py log --author="John Doe"
+# Search semantic history
+svcs search --limit=20                       # Basic search
+svcs search --author="John Doe"              # Filter by author
+svcs search --event-types="node_signature_changed"  # Filter by event type
+svcs evolution "func:greet"                  # Track specific function
+svcs search --min-confidence=0.8             # High-confidence AI insights
 
-# Filter by event type
-python3 svcs.py log --type="node_signature_changed"
-
-# Filter by specific function/node
-python3 svcs.py log --node="func:greet"
-
-# Filter by analysis layer
-python3 svcs.py log --layer="5b"  # AI semantic insights
-python3 svcs.py log --layer="core" # Structural changes
-
-# Complex queries
-python3 svcs.py log --layer="5b" --min-confidence=0.8
-python3 svcs.py log --type="abstract_performance_optimization"
-
-# Clean orphaned data
-python3 svcs.py prune
+# Database maintenance
+svcs cleanup --show-stats                    # Show database status
+svcs prune --all-projects                    # Clean orphaned data
 ```
 
 ### **Conversational Interface (`svcs_discuss.py`)**
@@ -561,7 +314,7 @@ python3 svcs_web.py
 - Quality metrics visualization
 - Developer activity heatmaps
 
-### **Interactive Web Dashboard** 🆕
+### **Interactive Web Dashboard**
 
 Launch a full-featured web interface for exploring SVCS data:
 
@@ -614,93 +367,19 @@ python3 svcs_quality.py
 python3 svcs_ci.py --pr-analysis --target=main
 ```
 
-## � **Database Maintenance**
+## 📊 **Database Maintenance**
 
-SVCS includes comprehensive database maintenance tools to keep your semantic data clean and optimized.
+SVCS includes database maintenance tools to keep semantic data clean and optimized. When git history is modified (rebasing, squashing, force-pushing), some semantic data may become "orphaned" - linked to commits that no longer exist.
 
-### **Orphaned Data Cleanup**
+**Available through**:
+- Interactive web dashboard (recommended)
+- CLI commands (`svcs prune`, `svcs cleanup`)
+- MCP server integration
 
-When git history is modified (rebasing, squashing, force-pushing), some semantic data may become "orphaned" - linked to commits that no longer exist. SVCS provides multiple ways to clean this up:
-
-#### **Interactive Dashboard** (Recommended)
-- Navigate to "🔧 Database Maintenance" in the web interface
-- Choose specific project or global cleanup
-- Visual results with detailed statistics
-- Built-in help and safety information
-
-#### **Command Line Interface**
-```bash
-# Clean all projects
-python3 svcs.py prune
-
-# Clean specific project
-python3 svcs.py prune /path/to/project
-```
-
-#### **MCP Server Integration**
-```
-> prune orphaned data for /path/to/project
-> clean up database for all projects
-```
-
-### **Safety & Best Practices** 🛡️
-
-#### **Database Backup Strategy**
-```bash
-# Always backup before major operations
-cp ~/.svcs/global.db ~/.svcs/global.db.backup
-
-# Automated backup before purge operations
-svcs remove --purge /path/to/project  # Automatically prompts for confirmation
-```
-
-#### **Project Removal Guidelines**
-- **Use soft delete by default**: `svcs remove /path/to/project` preserves data
-- **Hard delete only when certain**: `svcs remove --purge` cannot be undone
-- **Review inactive projects**: Use `svcs cleanup --show-inactive` before purging
-- **Check database impact**: Use `svcs cleanup --show-stats` to see storage usage
-
-#### **Team Coordination**
-- **Communicate removals** to team members on shared repositories
-- **Document reasons** for permanent project deletions
-- **Coordinate maintenance** windows for large cleanup operations
-- **Share backup locations** with team for recovery scenarios
-
-#### **Regular Maintenance Schedule**
-```bash
-# Weekly: Check for inactive projects
-svcs cleanup --show-inactive
-
-# After major git operations (rebase, squash): Clean orphaned data
-svcs prune
-
-# Monthly: Review database statistics  
-svcs cleanup --show-stats
-
-# Quarterly: Backup and purge abandoned test projects
-cp ~/.svcs/global.db ~/.svcs/backup-$(date +%Y%m%d).db
-svcs cleanup --show-inactive  # Review candidates
-# Purge confirmed abandoned projects
-```
-
-#### **Recovery Procedures**
-```bash
-# Restore from backup
-cp ~/.svcs/global.db.backup ~/.svcs/global.db
-
-# Reactivate accidentally removed project
-svcs init --name "Recovered Project" /path/to/project
-
-# Verify data integrity after recovery
-svcs debug /path/to/project
-svcs stats /path/to/project
-```
-
-#### **Troubleshooting**
-- **Monitor results** - review what was cleaned to ensure nothing important was lost
-- **Check git integrity** - ensure git repository is in good state before pruning
-- **Verify hooks** - use `svcs status` to ensure git hooks are properly installed
-- **Database diagnostics** - use `svcs debug` for detailed project analysis
+**Best Practices**:
+- Always backup before major operations: `cp ~/.svcs/global.db ~/.svcs/global.db.backup`
+- Use soft delete by default: `svcs remove /path/to/project` (preserves data)
+- Review inactive projects before purging: `svcs cleanup --show-inactive`
 
 For comprehensive maintenance documentation, see [`docs/DATABASE_MAINTENANCE_GUIDE.md`](docs/DATABASE_MAINTENANCE_GUIDE.md).
 
@@ -708,11 +387,14 @@ For comprehensive maintenance documentation, see [`docs/DATABASE_MAINTENANCE_GUI
 
 ### **Core Analysis Engine**
 
-#### **`svcs.py` - Main CLI Interface**
-- Rich terminal output with filtering capabilities
-- Event type and layer-based queries
+#### **`svcs` - CLI Interface**
+- Command-line interface with rich terminal output
+- Project management (init, list, stats, recent)
+- Advanced semantic search with filtering capabilities
+- Event type and confidence-based queries
 - Author and time-based filtering
-- Database maintenance operations (prune, stats, debug)
+- Evolution tracking for specific code elements
+- Database maintenance operations (prune, cleanup)
 
 #### **`svcs_discuss.py` - Conversational AI Interface**
 - Natural language query processing
@@ -770,7 +452,7 @@ Modern AI-integrated interface for multiple projects:
 #### **Project Management**
 - `list_projects` - List all registered SVCS projects
 - `register_project` - Register new project for tracking
-- `unregister_project` - Soft delete project (mark inactive, preserve data) 🆕
+- `unregister_project` - Soft delete project (mark inactive, preserve data)
 - `get_project_statistics` - Get semantic statistics for project
 
 #### **Semantic Analysis**
@@ -781,49 +463,41 @@ Modern AI-integrated interface for multiple projects:
 - `search_events_advanced` - Advanced filtering and search
 - `analyze_current_commit` - Analyze most recent commit
 
-#### **Git Integration** 🆕
+#### **Git Integration**
 - `get_commit_changed_files` - List files changed in a specific commit
 - `get_commit_diff` - Get git diff for a commit (optionally filtered to specific file)
 - `get_commit_summary` - Comprehensive commit information including metadata, files, and semantic events
 
-#### **Database Maintenance** 🆕
+#### **Database Maintenance**
 - `prune_orphaned_data` - Remove semantic data for commits no longer in git history
 - `debug_query_tools` - Diagnostic information for database debugging
 
-### **Practical Usage**
+### **Usage in MCP-Compatible IDEs**
 
-In any MCP-compatible IDE (VS Code, Cursor, etc.):
+In VS Code, Cursor, or other MCP-compatible editors:
 
 ```
 # Project management
 > list svcs projects
-> show stats for /path/to/project
 > register this project with SVCS
-> unregister project /path/to/project              # Soft delete (NEW)
+> show stats for /path/to/project
 
-# Semantic queries
+# Semantic queries  
 > find performance improvements in my project
 > show recent architecture changes
-> what functions were added last week?
 > analyze error handling patterns
 
-# Git integration queries
+# Git integration
 > get changed files for commit abc123
 > show me the diff for commit abc123
 > summarize commit abc123
-> show diff for file.py in commit abc123
-
-# Database maintenance
-> prune orphaned data for /path/to/project
-> clean up database for all projects
-> debug database for this project
 ```
 
 ## 🗂️ **Project Management & Cleanup**
 
 SVCS provides comprehensive project lifecycle management with intelligent cleanup capabilities to prevent database bloat from test projects and abandoned repositories.
 
-### **Project Management CLI** 🆕
+### **Project Management CLI**
 
 SVCS provides comprehensive project lifecycle management with both **soft delete** (recoverable) and **hard delete** (permanent) options:
 
@@ -840,114 +514,33 @@ svcs remove --purge /path/to/project               # Hard delete: permanently re
 # Database cleanup and maintenance
 svcs cleanup --show-stats                          # Show database statistics
 svcs cleanup --show-inactive                       # List inactive projects
-svcs prune /path/to/project                        # Clean orphaned data for specific project
-svcs prune                                         # Clean orphaned data for all projects
+svcs prune --project /path/to/project              # Clean orphaned data for specific project
+svcs prune --all-projects                          # Clean orphaned data for all projects
 ```
 
-#### **🔄 Smart Project Removal System**
+#### **Project Lifecycle Management**
 
-**Soft Delete (Default - Recoverable)**:
+**Basic Operations**:
 ```bash
-svcs remove /path/to/project
-# ✅ Marks project as 'inactive' 
-# ✅ Preserves all semantic events and commit history
-# ✅ Removes local .svcs directory and git hooks
-# ✅ Can be recovered by re-registering the project
+svcs init --name "My Project" /path/to/project     # Register project
+svcs list                                          # List projects
+svcs remove /path/to/project                       # Soft delete (recoverable)
+svcs remove --purge /path/to/project               # Hard delete (permanent)
 ```
 
-**Hard Delete (Permanent - Data Destruction)**:
+**Database Maintenance**:
 ```bash
-svcs remove --purge /path/to/project
-# ⚠️  Requires confirmation prompt
-# 🗑️ Permanently deletes ALL project data from database
-# 🗑️ Removes semantic events, commits, and project registration
-# ❌ Cannot be undone - use with caution!
+svcs cleanup --show-stats                          # Database statistics
+svcs cleanup --show-inactive                       # List inactive projects
+svcs prune --all-projects                          # Clean orphaned data
 ```
-
-**Smart Reactivation**:
-```bash
-# Reactivate an inactive project
-svcs init --name "Reactivated Project" /path/to/inactive/project
-# ✅ Automatically detects inactive project
-# ✅ Reactivates with preserved data and history
-# ✅ Updates project name if desired
-# ✅ Reinstalls git hooks
-```
-
-#### **🧹 Database Cleanup & Maintenance**
-
-**View Database Status**:
-```bash
-# Get comprehensive database statistics
-svcs cleanup --show-stats
-# Shows:
-# • Active vs inactive projects
-# • Semantic events distribution  
-# • Storage usage breakdown
-# • Wasted storage from inactive projects
-
-# List inactive projects for cleanup
-svcs cleanup --show-inactive
-# Shows:
-# • Inactive project details
-# • Associated data counts
-# • Exact purge commands
-# • Total wasted storage statistics
-```
-
-**Cleanup Orphaned Data**:
-```bash
-# Clean data for commits no longer in git history
-svcs prune /path/to/project                        # Single project
-svcs prune                                         # All projects
-
-# Results show:
-# • Number of orphaned commits cleaned
-# • Projects processed
-# • Storage space recovered
-```
-
-#### **💡 Usage Examples**
-
-**Managing Test Projects**:
-```bash
-# Register test project
-svcs init --name "Test Project" /tmp/test-repo
-
-# Work with it, generate data...
-# git commit -m "test changes"
-
-# Clean removal when done testing
-svcs remove --purge /tmp/test-repo  # Permanent cleanup
-
-# Check database impact
-svcs cleanup --show-stats           # Verify cleanup
-```
-
-**Team Project Handoff**:
-```bash
-# Soft remove old developer's local setup
-svcs remove /path/to/shared/project
-
-# New developer setup
-svcs init --name "Team Project" /path/to/shared/project
-# ✅ Reactivates with full history preserved
-```
-
-**Database Spring Cleaning**:
-```bash
-# Review what can be cleaned
-svcs cleanup --show-inactive
-svcs cleanup --show-stats
-
-# Clean up abandoned test projects
-svcs remove --purge /path/to/old/test1
-svcs remove --purge /path/to/old/test2
 
 # Clean orphaned data from git operations
+```bash
 svcs prune
-
+```
 # Verify cleanup results
+```bash
 svcs cleanup --show-stats
 ```
 
@@ -1075,21 +668,4 @@ This project originated from the "Time Crystal VCS" concept - a science fiction-
 
 ## 📄 License
 
-[MIT License - Specify your license here]
-
----
-
-## 🌟 **Getting Started**
-
-SVCS provides semantic understanding of code evolution beyond traditional version control. Start tracking the meaning of your code changes today:
-
-```bash
-# Quick start
-git clone https://github.com/markomanninen/svcs.git
-cd your-project
-/path/to/svcs/svcs_mcp/cli.py init --name "My Project" .
-export GOOGLE_API_KEY="your_key"  # Optional, for Layer 5b
-git commit -m "Begin semantic tracking" --allow-empty
-```
-
-**SVCS - Understanding what your code changes actually mean.** 🚀
+[MIT License](LICENCE)
