@@ -6,13 +6,13 @@ This document provides detailed task-level instructions for creating screenshots
 
 1. [Setup & Preparation](#setup--preparation)
 2. [Core Feature Demonstrations](#core-feature-demonstrations)
-3. [Multi-Language Support Demos](#multi-language-support-demos)
-4. [MCP Server Integration](#mcp-server-integration)
-5. [Web Dashboard & Analytics](#web-dashboard--analytics)
-6. [AI-Powered Features](#ai-powered-features)
-7. [Git Integration Features](#git-integration-features)
-8. [Real-World Use Cases](#real-world-use-cases)
-9. [CLI Interface Demonstrations](#cli-interface-demonstrations)
+3. [MCP Server Integration](#mcp-server-integration)
+4. [Web Dashboard & Analytics](#web-dashboard--analytics)
+5. [Project Management & Cleanup](#project-management--cleanup)
+6. [Multi-Language Support Demos](#multi-language-support-demos)
+7. [AI-Powered Features](#ai-powered-features)
+8. [CLI Interface Demonstrations](#cli-interface-demonstrations)
+9. [Real-World Use Cases](#real-world-use-cases)
 10. [Production Quality Checks](#production-quality-checks)
 
 ---
@@ -60,9 +60,6 @@ python3 svcs.py --help
 
 # Note: svcs (MCP CLI) has full features, svcs.py has basic log/prune only
 # Use 'svcs' for all modern features, 'svcs.py' only for legacy log viewing
-# TODO: prune functionality should be added to 'svcs' command as well
-# prune: removes semantic data for commits that no longer exist in git history
-#        (useful after git rebase, squash, or reset operations)
 
 # Verify web dashboard
 ./start_dashboard.sh &
@@ -73,103 +70,18 @@ curl http://127.0.0.1:8080/health
 
 ## 🚀 Core Feature Demonstrations
 
-### Demo 0: Complete Setup from GitHub
-**Duration**: 4-5 minutes
-**Objective**: Show complete installation process from scratch
-
-#### Recording Script:
-1. **Start with clean environment**
-   ```bash
-   # Show clean directory
-   ls
-   
-   # Clone SVCS from GitHub
-   git clone https://github.com/markomanninen/svcs.git
-   cd svcs
-   ```
-   - **Narration**: "Starting with fresh installation from GitHub"
-
-2. **Set up virtual environment and install**
-   ```bash
-   # Create virtual environment
-   python3 -m venv venv
-   source venv/bin/activate
-   
-   # Install SVCS MCP server (provides 'svcs' command)
-   cd svcs_mcp
-   pip install -e .
-   cd ..
-   
-   # Install ALL dependencies (includes language parsers)
-   pip install -r requirements.txt
-   
-   # Install web dashboard dependencies  
-   pip install -r requirements_web.txt
-   ```
-   - **Narration**: "Installing SVCS with all language support and web dependencies"
-
-3. **Verify installation**
-   ```bash
-   # Test CLI commands
-   svcs --help
-   python3 svcs.py --help
-   
-   # Test web dashboard
-   ./start_dashboard.sh &
-   curl http://127.0.0.1:8080/health
-   ```
-   - **Screenshot point**: Help output and successful health check
-
-4. **Optional: Set up AI features**
-   ```bash
-   # Set Google API key for Layer 5b (if available)
-   export GOOGLE_API_KEY="your_key_here"
-   
-   # Test conversational interface
-   python3 svcs_discuss.py
-   # Type 'exit' to exit
-   ```
-
-#### Expected Outputs to Highlight:
-- Successful git clone
-- Virtual environment creation
-- Package installations
-- Working CLI commands
-- Healthy web dashboard
-
----
-
 ### Demo 1: Initial Project Setup and First Analysis
 **Duration**: 3-4 minutes
-**Objective**: Show how to get started with SVCS from scratch
+**Objective**: Show complete installation and first-time project setup
 
 #### Recording Script:
-1. **Show fresh installation from GitHub**
+1. **Create and setup demo project**
    ```bash
-   # Clone SVCS repository
-   git clone https://github.com/markomanninen/svcs.git
-   cd svcs
-   
-   # Set up virtual environment
-   python3 -m venv venv
-   source venv/bin/activate
-   
-   # Install SVCS
-   cd svcs_mcp
-   pip install -e .
-   cd ..
-   pip install -r requirements.txt
-   pip install -r requirements_web.txt
-   ```
-   - **Narration**: "Starting with a fresh installation of SVCS from GitHub"
-
-2. **Create demo project directory**
-   ```bash
-   mkdir ../demo_project && cd ../demo_project
+   mkdir demo_project && cd demo_project
    git init
    ```
 
-3. **Register project with SVCS**
+2. **Register project with SVCS**
    ```bash
    svcs init --name "Demo Project" .
    ```
@@ -195,7 +107,6 @@ curl http://127.0.0.1:8080/health
 
 5. **Query the semantic history**
    ```bash
-   # Use the unified svcs command
    svcs search --project . --limit 10
    ```
    - **Screenshot point**: Terminal output showing semantic events
@@ -268,9 +179,186 @@ curl http://127.0.0.1:8080/health
 
 ---
 
+## 🤖 MCP Server Integration
+
+### Demo 3: VS Code MCP Integration
+**Duration**: 4-5 minutes
+**Objective**: Show SVCS working with AI assistants in VS Code
+
+#### Recording Script:
+1. **Show MCP configuration in VS Code**
+   - Open VS Code settings.json
+   - Show SVCS MCP server configuration
+
+2. **Demonstrate MCP tools in chat**
+   ```
+   @copilot list svcs projects
+   @copilot show recent activity for this project
+   @copilot find performance improvements in my code
+   @copilot analyze the current commit
+   ```
+
+3. **Show project management commands**
+   ```
+   @copilot register this project with SVCS
+   @copilot get project statistics
+   ```
+
+4. **Demonstrate semantic queries**
+   ```
+   @copilot search for error handling patterns
+   @copilot show functions that were added last week
+   @copilot find architecture improvements with high confidence
+   ```
+
+5. **Show git integration queries**
+   ```
+   @copilot get changed files for commit abc123
+   @copilot show me the diff for commit abc123
+   @copilot summarize commit abc123
+   ```
+
+#### Screenshot Points:
+- MCP server configuration
+- Chat interface with SVCS responses
+- Rich semantic data in AI responses
+- Git integration features
+
+---
+
+## 📊 Web Dashboard & Analytics
+
+### Demo 4: Interactive Web Dashboard
+**Duration**: 6-7 minutes
+**Objective**: Show the full web interface for SVCS data exploration
+
+#### Recording Script:
+1. **Launch dashboard**
+   ```bash
+   ./start_dashboard.sh
+   ```
+   - Open browser to http://127.0.0.1:8080
+
+2. **Show main features**
+   - Project selection dropdown
+   - Timeline visualization
+   - Event type filters
+   - Author filters
+
+3. **Demonstrate semantic search**
+   - Use pattern search for "performance"
+   - Filter by confidence scores
+   - Show event details
+
+4. **Show git integration**
+   - Click on commit hash
+   - View changed files
+   - Show diff viewer
+   - Demonstrate commit summary
+
+5. **Show analytics section**
+   - Quality trends over time
+   - Developer activity patterns
+   - Event type distribution
+
+6. **Demonstrate evolution tracking**
+   - Search for specific function
+   - Show evolution timeline
+   - Track method signature changes
+
+#### Screenshot Points:
+- Main dashboard overview
+- Semantic search results
+- Git integration features
+- Analytics visualizations
+- Evolution tracking interface
+
+---
+
+### Demo 5: Static Dashboard Generation
+**Duration**: 2-3 minutes
+**Objective**: Show HTML dashboard generation for sharing/reports
+
+#### Recording Script:
+1. **Generate static dashboard**
+   ```bash
+   python3 svcs_web.py
+   ```
+
+2. **Open generated HTML file**
+   - Show browser opening svcs_dashboard.html
+   - Navigate through interactive elements
+
+3. **Highlight static features**
+   - Standalone HTML (no server needed)
+   - Interactive charts and graphs
+   - Timeline visualization
+   - Network diagrams
+
+---
+
+## 🗂️ Project Management & Cleanup
+
+### Demo 6: Project Lifecycle Management
+**Duration**: 5-6 minutes
+**Objective**: Demonstrate complete project management features
+
+#### Recording Script:
+1. **Show project registration**
+   ```bash
+   # Register multiple projects
+   svcs init --name "Project A" /path/to/project-a
+   svcs init --name "Project B" /path/to/project-b
+   
+   # List all projects
+   svcs list
+   ```
+
+2. **Show project statistics**
+   ```bash
+   svcs stats --project /path/to/project-a
+   svcs recent --project /path/to/project-a --days 7
+   ```
+
+3. **Demonstrate soft delete (recoverable)**
+   ```bash
+   # Soft delete - preserves data
+   svcs remove /path/to/project-b
+   
+   # Show it's marked inactive
+   svcs list
+   
+   # Reactivate project
+   svcs init --name "Project B Reactivated" /path/to/project-b
+   ```
+
+4. **Show cleanup utility**
+   ```bash
+   # Preview cleanup
+   python3 svcs_cleanup.py --temp-dirs --dry-run
+   
+   # Show different filtering options
+   python3 svcs_cleanup.py --inactive --dry-run
+   python3 svcs_cleanup.py --pattern "*test*" --dry-run
+   ```
+
+5. **Demonstrate hard delete (permanent)**
+   ```bash
+   # Hard delete with confirmation
+   python3 svcs_cleanup.py --pattern "demo_*"
+   ```
+
+#### Screenshot Points:
+- Project listing before/after operations
+- Soft delete vs hard delete differences
+- Cleanup utility filtering options
+- Safety features (dry-run, confirmations)
+
+---
+
 ## 🌍 Multi-Language Support Demos
 
-### Demo 3: Multi-Language Project Analysis
+### Demo 7: Multi-Language Project Analysis
 **Duration**: 5-6 minutes
 **Objective**: Show SVCS analyzing Python, PHP, and JavaScript in one project
 
@@ -328,125 +416,16 @@ curl http://127.0.0.1:8080/health
 
 ---
 
-## 🤖 MCP Server Integration
-
-### Demo 4: VS Code MCP Integration
-**Duration**: 4-5 minutes
-**Objective**: Show SVCS working with AI assistants in VS Code
-
-#### Recording Script:
-1. **Show MCP configuration in VS Code**
-   - Open VS Code settings.json
-   - Show SVCS MCP server configuration
-
-2. **Demonstrate MCP tools in chat**
-   ```
-   @copilot list svcs projects
-   @copilot show recent activity for this project
-   @copilot find performance improvements in my code
-   @copilot analyze the current commit
-   ```
-
-3. **Show project management commands**
-   ```
-   @copilot register this project with SVCS
-   @copilot get project statistics
-   ```
-
-4. **Demonstrate semantic queries**
-   ```
-   @copilot search for error handling patterns
-   @copilot show functions that were added last week
-   @copilot find architecture improvements with high confidence
-   ```
-
-#### Screenshot Points:
-- MCP server configuration
-- Chat interface with SVCS responses
-- Rich semantic data in AI responses
-
----
-
-## 📊 Web Dashboard & Analytics
-
-### Demo 5: Interactive Web Dashboard
-**Duration**: 6-7 minutes
-**Objective**: Show the full web interface for SVCS data exploration
-
-#### Recording Script:
-1. **Launch dashboard**
-   ```bash
-   ./start_dashboard.sh
-   ```
-   - Open browser to http://127.0.0.1:8080
-
-2. **Show main features**
-   - Project selection dropdown
-   - Timeline visualization
-   - Event type filters
-   - Author filters
-
-3. **Demonstrate semantic search**
-   - Use pattern search for "performance"
-   - Filter by confidence scores
-   - Show event details
-
-4. **Show git integration**
-   - Click on commit hash
-   - View changed files
-   - Show diff viewer
-   - Demonstrate commit summary
-
-5. **Show analytics section**
-   - Quality trends over time
-   - Developer activity patterns
-   - Event type distribution
-
-6. **Demonstrate evolution tracking**
-   - Search for specific function
-   - Show evolution timeline
-   - Track method signature changes
-
-#### Screenshot Points:
-- Main dashboard overview
-- Semantic search results
-- Git integration features
-- Analytics visualizations
-- Evolution tracking interface
-
----
-
-### Demo 6: Static Dashboard Generation
-**Duration**: 2-3 minutes
-**Objective**: Show HTML dashboard generation for sharing/reports
-
-#### Recording Script:
-1. **Generate static dashboard**
-   ```bash
-   python3 svcs_web.py
-   ```
-
-2. **Open generated HTML file**
-   - Show browser opening svcs_dashboard.html
-   - Navigate through interactive elements
-
-3. **Highlight static features**
-   - Standalone HTML (no server needed)
-   - Interactive charts and graphs
-   - Timeline visualization
-   - Network diagrams
-
----
-
 ## 🧠 AI-Powered Features
 
-### Demo 7: Conversational Interface
+### Demo 8: Conversational Interface
 **Duration**: 5-6 minutes
 **Objective**: Show natural language queries about code evolution
 
 #### Recording Script:
 1. **Start conversational interface**
    ```bash
+   export GOOGLE_API_KEY="your_key_here"
    python3 svcs_discuss.py
    ```
 
@@ -465,6 +444,7 @@ curl http://127.0.0.1:8080/health
    "What files were changed in commit abc123?"
    "Show me the actual diff for that commit"
    "What were the exact code changes in the authentication refactoring?"
+   "Show me only the changes to auth.py in commit abc123"
    ```
 
 4. **Demonstrate context awareness**
@@ -480,7 +460,7 @@ curl http://127.0.0.1:8080/health
 
 ---
 
-### Demo 8: Layer 5b AI Analysis in Detail
+### Demo 9: Layer 5b AI Analysis in Detail
 **Duration**: 3-4 minutes
 **Objective**: Show AI semantic pattern detection
 
@@ -520,54 +500,6 @@ curl http://127.0.0.1:8080/health
 - `abstract_functional_programming_adoption`
 - `abstract_code_simplification`
 - `abstract_readability_improvement`
-
----
-
-## 🔗 Git Integration Features
-
-### Demo 9: Git Traceability and Analysis
-**Duration**: 4-5 minutes
-**Objective**: Show deep git integration features
-
-#### Recording Script:
-1. **Show commit hash linkage**
-   ```bash
-   svcs recent --project . --limit 5
-   ```
-   - Highlight commit hashes in output
-
-2. **Demonstrate git commands with SVCS data**
-   ```bash
-   # Get semantic events for specific commit
-   svcs search --project . --limit 5
-   
-   # Show actual git changes
-   git show abc123
-   
-   # Show commit context
-   git log --oneline abc123
-   ```
-
-3. **Use MCP git integration tools**
-   ```bash
-   svcs get-commit-files abc123
-   svcs get-commit-diff abc123
-   svcs get-commit-summary abc123
-   ```
-
-4. **Show forensic analysis**
-   ```bash
-   # Find when complexity was introduced  
-   svcs search --project . --event-types "complexity_increase" --limit 10
-   
-   # Trace evolution of specific function
-   svcs evolution "func:authenticate"
-   ```
-
-#### Screenshot Points:
-- Commit hash linkage in SVCS output
-- Git diff correlation with semantic events
-- Forensic analysis results
 
 ---
 
