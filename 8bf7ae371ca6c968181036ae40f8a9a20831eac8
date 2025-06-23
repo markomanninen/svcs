@@ -1,0 +1,68 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-23T18:49:19.841342",
+  "semantic_events": [
+    {
+      "event_type": "node_removed",
+      "node_id": "func:basic_method",
+      "location": "test_workflow_feature.py",
+      "details": "Removed func:basic_method",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "8bf7ae371ca6c968181036ae40f8a9a20831eac8",
+      "created_at": 1750693759
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:enhanced_method",
+      "location": "test_workflow_feature.py",
+      "details": "Added func:enhanced_method",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "8bf7ae371ca6c968181036ae40f8a9a20831eac8",
+      "created_at": 1750693759
+    },
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "class:WorkflowTester",
+      "location": "test_workflow_feature.py",
+      "details": "The implementation of this node has changed.",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "8bf7ae371ca6c968181036ae40f8a9a20831eac8",
+      "created_at": 1750693759
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:another_new_function",
+      "location": "test_workflow_feature.py",
+      "details": "Added func:another_new_function",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "8bf7ae371ca6c968181036ae40f8a9a20831eac8",
+      "created_at": 1750693759
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:new_static_method",
+      "location": "test_workflow_feature.py",
+      "details": "Added func:new_static_method",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "8bf7ae371ca6c968181036ae40f8a9a20831eac8",
+      "created_at": 1750693759
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "8bf7ae371ca6c968181036ae40f8a9a20831eac8"
+}
