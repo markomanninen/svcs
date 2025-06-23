@@ -1,0 +1,86 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-23T17:35:50.142414",
+  "semantic_events": [
+    {
+      "event_type": "assignment_pattern_changed",
+      "node_id": "func:demonstrate_php_support",
+      "location": "demos/demo_php_support.py",
+      "details": "Assignment patterns changed",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750653372,
+      "commit_hash": "bf11896713c6dd9b787416c7f80ccf22195ffb6e"
+    },
+    {
+      "event_type": "string_literal_usage_changed",
+      "node_id": "func:demonstrate_php_support",
+      "location": "demos/demo_php_support.py",
+      "details": "added 6 new literals; removed 2 literals",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750653372,
+      "commit_hash": "bf11896713c6dd9b787416c7f80ccf22195ffb6e"
+    },
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "func:process_commit",
+      "location": "svcs_mcp/svcs_mcp_server_simple.py",
+      "details": "The implementation of this node has changed.",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750653372,
+      "commit_hash": "bf11896713c6dd9b787416c7f80ccf22195ffb6e"
+    },
+    {
+      "event_type": "algorithm_optimized",
+      "node_id": "svcs_mcp/svcs_mcp_server_simple.py",
+      "location": "svcs_mcp/svcs_mcp_server_simple.py",
+      "details": "Algorithm optimized from O(n\u00b2) to O(n) using data structures (confidence: 75.0%)",
+      "layer": "5a",
+      "layer_description": null,
+      "confidence": 0.75,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750653372,
+      "commit_hash": "bf11896713c6dd9b787416c7f80ccf22195ffb6e"
+    },
+    {
+      "event_type": "string_literal_usage_changed",
+      "node_id": "func:__init__",
+      "location": "svcs_multilang.py",
+      "details": "added 5 new literals",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750653372,
+      "commit_hash": "bf11896713c6dd9b787416c7f80ccf22195ffb6e"
+    },
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "class:MultiLanguageAnalyzer",
+      "location": "svcs_multilang.py",
+      "details": "The implementation of this node has changed.",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750653372,
+      "commit_hash": "bf11896713c6dd9b787416c7f80ccf22195ffb6e"
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "bf11896713c6dd9b787416c7f80ccf22195ffb6e"
+}
