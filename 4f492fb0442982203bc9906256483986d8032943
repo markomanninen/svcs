@@ -1,0 +1,20 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-23T17:47:09.037520",
+  "semantic_events": [
+    {
+      "event_type": "node_added",
+      "node_id": "func:test_function",
+      "location": "test_semantic.py",
+      "details": "Added func:test_function",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "HEAD",
+      "created_at": 1750690029
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "HEAD"
+}
