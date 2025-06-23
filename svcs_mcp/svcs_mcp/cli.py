@@ -747,7 +747,7 @@ def init(name: str, path: str):
             'path': path,
             'mcp_managed': True,
             'hooks_installed': True,
-            'created_at': None  # Will be set by MCP server
+            'created_at': datetime.now().isoformat()
         }
         
         with open(local_svcs / 'config.yaml', 'w') as f:

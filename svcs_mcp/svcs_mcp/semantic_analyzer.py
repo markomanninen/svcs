@@ -142,8 +142,9 @@ class GlobalSemanticAnalyzer:
         
         full_file_path = project_path / file_path
         
-        # Skip non-Python files for now (could extend to other languages)
-        if not file_path.endswith('.py'):
+        # Support multiple file types including PHP and JavaScript
+        supported_extensions = ('.py', '.php', '.phtml', '.php3', '.php4', '.php5', '.phps', '.js', '.ts')
+        if not file_path.endswith(supported_extensions):
             return []
         
         try:
