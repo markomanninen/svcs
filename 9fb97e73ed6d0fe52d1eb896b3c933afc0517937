@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-23T17:52:44.923206",
+  "semantic_events": [
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "class:TestClass",
+      "location": "test_python_semantic.py",
+      "details": "The implementation of this node has changed.",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "9fb97e73ed6d0fe52d1eb896b3c933afc0517937",
+      "created_at": 1750690364
+    },
+    {
+      "node_id": "func:method",
+      "location": "test_python_semantic.py",
+      "event_type": "node_signature_changed",
+      "details": "Signature changed from (self) to (self, multiplier)",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "9fb97e73ed6d0fe52d1eb896b3c933afc0517937",
+      "created_at": 1750690364
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "9fb97e73ed6d0fe52d1eb896b3c933afc0517937"
+}
