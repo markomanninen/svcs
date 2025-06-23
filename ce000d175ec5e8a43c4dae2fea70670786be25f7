@@ -1,0 +1,92 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-23T18:49:19.198135",
+  "semantic_events": [
+    {
+      "event_type": "dependency_added",
+      "node_id": "module",
+      "location": "test_workflow_feature.py",
+      "details": "Added: asyncio, json, typing",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "ce000d175ec5e8a43c4dae2fea70670786be25f7",
+      "created_at": 1750693759
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:utility_function",
+      "location": "test_workflow_feature.py",
+      "details": "Added func:utility_function",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "ce000d175ec5e8a43c4dae2fea70670786be25f7",
+      "created_at": 1750693759
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "class:WorkflowTester",
+      "location": "test_workflow_feature.py",
+      "details": "Added class:WorkflowTester",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "ce000d175ec5e8a43c4dae2fea70670786be25f7",
+      "created_at": 1750693759
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:__init__",
+      "location": "test_workflow_feature.py",
+      "details": "Added func:__init__",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "ce000d175ec5e8a43c4dae2fea70670786be25f7",
+      "created_at": 1750693759
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:status",
+      "location": "test_workflow_feature.py",
+      "details": "Added func:status",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "ce000d175ec5e8a43c4dae2fea70670786be25f7",
+      "created_at": 1750693759
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:async_workflow_function",
+      "location": "test_workflow_feature.py",
+      "details": "Added func:async_workflow_function",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "ce000d175ec5e8a43c4dae2fea70670786be25f7",
+      "created_at": 1750693759
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:basic_method",
+      "location": "test_workflow_feature.py",
+      "details": "Added func:basic_method",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "ce000d175ec5e8a43c4dae2fea70670786be25f7",
+      "created_at": 1750693759
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "ce000d175ec5e8a43c4dae2fea70670786be25f7"
+}
