@@ -1,0 +1,73 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-23T17:35:47.229932",
+  "semantic_events": [
+    {
+      "event_type": "comprehension_usage_changed",
+      "node_id": "func:process_commit",
+      "location": "svcs_mcp/svcs_mcp_server_simple.py",
+      "details": "generator comprehensions: 0\u21921",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750624582,
+      "commit_hash": "33db725a1401ee1a0e2f48365ef1bcb579bff131"
+    },
+    {
+      "event_type": "assignment_pattern_changed",
+      "node_id": "func:process_commit",
+      "location": "svcs_mcp/svcs_mcp_server_simple.py",
+      "details": "Assignment patterns changed",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750624582,
+      "commit_hash": "33db725a1401ee1a0e2f48365ef1bcb579bff131"
+    },
+    {
+      "event_type": "internal_call_added",
+      "node_id": "func:process_commit",
+      "location": "svcs_mcp/svcs_mcp_server_simple.py",
+      "details": "Now calls: any",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750624582,
+      "commit_hash": "33db725a1401ee1a0e2f48365ef1bcb579bff131"
+    },
+    {
+      "event_type": "string_literal_usage_changed",
+      "node_id": "func:process_commit",
+      "location": "svcs_mcp/svcs_mcp_server_simple.py",
+      "details": "added 9 new literals; removed 1 literals",
+      "layer": "core",
+      "layer_description": null,
+      "confidence": 1.0,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750624582,
+      "commit_hash": "33db725a1401ee1a0e2f48365ef1bcb579bff131"
+    },
+    {
+      "event_type": "algorithm_optimized",
+      "node_id": "svcs_mcp/svcs_mcp_server_simple.py",
+      "location": "svcs_mcp/svcs_mcp_server_simple.py",
+      "details": "Algorithm optimized from O(n\u00b2) to O(n) using data structures (confidence: 75.0%)",
+      "layer": "5a",
+      "layer_description": null,
+      "confidence": 0.75,
+      "reasoning": null,
+      "impact": null,
+      "created_at": 1750624582,
+      "commit_hash": "33db725a1401ee1a0e2f48365ef1bcb579bff131"
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "33db725a1401ee1a0e2f48365ef1bcb579bff131"
+}
