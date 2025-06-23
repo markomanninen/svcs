@@ -20,7 +20,8 @@ def demonstrate_php_support():
     events = get_full_log()
     
     # Filter PHP events
-    php_events = [e for e in events if e['location'].endswith('.php')]
+    php_extensions = ('.php', '.phtml', '.php3', '.php4', '.php5', '.phps')
+    php_events = [e for e in events if e['location'].endswith(php_extensions)]
     
     if not php_events:
         print("❌ No PHP events found. Make sure to commit some PHP files!")
@@ -29,56 +30,82 @@ def demonstrate_php_support():
     print(f"📊 Total PHP Events: {len(php_events)}")
     print(f"📁 PHP Files Tracked: {len(set(e['location'] for e in php_events))}")
     
-    # Categorize PHP-specific events
-    php_categories = {
-        'Classes & Objects': ['class:', 'interface:', 'trait:'],
-        'Methods & Functions': ['func:'],
-        'Properties & Constants': ['prop:', 'const:'],
-        'Dependencies': ['namespace:', 'implements:', 'extends:'],
-        'Module Changes': ['module:']
+    # Enhanced categorization for new event types
+    print("\n🎯 DETAILED PHP EVENT CATEGORIES & EXAMPLES")
+    print("Note: The richness of detected events depends on the underlying PHP parser.")
+    print("If using fallback regex parser, many detailed events may not appear.")
+
+    detailed_event_types = {
+        "PHP Structure Changes": [
+            "node_added", "node_removed",  # For namespaces, classes, functions, etc.
+            "php_use_statement_added", "php_use_statement_removed",
+            "php_global_code_changed"
+        ],
+        "PHP Function/Method Changes": [
+            "php_node_signature_changed", "php_return_type_changed",
+            "php_node_logic_changed", "php_visibility_changed",
+            "php_static_modifier_changed", "php_abstract_modifier_changed",
+            "php_final_modifier_changed"
+        ],
+        "PHP Class/Interface/Trait Changes": [
+            "php_inheritance_changed", "php_interface_extends_changed",
+            "php_abstract_modifier_changed", "php_final_modifier_changed"
+            # Note: node_added/removed for methods/properties are covered by general structure
+        ],
+        "PHP Property Changes": [
+            "php_typed_property_changed", "php_property_default_value_changed",
+            # php_visibility_changed, php_static_modifier_changed (covered above)
+        ],
+        "PHP Constant Changes": [
+            "php_constant_value_changed",
+            # php_visibility_changed (covered above)
+        ],
+        "PHP Metadata Changes": [
+            "php_attribute_added", "php_attribute_removed", "php_docstring_changed"
+        ],
+        "Basic Fallback Events": [ # Events more likely from regex fallback
+             "variable_usage_changed", "dependency_added", "dependency_removed"
+        ]
     }
-    
-    print("\n🎯 PHP EVENT CATEGORIES")
-    for category, prefixes in php_categories.items():
-        category_events = [e for e in php_events 
-                         if any(e['node_id'].startswith(prefix) for prefix in prefixes)]
-        if category_events:
-            print(f"\n📋 {category} ({len(category_events)} events):")
-            
-            # Group by event type
-            event_types = {}
-            for event in category_events:
-                event_type = event['event_type']
-                if event_type not in event_types:
-                    event_types[event_type] = []
-                event_types[event_type].append(event)
-            
-            for event_type, type_events in event_types.items():
-                print(f"   • {event_type}: {len(type_events)} events")
-                for event in type_events[:3]:  # Show first 3 examples
-                    node_name = event['node_id'].split(':')[-1]
-                    print(f"     - {node_name}")
-                if len(type_events) > 3:
-                    print(f"     ... and {len(type_events) - 3} more")
-    
-    # Show PHP-specific patterns detected
-    print("\n🔍 PHP-SPECIFIC PATTERNS DETECTED")
-    
-    patterns = {
-        'Namespaces': len([e for e in php_events if 'namespace:' in e.get('details', '')]),
-        'Interfaces': len([e for e in php_events if e['node_id'].startswith('interface:')]),
-        'Traits': len([e for e in php_events if e['node_id'].startswith('trait:')]),
-        'Properties': len([e for e in php_events if e['node_id'].startswith('prop:')]),
-        'Constants': len([e for e in php_events if e['node_id'].startswith('const:')]),
-        'Interface Implementations': len([e for e in php_events if 'implements:' in e.get('details', '')])
+
+    for category, event_type_list in detailed_event_types.items():
+        category_events_found = []
+        for event_type_name in event_type_list:
+            typed_events = [e for e in php_events if e['event_type'] == event_type_name]
+            if typed_events:
+                if not category_events_found: # Print category header only if events exist
+                    print(f"\n📋 {category}:")
+                category_events_found.extend(typed_events)
+                print(f"   Events of type '{event_type_name}': {len(typed_events)}")
+                for event in typed_events[:2]: # Show first 2 examples
+                    node_name = event['node_id']
+                    details = event.get('details', 'No details')
+                    if len(details) > 120: details = details[:117] + "..."
+                    print(f"     - Node: {node_name}, Details: {details}")
+                if len(typed_events) > 2:
+                    print(f"     ... and {len(typed_events) - 2} more.")
+
+    # Highlight some specific advanced changes if present
+    print("\n🔍 HIGHLIGHTING SPECIFIC ADVANCED PATTERNS")
+    advanced_highlights = {
+        "Attribute Changes": ["php_attribute_added", "php_attribute_removed"],
+        "Signature Changes": ["php_node_signature_changed"],
+        "Return Type Changes": ["php_return_type_changed"],
+        "Inheritance Changes": ["php_inheritance_changed", "php_interface_extends_changed"],
+        "Typed Property Changes": ["php_typed_property_changed"]
     }
-    
-    for pattern, count in patterns.items():
+    has_advanced_highlights = False
+    for desc, types_to_check in advanced_highlights.items():
+        count = sum(1 for e in php_events if e['event_type'] in types_to_check)
         if count > 0:
-            print(f"   • {pattern}: {count}")
-    
-    # Show evolution of specific PHP files
-    print("\n📈 PHP FILE EVOLUTION")
+            has_advanced_highlights = True
+            print(f"   • {desc} detected: {count} instance(s)")
+    if not has_advanced_highlights:
+        print("   No specific advanced patterns (from the highlight list) detected in this set of events.")
+
+
+    # Show evolution of specific PHP files (remains useful)
+    print("\n📈 PHP FILE EVOLUTION (Summary)")
     php_files = set(e['location'] for e in php_events)
     
     for php_file in sorted(php_files):

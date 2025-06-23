@@ -23,7 +23,7 @@ SVCS tracks semantic meaning in code changes beyond traditional line-by-line dif
 
 - **🧠 5-Layer Semantic Analysis** - From AST parsing to optional AI understanding
 - **🤖 Model Context Protocol (MCP) Server** - Modern AI integration architecture
-- **🌍 Multi-Language Support** - Python (complete), JavaScript/TypeScript/Go/PHP (basic)
+- **🌍 Multi-Language Support** - Python (complete), PHP (modern with Tree-sitter), JavaScript/TypeScript (AST-based)
 - **💬 Conversational Interface** - Natural language queries about code evolution
 - **📊 Analytics & Visualization** - Web dashboard and quality insights
 - **🔧 CI/CD Integration** - Automated quality gates and PR analysis
@@ -325,15 +325,54 @@ SVCS employs a multi-layer analysis system:
 
 ## 🌍 Language Support
 
-| Language | Extensions | Support Level | Features |
-|----------|------------|---------------|----------|
-| **Python** | `.py`, `.pyw`, `.pyi` | **Complete** | Full AST analysis, 31+ semantic event types, decorators, async/await, generators, comprehensions, type annotations |
-| **JavaScript** | `.js`, `.jsx`, `.mjs` | **Basic** | Functions, classes, imports/requires, ES6+ features |
-| **TypeScript** | `.ts`, `.tsx` | **Basic** | Functions, classes, imports, type definitions |
-| **Go** | `.go` | **Basic** | Functions, structs, packages, imports, method receivers |
-| **PHP** | `.php`, `.phtml`, `.php3-5`, `.phps` | **Basic** | Classes, interfaces, traits, methods, properties, namespaces |
+| Language | Extensions | Support Level | Parser Technology | Features |
+|----------|------------|---------------|-------------------|----------|
+| **Python** | `.py`, `.pyw`, `.pyi` | **Complete** | Native AST | Full AST analysis, 31+ semantic event types, decorators, async/await, generators, comprehensions, type annotations |
+| **PHP** | `.php`, `.phtml`, `.php3`, `.php4`, `.php5`, `.phps` | **Modern** | Tree-sitter (primary) + phply (fallback) | Modern PHP 7.4+/8.x features (enums, attributes, typed properties), legacy PHP 5.x-7.3 support, classes, interfaces, traits, methods, properties, namespaces, inheritance tracking |
+| **JavaScript** | `.js` | **AST-based** | esprima AST parser + regex fallback | ES6+ classes, arrow functions, async/await, inheritance changes, method signatures, constructor parameters, import/export tracking |
+| **TypeScript** | `.ts` | **AST-based** | esprima AST parser + regex fallback | Same as JavaScript with TypeScript syntax support |
 
-**Note**: Only Python has comprehensive semantic analysis. Other languages provide basic structural change detection.
+### **Parser Architecture & Robustness**
+
+SVCS uses a **multi-tier fallback system** for maximum reliability:
+
+#### **PHP Analysis**
+1. **Primary**: Tree-sitter PHP parser (supports PHP 7.4+ and 8.x)
+   - Modern features: enums, attributes, typed properties, union types
+   - Accurate AST-based parsing with full semantic understanding
+2. **Fallback**: phply parser (PHP 5.x-7.3 legacy support)
+   - Maintains compatibility with older codebases
+3. **Final Fallback**: Regex parsing for basic structural detection
+
+#### **JavaScript/TypeScript Analysis** 
+1. **Primary**: esprima AST parser with tolerance mode
+   - Full ES6+ syntax support including classes, arrow functions, async/await
+   - Detailed parameter and inheritance tracking
+   - Supports both JavaScript (.js) and TypeScript (.ts) syntax
+2. **Fallback**: Enhanced regex parsing with modern JS patterns
+   - Comprehensive pattern matching for various function declarations
+
+#### **Detected Change Types by Language**
+
+**PHP (Modern Support)**:
+- ✅ Classes, interfaces, traits, enums (PHP 8.1+)
+- ✅ Method signature changes, property type changes
+- ✅ Inheritance tracking (`extends`, `implements`)
+- ✅ Modern features: attributes (PHP 8.0+), typed properties
+- ✅ Namespace and use statement tracking
+- ✅ Visibility modifier changes (`public`, `private`, `protected`)
+
+**JavaScript/TypeScript (AST-based Support)**:
+- ✅ Function declarations, expressions, and arrow functions
+- ✅ Class inheritance tracking (`extends` relationships)
+- ✅ Constructor parameter changes
+- ✅ Method additions/removals within classes
+- ✅ Variable declarations with function assignments
+- ✅ ES6+ syntax support (classes, arrow functions, async/await)
+- ✅ TypeScript syntax compatibility
+- ✅ Variable scope and declaration changes
+
+**Note**: Python provides the most comprehensive semantic analysis. PHP and JavaScript now offer robust structural and semantic change detection suitable for production use in git hooks.
 
 ## 🛠️ **Installation**
 
@@ -353,6 +392,12 @@ source venv/bin/activate  # On Windows WSL: venv/bin/activate
 # Install MCP server
 cd svcs_mcp
 pip install -e .
+
+# Install enhanced language parsing dependencies
+pip install tree-sitter tree-sitter-php esprima
+
+# Install core SVCS dependencies
+pip install -r ../requirements.txt
 
 # Set up Google API key for Layer 5b AI features (optional)
 export GOOGLE_API_KEY="your_gemini_api_key_here"
@@ -376,6 +421,8 @@ Add to your VS Code `settings.json`:
 }
 ```
 
+> **💡 Note**: For enhanced PHP and JavaScript/TypeScript support, ensure you have installed the language parsing dependencies: `tree-sitter`, `tree-sitter-php`, and `esprima`. Without these, SVCS will fall back to basic regex parsing.
+
 ## 🚀 **Quick Start**
 
 ### **1. Register a Project**
@@ -391,13 +438,16 @@ svcs init --name "My Project" .
 ### **2. Make Changes and Commit**
 
 ```bash
-# Create a test file
+# Create test files in different languages
 echo "def hello(): return 'world'" > test.py
-git add test.py
-git commit -m "Add hello function"
+echo "<?php function hello() { return 'world'; } ?>" > test.php
+echo "function hello() { return 'world'; }" > test.js
 
-# SVCS automatically analyzes the commit
-# You'll see semantic analysis output in the terminal
+git add test.py test.php test.js
+git commit -m "Add hello function in multiple languages"
+
+# SVCS automatically detects and analyzes all supported languages
+# You'll see semantic analysis output for each file in the terminal
 ```
 
 ### **3. Query Your Code Evolution**
@@ -568,10 +618,16 @@ python3 svcs_ci.py --pr-analysis --target=main
 
 ### **Multi-Language Support**
 
-#### **`svcs_multilang.py` - Language Extension Framework**
-- Extensible framework for analyzing semantic changes across programming languages
-- Currently supports Python (complete), JavaScript/TypeScript/Go/PHP (basic)
-- Language-specific semantic pattern detection
+#### **`svcs_multilang.py` - Advanced Language Extension Framework**
+- **Production-ready multi-language semantic analysis** with robust fallback systems
+- **PHP**: Complete modern support (PHP 7.4+/8.x) with Tree-sitter parser + phply legacy fallback
+- **JavaScript/TypeScript**: AST-based analysis with esprima parser + intelligent regex fallback
+- **Extensible architecture**: Easy addition of new language analyzers with standardized interface
+
+#### **Real-world Git Hook Integration**
+- **Tested in production scenarios**: Multi-language analysis in git post-commit hooks
+- **Error resilience**: Graceful handling of syntax errors, missing parsers, binary files
+- **Performance optimized**: Efficient parsing with minimal git hook overhead
 
 ## 🤖 **MCP Server Interface**
 
@@ -707,11 +763,11 @@ mcp>=0.1.0                 # Model Context Protocol
 - **Windows Support**: Requires WSL due to symbolic link usage for git hooks
 - **API Dependency**: Layer 5b features require external Google API
 
-### **Language Support Gaps**
-- Only Python has comprehensive semantic analysis
-- Other languages provide basic structural detection only
-- No cross-language architectural change detection
-- Limited understanding of language-specific patterns
+### **Language Support Status**
+- **Python**: Comprehensive semantic analysis with 31+ event types
+- **PHP**: Modern language support with Tree-sitter parsing (PHP 7.4+/8.x) and phply fallback
+- **JavaScript/TypeScript**: AST-based analysis using esprima parser with comprehensive syntax support
+- **Cross-language projects**: Multi-language repository support for mixed codebases
 
 ### **Scalability Considerations**
 - SQLite database may not scale to very large repositories
@@ -727,8 +783,8 @@ This project originated from the "Time Crystal VCS" concept - a science fiction-
 - A code contribution from OpenAI O3 (debug persistent click cli --event-types parsing problem)
 
 ### **Planned Improvements**
-- **Enhanced Language Support**: Full semantic analysis for JavaScript, TypeScript, Go, PHP
-- **Cross-Language Analysis**: Detection of architectural changes spanning multiple languages
+- **Enhanced Language Support**: Full semantic analysis for more languages (Go, Rust, Java, C++, etc.)
+- **Cross-Language Analysis**: Detection of architectural changes spanning multiple languages  
 - **Real-time Analysis**: File-watching based analysis for immediate feedback
 - **Distributed Architecture**: Support for large-scale, multi-repository analysis
 - **Advanced AI Integration**: Support for multiple LLM providers and local models

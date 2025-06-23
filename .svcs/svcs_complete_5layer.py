@@ -96,10 +96,10 @@ class SVCSComplete5LayerAnalyzer:
     def _run_core_analysis(self, filepath: str, before_content: str, after_content: str) -> List[Dict[str, Any]]:
         """Run the core analyzer (Layers 1-4)."""
         try:
-            from analyzer import analyze_python_changes
+            from analyzer import analyze_changes
             
-            # Get core events (this includes basic structural analysis)
-            events = analyze_python_changes(filepath, before_content, after_content)
+            # Get core events (this includes multi-language support)
+            events = analyze_changes(filepath, before_content, after_content)
             
             # Add layer information
             for event in events:

@@ -16,15 +16,15 @@ def analyze_changes(filepath, before_content, after_content):
     if before_content == after_content:
         return []
 
-    # Check if this is a PHP file
-    if filepath.endswith('.php'):
-        return analyze_php_changes(filepath, before_content, after_content)
+    # Check if this is a multi-language supported file
+    if filepath.endswith(('.php', '.phtml', '.php3', '.php4', '.php5', '.phps', '.js', '.ts')):
+        return analyze_multilang_changes(filepath, before_content, after_content)
     
     # Default to Python analysis
     return analyze_python_changes(filepath, before_content, after_content)
 
-def analyze_php_changes(filepath, before_content, after_content):
-    """Analyze PHP file changes using the multi-language analyzer."""
+def analyze_multilang_changes(filepath, before_content, after_content):
+    """Analyze multi-language file changes using the multi-language analyzer."""
     try:
         from svcs_multilang import MultiLanguageAnalyzer
         analyzer = MultiLanguageAnalyzer()
