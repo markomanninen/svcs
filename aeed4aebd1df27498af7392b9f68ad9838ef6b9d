@@ -1,0 +1,44 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-23T17:48:50.370128",
+  "semantic_events": [
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "func:async_function",
+      "location": "test_python_semantic.py",
+      "details": "The implementation of this node has changed.",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "HEAD",
+      "created_at": 1750690130
+    },
+    {
+      "node_id": "func:simple_function",
+      "location": "test_python_semantic.py",
+      "event_type": "node_signature_changed",
+      "details": "Signature changed from () to (name)",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "HEAD",
+      "created_at": 1750690130
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:new_property",
+      "location": "test_python_semantic.py",
+      "details": "Added func:new_property",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "HEAD",
+      "created_at": 1750690130
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "HEAD"
+}
