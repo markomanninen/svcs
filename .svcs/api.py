@@ -10,7 +10,10 @@ import subprocess
 
 # --- Configuration ---
 SVCS_DIR = ".svcs"
-DB_PATH = os.path.join(SVCS_DIR, "history.db")
+# Support both old and new database names for compatibility
+DB_PATH = os.path.join(SVCS_DIR, "semantic.db")
+if not os.path.exists(DB_PATH):
+    DB_PATH = os.path.join(SVCS_DIR, "history.db")
 
 def _get_db_connection():
     """Establishes a connection to the SQLite database."""
@@ -50,7 +53,7 @@ def get_full_log():
         SELECT
             e.event_id, e.commit_hash, e.event_type, e.node_id, e.location, e.details,
             e.layer, e.layer_description, e.confidence, e.reasoning, e.impact,
-            c.author, c.timestamp
+            c.author, c.branch, c.timestamp
         FROM semantic_events e
         JOIN commits c ON e.commit_hash = c.commit_hash
         ORDER BY c.timestamp DESC
@@ -68,7 +71,7 @@ def search_events(author=None, event_type=None, node_id=None, location=None):
         SELECT
             e.event_id, e.commit_hash, e.event_type, e.node_id, e.location, e.details,
             e.layer, e.layer_description, e.confidence, e.reasoning, e.impact,
-            c.author, c.timestamp
+            c.author, c.branch, c.timestamp
         FROM semantic_events e
         JOIN commits c ON e.commit_hash = c.commit_hash
         WHERE 
@@ -102,7 +105,7 @@ def get_node_evolution(node_id: str):
         SELECT
             e.event_id, e.commit_hash, e.event_type, e.node_id, e.location, e.details,
             e.layer, e.layer_description, e.confidence, e.reasoning, e.impact,
-            c.author, c.timestamp
+            c.author, c.branch, c.timestamp
         FROM semantic_events e
         JOIN commits c ON e.commit_hash = c.commit_hash
         WHERE e.node_id = ?
@@ -122,7 +125,7 @@ def find_dependency_changes(dependency_name: str):
         SELECT 
             e.event_id, e.commit_hash, e.event_type, e.node_id, e.location, e.details,
             e.layer, e.layer_description, e.confidence, e.reasoning, e.impact,
-            c.author, c.timestamp 
+            c.author, c.branch, c.timestamp 
         FROM semantic_events e
         JOIN commits c ON e.commit_hash = c.commit_hash
         WHERE e.event_type LIKE 'dependency_%' AND e.details LIKE ? ORDER BY c.timestamp DESC
@@ -141,7 +144,7 @@ def get_commit_details(commit_hash: str):
         SELECT 
             e.event_id, e.commit_hash, e.event_type, e.node_id, e.location, e.details,
             e.layer, e.layer_description, e.confidence, e.reasoning, e.impact,
-            c.author, c.timestamp 
+            c.author, c.branch, c.timestamp 
         FROM semantic_events e
         JOIN commits c ON e.commit_hash = c.commit_hash
         WHERE e.commit_hash LIKE ? ORDER BY c.timestamp DESC
@@ -210,7 +213,7 @@ def search_events_advanced(
         SELECT
             e.event_id, e.commit_hash, e.event_type, e.node_id, e.location, e.details,
             e.layer, e.layer_description, e.confidence, e.reasoning, e.impact,
-            c.author, c.timestamp,
+            c.author, c.branch, c.timestamp,
             datetime(c.timestamp, 'unixepoch') as readable_date
         FROM semantic_events e
         JOIN commits c ON e.commit_hash = c.commit_hash
@@ -330,7 +333,7 @@ def get_recent_activity(
         SELECT
             e.event_id, e.commit_hash, e.event_type, e.node_id, e.location, e.details,
             e.layer, e.layer_description, e.confidence, e.reasoning, e.impact,
-            c.author, c.timestamp,
+            c.author, c.branch, c.timestamp,
             datetime(c.timestamp, 'unixepoch') as readable_date
         FROM semantic_events e
         JOIN commits c ON e.commit_hash = c.commit_hash
@@ -461,7 +464,7 @@ def search_semantic_patterns(
         SELECT
             e.event_id, e.commit_hash, e.event_type, e.node_id, e.location, e.details,
             e.layer, e.layer_description, e.confidence, e.reasoning, e.impact,
-            c.author, c.timestamp,
+            c.author, c.branch, c.timestamp,
             datetime(c.timestamp, 'unixepoch') as readable_date
         FROM semantic_events e
         JOIN commits c ON e.commit_hash = c.commit_hash
@@ -548,7 +551,7 @@ def get_filtered_evolution(
             SELECT 
                 e.event_id, e.commit_hash, e.event_type, e.node_id, e.location, e.details,
                 e.layer, e.layer_description, e.confidence, e.reasoning, e.impact,
-                c.author, c.timestamp
+                c.author, c.branch, c.timestamp
             FROM semantic_events e
             JOIN commits c ON e.commit_hash = c.commit_hash
             WHERE e.node_id = ?
