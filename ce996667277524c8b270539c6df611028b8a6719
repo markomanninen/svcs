@@ -1,0 +1,92 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-25T01:38:57.733137",
+  "semantic_events": [
+    {
+      "event_type": "dependency_added",
+      "node_id": "module",
+      "location": "language_coverage_analysis.py",
+      "details": "Added: os, pathlib, re",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "ce996667277524c8b270539c6df611028b8a6719",
+      "created_at": 1750804737
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:get_defined_event_types",
+      "location": "language_coverage_analysis.py",
+      "details": "Added func:get_defined_event_types",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "ce996667277524c8b270539c6df611028b8a6719",
+      "created_at": 1750804737
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:main",
+      "location": "language_coverage_analysis.py",
+      "details": "Added func:main",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "ce996667277524c8b270539c6df611028b8a6719",
+      "created_at": 1750804737
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:get_language_detected_types",
+      "location": "language_coverage_analysis.py",
+      "details": "Added func:get_language_detected_types",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "ce996667277524c8b270539c6df611028b8a6719",
+      "created_at": 1750804737
+    },
+    {
+      "event_type": "dependency_added",
+      "node_id": "module",
+      "location": "run_targeted_tests.py",
+      "details": "Added: os, pathlib, re, svcs.semantic_analyzer, sys",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "ce996667277524c8b270539c6df611028b8a6719",
+      "created_at": 1750804737
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:main",
+      "location": "run_targeted_tests.py",
+      "details": "Added func:main",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "ce996667277524c8b270539c6df611028b8a6719",
+      "created_at": 1750804737
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:run_test_case",
+      "location": "run_targeted_tests.py",
+      "details": "Added func:run_test_case",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "ce996667277524c8b270539c6df611028b8a6719",
+      "created_at": 1750804737
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "ce996667277524c8b270539c6df611028b8a6719"
+}
