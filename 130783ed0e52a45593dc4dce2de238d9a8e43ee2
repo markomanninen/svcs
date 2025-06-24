@@ -1,0 +1,116 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-25T01:19:06.113650",
+  "semantic_events": [
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "func:get_full_log",
+      "location": ".svcs/api.py",
+      "details": "The implementation of this node has changed.",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "130783ed0e52a45593dc4dce2de238d9a8e43ee2",
+      "created_at": 1750803546
+    },
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "func:search_events",
+      "location": ".svcs/api.py",
+      "details": "The implementation of this node has changed.",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "130783ed0e52a45593dc4dce2de238d9a8e43ee2",
+      "created_at": 1750803546
+    },
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "func:get_node_evolution",
+      "location": ".svcs/api.py",
+      "details": "The implementation of this node has changed.",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "130783ed0e52a45593dc4dce2de238d9a8e43ee2",
+      "created_at": 1750803546
+    },
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "func:get_recent_activity",
+      "location": ".svcs/api.py",
+      "details": "The implementation of this node has changed.",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "130783ed0e52a45593dc4dce2de238d9a8e43ee2",
+      "created_at": 1750803546
+    },
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "func:search_events_advanced",
+      "location": ".svcs/api.py",
+      "details": "The implementation of this node has changed.",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "130783ed0e52a45593dc4dce2de238d9a8e43ee2",
+      "created_at": 1750803546
+    },
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "func:find_dependency_changes",
+      "location": ".svcs/api.py",
+      "details": "The implementation of this node has changed.",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "130783ed0e52a45593dc4dce2de238d9a8e43ee2",
+      "created_at": 1750803546
+    },
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "func:get_filtered_evolution",
+      "location": ".svcs/api.py",
+      "details": "The implementation of this node has changed.",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "130783ed0e52a45593dc4dce2de238d9a8e43ee2",
+      "created_at": 1750803546
+    },
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "func:search_semantic_patterns",
+      "location": ".svcs/api.py",
+      "details": "The implementation of this node has changed.",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "130783ed0e52a45593dc4dce2de238d9a8e43ee2",
+      "created_at": 1750803546
+    },
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "func:get_commit_details",
+      "location": ".svcs/api.py",
+      "details": "The implementation of this node has changed.",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "130783ed0e52a45593dc4dce2de238d9a8e43ee2",
+      "created_at": 1750803546
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "130783ed0e52a45593dc4dce2de238d9a8e43ee2"
+}
