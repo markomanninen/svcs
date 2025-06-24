@@ -1,0 +1,68 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-25T01:40:13.666239",
+  "semantic_events": [
+    {
+      "event_type": "dependency_added",
+      "node_id": "module",
+      "location": "install.py",
+      "details": "Added: os, pathlib, shutil, sys",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "396fd884ee201f1f1c1d938a9edd233d0af9d5df",
+      "created_at": 1750804813
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:uninstall_svcs",
+      "location": "install.py",
+      "details": "Added func:uninstall_svcs",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "396fd884ee201f1f1c1d938a9edd233d0af9d5df",
+      "created_at": 1750804813
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:main",
+      "location": "install.py",
+      "details": "Added func:main",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "396fd884ee201f1f1c1d938a9edd233d0af9d5df",
+      "created_at": 1750804813
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:install_svcs",
+      "location": "install.py",
+      "details": "Added func:install_svcs",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "396fd884ee201f1f1c1d938a9edd233d0af9d5df",
+      "created_at": 1750804813
+    },
+    {
+      "event_type": "dependency_added",
+      "node_id": "module",
+      "location": "setup.py",
+      "details": "Added: pathlib, setuptools",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "396fd884ee201f1f1c1d938a9edd233d0af9d5df",
+      "created_at": 1750804813
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "396fd884ee201f1f1c1d938a9edd233d0af9d5df"
+}
