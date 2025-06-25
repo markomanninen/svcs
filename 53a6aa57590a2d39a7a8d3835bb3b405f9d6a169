@@ -1,0 +1,140 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-25T11:23:18.900787",
+  "semantic_events": [
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "class:RepositoryLocalCIIntegration",
+      "location": "svcs_repo_ci.py",
+      "details": "The implementation of this node has changed.",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "53a6aa57590a2d39a7a8d3835bb3b405f9d6a169",
+      "created_at": 1750839798
+    },
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "func:run_quality_gate",
+      "location": "svcs_repo_ci.py",
+      "details": "The implementation of this node has changed.",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "53a6aa57590a2d39a7a8d3835bb3b405f9d6a169",
+      "created_at": 1750839798
+    },
+    {
+      "event_type": "dependency_added",
+      "node_id": "module",
+      "location": "test_ai_call_limiter.py",
+      "details": "Added: svcs.layers.layer5b_true_ai, traceback",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "53a6aa57590a2d39a7a8d3835bb3b405f9d6a169",
+      "created_at": 1750839798
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:test_ai_call_limiter",
+      "location": "test_ai_call_limiter.py",
+      "details": "Added func:test_ai_call_limiter",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "53a6aa57590a2d39a7a8d3835bb3b405f9d6a169",
+      "created_at": 1750839798
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:demonstrate_cost_savings",
+      "location": "test_ai_call_limiter.py",
+      "details": "Added func:demonstrate_cost_savings",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "53a6aa57590a2d39a7a8d3835bb3b405f9d6a169",
+      "created_at": 1750839798
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:main",
+      "location": "test_ai_call_limiter.py",
+      "details": "Added func:main",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "53a6aa57590a2d39a7a8d3835bb3b405f9d6a169",
+      "created_at": 1750839798
+    },
+    {
+      "event_type": "dependency_added",
+      "node_id": "module",
+      "location": "test_google_flash_integration.py",
+      "details": "Added: google.generativeai, os, rich.console, rich.panel, rich.table, rich.text, svcs.analyzers.comprehensive_analyzer, svcs.layers.layer5b_true_ai, sys",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "53a6aa57590a2d39a7a8d3835bb3b405f9d6a169",
+      "created_at": 1750839798
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:main",
+      "location": "test_google_flash_integration.py",
+      "details": "Added func:main",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "53a6aa57590a2d39a7a8d3835bb3b405f9d6a169",
+      "created_at": 1750839798
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:test_google_flash_availability",
+      "location": "test_google_flash_integration.py",
+      "details": "Added func:test_google_flash_availability",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "53a6aa57590a2d39a7a8d3835bb3b405f9d6a169",
+      "created_at": 1750839798
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:test_layer5b_integration",
+      "location": "test_google_flash_integration.py",
+      "details": "Added func:test_layer5b_integration",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "53a6aa57590a2d39a7a8d3835bb3b405f9d6a169",
+      "created_at": 1750839798
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:test_comprehensive_analyzer",
+      "location": "test_google_flash_integration.py",
+      "details": "Added func:test_comprehensive_analyzer",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "53a6aa57590a2d39a7a8d3835bb3b405f9d6a169",
+      "created_at": 1750839798
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "53a6aa57590a2d39a7a8d3835bb3b405f9d6a169"
+}
