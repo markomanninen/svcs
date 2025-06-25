@@ -1,0 +1,516 @@
+🚀 SVCS Fresh Repository Workflow Test - 2025-06-23 19:08:58.873071
+📝 Log file: test_fresh_repo_workflow_20250623_190858.log
+======================================================================
+🚀 SVCS Fresh Repository Complete Workflow Test
+======================================================================
+
+🏗️  STEP 1: Setting up fresh repository
+📁 Created fresh directory: /tmp/svcs_test
+🔧 Running: git init
+📤 Output: Initialized empty Git repository in /private/tmp/svcs_test/.git/
+🔧 Running: git config user.name 'SVCS Test User'
+🔧 Running: git config user.email 'test@svcs.example'
+✅ Fresh git repository initialized
+🔧 Running: python3 svcs_local_cli.py init
+📤 Output: ✅ SVCS initialized for repository at /private/tmp/svcs_test (branch: main)
+✅ Installed git hooks: post-commit, post-merge, post-checkout, pre-push
+🔧 Running: git add geometry.py
+🔧 Running: git commit -m "Initial commit: basic circle geometry functions"
+📤 Output: [main (root-commit) 40d191b] Initial commit: basic circle geometry functions
+ 1 file changed, 34 insertions(+)
+ create mode 100644 geometry.py
+⚠️  Error: 🔍 SVCS: Analyzing semantic changes...
+ℹ️ SVCS: No semantic changes detected
+🔧 Running: python3 svcs_local_cli.py events --limit 10
+📤 Output: ℹ️ No semantic events found for branch: main
+🔧 Running: git add geometry.py
+🔧 Running: git commit -m "Enhance geometry: add type hints, validation, new functions and classes"
+📤 Output: [main 79b3cca] Enhance geometry: add type hints, validation, new functions and classes
+ 1 file changed, 60 insertions(+), 11 deletions(-)
+⚠️  Error: 🔍 SVCS: Analyzing semantic changes...
+✅ SVCS: Stored 12 semantic events
+📝 SVCS: Semantic data saved as git notes
+🔧 Running: python3 svcs_local_cli.py events --limit 10
+📤 Output: 📊 Semantic Events (10 found)
+============================================================
+🔍 dependency_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 module @ geometry.py
+   💬 Added: typing
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:calculate_volume @ geometry.py
+   💬 Added func:calculate_volume
+   🧠 Multi-language AST analysis
+
+🔍 node_signature_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:__init__ @ geometry.py
+   💬 Signature changed from (self, radius) to (self, radius, height)
+   🧠 Multi-language AST analysis
+
+🔍 node_logic_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:calculate_area @ geometry.py
+   💬 The implementation of this node has changed.
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:volume @ geometry.py
+   💬 Added func:volume
+   🧠 Multi-language AST analysis
+
+🔍 node_logic_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:perimeter @ geometry.py
+   💬 The implementation of this node has changed.
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 class:Cylinder @ geometry.py
+   💬 Added class:Cylinder
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:scale @ geometry.py
+   💬 Added func:scale
+   🧠 Multi-language AST analysis
+
+🔍 node_logic_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:area @ geometry.py
+   💬 The implementation of this node has changed.
+   🧠 Multi-language AST analysis
+
+🔍 node_logic_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 class:Circle @ geometry.py
+   💬 The implementation of this node has changed.
+   🧠 Multi-language AST analysis
+🔧 Running: git checkout -b feature/advanced-shapes
+⚠️  Error: Switched to a new branch 'feature/advanced-shapes'
+🌿 SVCS: Switched to branch feature/advanced-shapes
+📊 SVCS: Tracking semantic data for branch: feature/advanced-shapes
+🔧 Running: git add advanced_shapes.py
+🔧 Running: git commit -m "Feature: Add advanced shapes with ABC, protocols, and new classes"
+📤 Output: [feature/advanced-shapes d24c09e] Feature: Add advanced shapes with ABC, protocols, and new classes
+ 1 file changed, 92 insertions(+)
+ create mode 100644 advanced_shapes.py
+⚠️  Error: 🔍 SVCS: Analyzing semantic changes...
+✅ SVCS: Stored 11 semantic events
+📝 SVCS: Semantic data saved as git notes
+🔧 Running: python3 svcs_local_cli.py events --limit 10
+📤 Output: 📊 Semantic Events (10 found)
+============================================================
+🔍 dependency_added
+   📝 d24c09ed | feature/advanced-shapes | 2025-06-23 19:09:04
+   🎯 module @ advanced_shapes.py
+   💬 Added: abc, math, typing
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | feature/advanced-shapes | 2025-06-23 19:09:04
+   🎯 class:Triangle @ advanced_shapes.py
+   💬 Added class:Triangle
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | feature/advanced-shapes | 2025-06-23 19:09:04
+   🎯 class:Shape @ advanced_shapes.py
+   💬 Added class:Shape
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | feature/advanced-shapes | 2025-06-23 19:09:04
+   🎯 class:Rectangle @ advanced_shapes.py
+   💬 Added class:Rectangle
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | feature/advanced-shapes | 2025-06-23 19:09:04
+   🎯 func:volume @ advanced_shapes.py
+   💬 Added func:volume
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | feature/advanced-shapes | 2025-06-23 19:09:04
+   🎯 func:area @ advanced_shapes.py
+   💬 Added func:area
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | feature/advanced-shapes | 2025-06-23 19:09:04
+   🎯 func:__init__ @ advanced_shapes.py
+   💬 Added func:__init__
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | feature/advanced-shapes | 2025-06-23 19:09:04
+   🎯 func:compare_shapes @ advanced_shapes.py
+   💬 Added func:compare_shapes
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | feature/advanced-shapes | 2025-06-23 19:09:04
+   🎯 func:perimeter @ advanced_shapes.py
+   💬 Added func:perimeter
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | feature/advanced-shapes | 2025-06-23 19:09:04
+   🎯 class:HasVolume @ advanced_shapes.py
+   💬 Added class:HasVolume
+   🧠 Multi-language AST analysis
+🔧 Running: git branch --show-current
+📤 Output: feature/advanced-shapes
+🔧 Running: python3 svcs_local_cli.py compare main feature/advanced-shapes
+📤 Output: 🔍 Comparing semantic events between branches: main ↔ feature/advanced-shapes
+
+🌿 Branch Comparison: main vs feature/advanced-shapes
+============================================================
+📊 Summary:
+   main: 12 total events
+   feature/advanced-shapes: 11 total events
+   Difference: 1
+
+🌿 Recent events in 'main':
+  📊 dependency_added at geometry.py (79b3ccac) - 2025-06-23 19:09:03
+  📊 node_added at geometry.py (79b3ccac) - 2025-06-23 19:09:03
+  📊 node_signature_changed at geometry.py (79b3ccac) - 2025-06-23 19:09:03
+  📊 node_logic_changed at geometry.py (79b3ccac) - 2025-06-23 19:09:03
+  📊 node_added at geometry.py (79b3ccac) - 2025-06-23 19:09:03
+
+🌿 Recent events in 'feature/advanced-shapes':
+  📊 dependency_added at advanced_shapes.py (d24c09ed) - 2025-06-23 19:09:04
+  📊 node_added at advanced_shapes.py (d24c09ed) - 2025-06-23 19:09:04
+  📊 node_added at advanced_shapes.py (d24c09ed) - 2025-06-23 19:09:04
+  📊 node_added at advanced_shapes.py (d24c09ed) - 2025-06-23 19:09:04
+  📊 node_added at advanced_shapes.py (d24c09ed) - 2025-06-23 19:09:04
+🔧 Running: python3 svcs_local_cli.py merged-events --limit 15
+📤 Output: 📊 Merged Semantic Events (15 found across all branches)
+======================================================================
+🌿 Branch: feature/advanced-shapes
+----------------------------------------
+🔍 dependency_added
+   📝 d24c09ed | 2025-06-23 19:09:04
+   🎯 module @ advanced_shapes.py
+   💬 Added: abc, math, typing
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | 2025-06-23 19:09:04
+   🎯 class:Triangle @ advanced_shapes.py
+   💬 Added class:Triangle
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | 2025-06-23 19:09:04
+   🎯 class:Shape @ advanced_shapes.py
+   💬 Added class:Shape
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | 2025-06-23 19:09:04
+   🎯 class:Rectangle @ advanced_shapes.py
+   💬 Added class:Rectangle
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | 2025-06-23 19:09:04
+   🎯 func:volume @ advanced_shapes.py
+   💬 Added func:volume
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | 2025-06-23 19:09:04
+   🎯 func:area @ advanced_shapes.py
+   💬 Added func:area
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | 2025-06-23 19:09:04
+   🎯 func:__init__ @ advanced_shapes.py
+   💬 Added func:__init__
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | 2025-06-23 19:09:04
+   🎯 func:compare_shapes @ advanced_shapes.py
+   💬 Added func:compare_shapes
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | 2025-06-23 19:09:04
+   🎯 func:perimeter @ advanced_shapes.py
+   💬 Added func:perimeter
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | 2025-06-23 19:09:04
+   🎯 class:HasVolume @ advanced_shapes.py
+   💬 Added class:HasVolume
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 d24c09ed | 2025-06-23 19:09:04
+   🎯 func:calculate_total_area @ advanced_shapes.py
+   💬 Added func:calculate_total_area
+   🧠 Multi-language AST analysis
+
+
+🌿 Branch: main
+----------------------------------------
+🔍 dependency_added
+   📝 79b3ccac | 2025-06-23 19:09:03
+   🎯 module @ geometry.py
+   💬 Added: typing
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 79b3ccac | 2025-06-23 19:09:03
+   🎯 func:calculate_volume @ geometry.py
+   💬 Added func:calculate_volume
+   🧠 Multi-language AST analysis
+
+🔍 node_signature_changed
+   📝 79b3ccac | 2025-06-23 19:09:03
+   🎯 func:__init__ @ geometry.py
+   💬 Signature changed from (self, radius) to (self, radius, height)
+   🧠 Multi-language AST analysis
+
+🔍 node_logic_changed
+   📝 79b3ccac | 2025-06-23 19:09:03
+   🎯 func:calculate_area @ geometry.py
+   💬 The implementation of this node has changed.
+   🧠 Multi-language AST analysis
+🔧 Running: git checkout main
+⚠️  Error: Switched to branch 'main'
+🌿 SVCS: Switched to branch main
+📊 SVCS: Tracking semantic data for branch: main
+🔧 Running: python3 svcs_local_cli.py events --limit 10
+📤 Output: 📊 Semantic Events (10 found)
+============================================================
+🔍 dependency_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 module @ geometry.py
+   💬 Added: typing
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:calculate_volume @ geometry.py
+   💬 Added func:calculate_volume
+   🧠 Multi-language AST analysis
+
+🔍 node_signature_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:__init__ @ geometry.py
+   💬 Signature changed from (self, radius) to (self, radius, height)
+   🧠 Multi-language AST analysis
+
+🔍 node_logic_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:calculate_area @ geometry.py
+   💬 The implementation of this node has changed.
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:volume @ geometry.py
+   💬 Added func:volume
+   🧠 Multi-language AST analysis
+
+🔍 node_logic_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:perimeter @ geometry.py
+   💬 The implementation of this node has changed.
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 class:Cylinder @ geometry.py
+   💬 Added class:Cylinder
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:scale @ geometry.py
+   💬 Added func:scale
+   🧠 Multi-language AST analysis
+
+🔍 node_logic_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:area @ geometry.py
+   💬 The implementation of this node has changed.
+   🧠 Multi-language AST analysis
+
+🔍 node_logic_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 class:Circle @ geometry.py
+   💬 The implementation of this node has changed.
+   🧠 Multi-language AST analysis
+🔧 Running: git merge feature/advanced-shapes --no-ff -m 'Merge feature/advanced-shapes: Add advanced shape classes'
+📤 Output: Merge made by the 'ort' strategy.
+ advanced_shapes.py | 92 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 92 insertions(+)
+ create mode 100644 advanced_shapes.py
+⚠️  Error: 🔄 SVCS: Processing merge...
+📥 SVCS: Syncing semantic data from merge
+✅ SVCS: Merge semantic data processed
+🔧 Running: python3 svcs_local_cli.py events --limit 10
+📤 Output: 📊 Semantic Events (10 found)
+============================================================
+🔍 dependency_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 module @ geometry.py
+   💬 Added: typing
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:calculate_volume @ geometry.py
+   💬 Added func:calculate_volume
+   🧠 Multi-language AST analysis
+
+🔍 node_signature_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:__init__ @ geometry.py
+   💬 Signature changed from (self, radius) to (self, radius, height)
+   🧠 Multi-language AST analysis
+
+🔍 node_logic_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:calculate_area @ geometry.py
+   💬 The implementation of this node has changed.
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:volume @ geometry.py
+   💬 Added func:volume
+   🧠 Multi-language AST analysis
+
+🔍 node_logic_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:perimeter @ geometry.py
+   💬 The implementation of this node has changed.
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 class:Cylinder @ geometry.py
+   💬 Added class:Cylinder
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:scale @ geometry.py
+   💬 Added func:scale
+   🧠 Multi-language AST analysis
+
+🔍 node_logic_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:area @ geometry.py
+   💬 The implementation of this node has changed.
+   🧠 Multi-language AST analysis
+
+🔍 node_logic_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 class:Circle @ geometry.py
+   💬 The implementation of this node has changed.
+   🧠 Multi-language AST analysis
+🔧 Running: python3 svcs_local_cli.py events --limit 10
+📤 Output: 📊 Semantic Events (10 found)
+============================================================
+🔍 dependency_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 module @ geometry.py
+   💬 Added: typing
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:calculate_volume @ geometry.py
+   💬 Added func:calculate_volume
+   🧠 Multi-language AST analysis
+
+🔍 node_signature_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:__init__ @ geometry.py
+   💬 Signature changed from (self, radius) to (self, radius, height)
+   🧠 Multi-language AST analysis
+
+🔍 node_logic_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:calculate_area @ geometry.py
+   💬 The implementation of this node has changed.
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:volume @ geometry.py
+   💬 Added func:volume
+   🧠 Multi-language AST analysis
+
+🔍 node_logic_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:perimeter @ geometry.py
+   💬 The implementation of this node has changed.
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 class:Cylinder @ geometry.py
+   💬 Added class:Cylinder
+   🧠 Multi-language AST analysis
+
+🔍 node_added
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:scale @ geometry.py
+   💬 Added func:scale
+   🧠 Multi-language AST analysis
+
+🔍 node_logic_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 func:area @ geometry.py
+   💬 The implementation of this node has changed.
+   🧠 Multi-language AST analysis
+
+🔍 node_logic_changed
+   📝 79b3ccac | main | 2025-06-23 19:09:03
+   🎯 class:Circle @ geometry.py
+   💬 The implementation of this node has changed.
+   🧠 Multi-language AST analysis
+🔧 Running: git log --oneline --graph
+📤 Output: *   3e2c7df Merge feature/advanced-shapes: Add advanced shape classes
+|\  
+| * d24c09e Feature: Add advanced shapes with ABC, protocols, and new classes
+|/  
+* 79b3cca Enhance geometry: add type hints, validation, new functions and classes
+* 40d191b Initial commit: basic circle geometry functions
+🔧 Running: git branch --show-current
+📤 Output: main
+🔧 Running: git notes --ref refs/notes/svcs-semantic list
+📤 Output: 3d9636aa39590be0d44e29e75a6ada69e218ab68 79b3ccac5c4311ca74cf02f08747d48fca35d8d4
+80a4f49b87f4d6b369be299de3e9ccd2aea5ee33 d24c09edb4f1bc9eaea2a3e3279215f726a9c348
+
+======================================================================
+🎯 COMPLETE WORKFLOW TEST SUMMARY
+======================================================================
+📊 Initial events: 0
+📊 After enhancements: 12
+📊 After feature development: 23
+📊 Final events: 23
+📈 Total new events created: 23
+✅ SUCCESS: Complete workflow validated!
+✅ SVCS successfully tracked semantic changes throughout development
+✅ Repository-local database maintained data integrity
+✅ Git integration worked seamlessly
+✅ Branch workflows preserved semantic history
+
+📝 Test completed at: 2025-06-23 19:09:05.520639
