@@ -53,16 +53,22 @@ def favicon():
 def dashboard():
     """Serve the main dashboard HTML."""
     try:
-        dashboard_path = Path(__file__).parent / 'svcs_new_dashboard.html'
-        if dashboard_path.exists():
-            return send_from_directory(str(dashboard_path.parent), 'svcs_new_dashboard.html')
+        # Serve the new modular web-app first
+        web_app_path = Path(__file__).parent / 'web-app' / 'index.html'
+        if web_app_path.exists():
+            return send_from_directory(str(web_app_path.parent), 'index.html')
         else:
-            # Fallback to old dashboard
-            old_dashboard_path = Path(__file__).parent / 'svcs_interactive_dashboard.html'
-            if old_dashboard_path.exists():
-                return send_from_directory(str(old_dashboard_path.parent), 'svcs_interactive_dashboard.html')
+            # Fallback to new dashboard
+            dashboard_path = Path(__file__).parent / 'svcs_new_dashboard.html'
+            if dashboard_path.exists():
+                return send_from_directory(str(dashboard_path.parent), 'svcs_new_dashboard.html')
             else:
-                return jsonify({'error': 'Dashboard not found'}), 404
+                # Fallback to old dashboard
+                old_dashboard_path = Path(__file__).parent / 'svcs_interactive_dashboard.html'
+                if old_dashboard_path.exists():
+                    return send_from_directory(str(old_dashboard_path.parent), 'svcs_interactive_dashboard.html')
+                else:
+                    return jsonify({'error': 'Dashboard not found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -76,6 +82,31 @@ def health_check():
         'architecture': 'repository-local',
         'repo_local_available': REPO_LOCAL_AVAILABLE
     })
+
+# Static file serving for modular web-app
+@app.route('/css/<path:filename>')
+def serve_css(filename):
+    """Serve CSS files from web-app/css directory."""
+    css_path = Path(__file__).parent / 'web-app' / 'css'
+    if css_path.exists():
+        return send_from_directory(str(css_path), filename)
+    return jsonify({'error': 'CSS file not found'}), 404
+
+@app.route('/js/<path:filename>')
+def serve_js(filename):
+    """Serve JavaScript files from web-app/js directory."""
+    js_path = Path(__file__).parent / 'web-app' / 'js'
+    if js_path.exists():
+        return send_from_directory(str(js_path), filename)
+    return jsonify({'error': 'JS file not found'}), 404
+
+@app.route('/js/components/<path:filename>')
+def serve_js_components(filename):
+    """Serve JavaScript component files from web-app/js/components directory."""
+    components_path = Path(__file__).parent / 'web-app' / 'js' / 'components'
+    if components_path.exists():
+        return send_from_directory(str(components_path), filename)
+    return jsonify({'error': 'JS component file not found'}), 404
 
 # Repository Management Endpoints
 @app.route('/api/repositories/discover', methods=['GET', 'POST'])
@@ -215,13 +246,20 @@ def search_events():
         if not repo_path:
             return jsonify({'success': False, 'error': 'repository_path required'}), 400
         
-        # Extract search parameters
+        # Extract search parameters - now including ordering
         limit = data.get('limit', 20)
         event_type = data.get('event_type')
         since_days = data.get('since_days')
+        order_by = data.get('order_by', 'timestamp')
+        order_desc = data.get('order_desc', True)
         
         events = web_repository_manager.search_events(
-            repo_path, limit=limit, event_type=event_type, since_days=since_days
+            repo_path, 
+            limit=limit, 
+            event_type=event_type, 
+            since_days=since_days,
+            order_by=order_by,
+            order_desc=order_desc
         )
         
         return jsonify({
@@ -237,7 +275,7 @@ def search_events():
 
 @app.route('/api/semantic/search_advanced', methods=['POST'])
 def search_events_advanced():
-    """Advanced semantic search with comprehensive filtering."""
+    """Advanced semantic search with comprehensive filtering - SAME repository as basic search!"""
     try:
         data = request.get_json()
         repo_path = data.get('repository_path')
@@ -245,68 +283,122 @@ def search_events_advanced():
         if not repo_path:
             return jsonify({'success': False, 'error': 'repository_path required'}), 400
         
-        # Get repository instance
+        # Get repository instance - SAME as basic search!
         svcs = web_repository_manager.get_repository(repo_path)
         if not svcs:
             return jsonify({'success': False, 'error': 'Repository not found or not initialized'}), 404
         
+        # Get all events from the SELECTED REPOSITORY
+        events = svcs.get_branch_events(limit=5000)  # Get more events for filtering
+        
         # Extract advanced search parameters
-        search_params = {
-            'author': data.get('author'),
-            'event_types': data.get('event_types'),  # List of event types
-            'location_pattern': data.get('location_pattern'),
-            'layers': data.get('layers'),  # List of layers: ['core', '5a', '5b']
-            'min_confidence': data.get('min_confidence'),
-            'max_confidence': data.get('max_confidence'),
-            'since_date': data.get('since_date'),  # YYYY-MM-DD or relative like "7 days ago"
-            'until_date': data.get('until_date'),
-            'limit': data.get('limit', 20),
-            'offset': data.get('offset', 0),
-            'order_by': data.get('order_by', 'timestamp'),  # timestamp, confidence, event_type
-            'order_desc': data.get('order_desc', True)
-        }
+        author = data.get('author')
+        event_types = data.get('event_types')  # List of event types
+        location_pattern = data.get('location_pattern')
+        layers = data.get('layers')  # List of layers: ['core', '5a', '5b']
+        min_confidence = data.get('min_confidence')
+        max_confidence = data.get('max_confidence')
+        since_date = data.get('since_date')  # YYYY-MM-DD or relative like "7 days ago"
+        until_date = data.get('until_date')
+        limit = data.get('limit', 20)
+        order_by = data.get('order_by', 'timestamp')
+        order_desc = data.get('order_desc', True)
         
-        # Remove None values
-        search_params = {k: v for k, v in search_params.items() if v is not None}
+        # Apply advanced filtering to repository events
+        filtered_events = events
         
-        # Import the advanced search function
-        try:
-            # Import from main SVCS API (current working directory)
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            svcs_api_path = os.path.join(current_dir, '.svcs')
-            sys.path.insert(0, svcs_api_path)
-            
-            from api import search_events_advanced as search_func
-            
-            # Add repository_path to search_params for context (though not used by function)
-            search_params['_repo_context'] = repo_path
-            
-            # Execute the search
-            results = search_func(**{k: v for k, v in search_params.items() if not k.startswith('_')})
-            
-            # Parse results if they are in string format
-            if isinstance(results, str):
-                import json
-                try:
-                    # Try to parse as JSON
-                    results_data = json.loads(results)
-                except:
-                    # If not JSON, treat as formatted text
-                    results_data = {'formatted_output': results, 'events': []}
+        # Filter by author
+        if author:
+            filtered_events = [e for e in filtered_events if author.lower() in str(e.get('author', '')).lower()]
+        
+        # Filter by event types
+        if event_types:
+            event_types_list = event_types if isinstance(event_types, list) else [event_types]
+            filtered_events = [e for e in filtered_events if e.get('event_type') in event_types_list]
+        
+        # Filter by location pattern
+        if location_pattern:
+            filtered_events = [e for e in filtered_events if location_pattern.lower() in str(e.get('location', '')).lower()]
+        
+        # Filter by layers
+        if layers:
+            layers_list = layers if isinstance(layers, list) else [layers]
+            filtered_events = [e for e in filtered_events if e.get('layer') in layers_list]
+        
+        # Filter by confidence
+        if min_confidence is not None:
+            filtered_events = [e for e in filtered_events if e.get('confidence', 0) >= min_confidence]
+        if max_confidence is not None:
+            filtered_events = [e for e in filtered_events if e.get('confidence', 1) <= max_confidence]
+        
+        # Filter by date range
+        if since_date:
+            # Handle relative dates like "7 days ago"
+            if 'days ago' in since_date:
+                import re
+                days_match = re.search(r'(\d+)\s*days?\s*ago', since_date)
+                if days_match:
+                    days = int(days_match.group(1))
+                    from datetime import datetime, timedelta
+                    cutoff = int((datetime.now() - timedelta(days=days)).timestamp())
+                    filtered_events = [e for e in filtered_events if e.get('created_at', 0) > cutoff]
             else:
-                results_data = results
-            
-            return jsonify({
-                'success': True,
-                'data': {
-                    'repository_path': repo_path,
-                    'search_params': search_params,
-                    'results': results_data
+                # Handle absolute dates
+                try:
+                    from datetime import datetime
+                    cutoff = int(datetime.strptime(since_date, '%Y-%m-%d').timestamp())
+                    filtered_events = [e for e in filtered_events if e.get('created_at', 0) > cutoff]
+                except:
+                    pass  # Invalid date format, skip filter
+        
+        if until_date:
+            try:
+                from datetime import datetime
+                cutoff = int(datetime.strptime(until_date, '%Y-%m-%d').timestamp())
+                filtered_events = [e for e in filtered_events if e.get('created_at', 0) < cutoff]
+            except:
+                pass  # Invalid date format, skip filter
+        
+        # Apply ordering
+        sort_field = order_by
+        if sort_field == 'timestamp':
+            sort_field = 'created_at'  # Map to actual field name
+        
+        def get_sort_key(event):
+            value = event.get(sort_field, 0)
+            if sort_field == 'created_at' and value:
+                return value
+            elif sort_field == 'confidence':
+                return event.get('confidence', 0)
+            elif sort_field == 'event_type':
+                return event.get('event_type', '')
+            else:
+                return value or 0
+        
+        filtered_events.sort(key=get_sort_key, reverse=order_desc)
+        
+        # Apply limit
+        final_events = filtered_events[:limit]
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'repository_path': repo_path,
+                'results': final_events,  # Use 'results' field for advanced search frontend
+                'total': len(filtered_events),
+                'showing': len(final_events),
+                'filters_applied': {
+                    'author': author,
+                    'event_types': event_types,
+                    'location_pattern': location_pattern,
+                    'layers': layers,
+                    'min_confidence': min_confidence,
+                    'since_date': since_date,
+                    'order_by': order_by,
+                    'order_desc': order_desc
                 }
-            })
-            
-        except ImportError as e:
-            return jsonify({'success': False, 'error': f'Advanced search not available: {e}'}), 500
+            }
+        })
         
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -493,8 +585,8 @@ def get_evolution():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-# Repository Status and Management
-@app.route('/api/repositories/status', methods=['POST'])
+# Repository Status and Info Endpoints
+@app.route('/api/repository/status', methods=['POST'])
 def get_repository_status():
     """Get detailed repository status (like svcs status)."""
     try:
@@ -542,6 +634,78 @@ def get_repository_status():
         }
         
         return jsonify({'success': True, 'data': status})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/repositories/status', methods=['POST'])
+def get_repositories_status():
+    """Get detailed repository status (alias for /api/repository/status)."""
+    # This is an alias for the singular version to match frontend API calls
+    return get_repository_status()
+
+@app.route('/api/repository/branches', methods=['POST'])
+def get_repository_branches():
+    """Get available git branches for a repository."""
+    try:
+        data = request.get_json()
+        repo_path = data.get('repository_path') or data.get('path')
+        
+        if not repo_path:
+            return jsonify({'success': False, 'error': 'Repository path required'}), 400
+        
+        # Check if repository has git initialized
+        repo_path_obj = Path(repo_path)
+        git_dir = repo_path_obj / '.git'
+        
+        if not git_dir.exists():
+            return jsonify({'success': False, 'error': 'Repository is not a git repository'}), 400
+        
+        # Get all available branches
+        try:
+            import subprocess
+            result = subprocess.run(["git", "branch", "-a"], 
+                                  cwd=repo_path, capture_output=True, text=True, check=True)
+            
+            # Parse branch names
+            available_branches = []
+            for line in result.stdout.split('\n'):
+                line = line.strip()
+                if not line:
+                    continue
+                
+                # Remove markers and prefixes
+                branch = line.replace('* ', '').replace('origin/', '')
+                
+                # Skip remote references that are not actual branches
+                if line.startswith('remotes/') and '->' in line:
+                    continue
+                if branch.startswith('remotes/'):
+                    continue
+                
+                available_branches.append(branch)
+            
+            # Remove duplicates and sort
+            available_branches = sorted(list(set(available_branches)))
+            
+            # Get current branch
+            try:
+                current_result = subprocess.run(['git', 'branch', '--show-current'], 
+                                              cwd=repo_path, capture_output=True, text=True)
+                current_branch = current_result.stdout.strip() if current_result.returncode == 0 else None
+            except:
+                current_branch = None
+            
+            return jsonify({
+                'success': True, 
+                'data': {
+                    'branches': available_branches,
+                    'current_branch': current_branch
+                }
+            })
+            
+        except subprocess.CalledProcessError as e:
+            return jsonify({'success': False, 'error': f'Failed to get branches: {e}'}), 500
+            
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
