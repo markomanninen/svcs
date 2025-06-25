@@ -1,0 +1,2344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVCS Dashboard - Repository-Local Architecture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .architecture-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 700px;
+        }
+
+        .sidebar {
+            background: #f8f9fa;
+            padding: 20px;
+            border-right: 1px solid #e9ecef;
+        }
+
+        .nav-section {
+            margin-bottom: 30px;
+        }
+
+        .nav-section h3 {
+            color: #495057;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 12px 15px;
+            margin: 5px 0;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            color: #495057;
+            text-decoration: none;
+            width: 100%;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: #007bff;
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .content-area {
+            padding: 30px;
+        }
+
+        .tool-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .tool-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .system-info {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .system-info h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .info-item .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .info-item .label {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-control, .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            color: #212529;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        }
+
+        .repository-list {
+            margin-bottom: 30px;
+        }
+
+        .repository-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .repository-card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .repository-card.selected {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+
+        .repo-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .repo-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .repo-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .repo-status.registered {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .repo-status.discovered {
+            background: #ffeaa7;
+            color: #856404;
+        }
+
+        .repo-info {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .repo-path {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin-top: 10px;
+        }
+
+        .result-container {
+            margin-top: 30px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .result-container h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .result-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+            margin: 15px 0;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #c3e6cb;
+            margin: 15px 0;
+        }
+
+        .event-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .event-type {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            margin-bottom: 8px;
+        }
+
+        .event-details {
+            color: #495057;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .event-meta {
+            color: #6c757d;
+            font-size: 0.8em;
+        }
+
+        .event-reasoning {
+            color: #495057;
+            font-size: 0.85em;
+            margin-top: 8px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-left: 3px solid #007bff;
+        }
+
+        .event-impact {
+            color: #495057;
+            font-size: 0.85em;
+            margin-top: 8px;
+            padding: 8px;
+            background: #fff3cd;
+            border-radius: 4px;
+            border-left: 3px solid #ffc107;
+        }
+
+        .search-info {
+            background: #e7f3ff;
+            border: 1px solid #b8daff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        .formatted-output {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        /* CI/CD Results Styling */
+        .ci-results {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+
+        .ci-results h4 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .ci-results h5 {
+            margin: 15px 0 10px 0;
+            color: #495057;
+            font-size: 1em;
+        }
+
+        .ci-results p {
+            margin-bottom: 8px;
+        }
+
+        .ci-results ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .ci-results li {
+            margin-bottom: 5px;
+        }
+
+        .status-success {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .status-warning {
+            color: #ffc107;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 SVCS Dashboard</h1>
+            <p>Semantic Version Control System</p>
+            <div class="architecture-badge">Repository-Local Architecture v2.0</div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="nav-section">
+                    <h3>Management</h3>
+                    <button class="nav-item active" onclick="showSection('repositories')">
+                        📁 Repositories
+                    </button>
+                    <button class="nav-item" onclick="showSection('system-status')">
+                        📊 System Status
+                    </button>
+                </div>
+                
+                <div class="nav-section">
+                    <h3>Analysis</h3>
+                    <button class="nav-item" onclick="showSection('semantic-search')">
+                        🔎 Semantic Search
+                    </button>
+                    <button class="nav-item" onclick="showSection('natural-query')">
+                        🤖 Natural Language
+                    </button>
+                    <button class="nav-item" onclick="showSection('evolution')">
+                        📈 Evolution Tracking
+                    </button>
+                    <button class="nav-item" onclick="showSection('analytics')">
+                        📋 Analytics
+                    </button>
+                    <button class="nav-item" onclick="showSection('quality')">
+                        ✅ Quality Analysis
+                    </button>
+                    <button class="nav-item" onclick="showSection('compare')">
+                        🔄 Branch Comparison
+                    </button>
+                </div>
+                
+                <div class="nav-section">
+                    <h3>CI/CD & Operations</h3>
+                    <button class="nav-item" onclick="showSection('ci-integration')">
+                        🚀 CI/CD Integration
+                    </button>
+                    <button class="nav-item" onclick="showSection('git-notes')">
+                        📝 Git Notes
+                    </button>
+                    <button class="nav-item" onclick="showSection('cleanup')">
+                        🧹 Repository Cleanup
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- System Status Section -->
+                <div id="system-status" class="tool-section">
+                    <h2>📊 System Status</h2>
+                    <div class="system-info">
+                        <h3>SVCS System Information</h3>
+                        <div class="info-grid" id="system-info-grid">
+                            <div class="loading">Loading system information...</div>
+                        </div>
+                    </div>
+                    <button class="btn" onclick="loadSystemStatus()">🔄 Refresh Status</button>
+                </div>
+
+                <!-- Repositories Section -->
+                <div id="repositories" class="tool-section active">
+                    <h2>📁 Repository Management</h2>
+                    
+                    <div class="form-group">
+                        <button class="btn" onclick="discoverRepositories()">🔍 Discover Repositories</button>
+                        <button class="btn btn-success" onclick="showAddRepositoryForm()">➕ Add Repository</button>
+                    </div>
+
+                    <!-- Add Repository Form (hidden by default) -->
+                    <div id="add-repo-form" style="display: none;">
+                        <div class="form-group">
+                            <label for="repo-path">Repository Path:</label>
+                            <input type="text" id="repo-path" class="form-control" placeholder="/path/to/your/repository">
+                        </div>
+                        <div class="form-group">
+                            <label for="repo-name">Repository Name (optional):</label>
+                            <input type="text" id="repo-name" class="form-control" placeholder="My Project">
+                        </div>
+                        <button class="btn" onclick="registerRepository()">📝 Register Repository</button>
+                        <button class="btn btn-warning" onclick="initializeRepository()">🚀 Initialize SVCS</button>
+                        <button class="btn btn-danger" onclick="hideAddRepositoryForm()">❌ Cancel</button>
+                    </div>
+
+                    <div id="repositories-list" class="repository-list">
+                        <div class="loading">Loading repositories...</div>
+                    </div>
+                </div>
+
+                <!-- Semantic Search Section -->
+                <div id="semantic-search" class="tool-section">
+                    <h2>🔎 Semantic Search</h2>
+                    
+                    <div class="form-group">
+                        <label for="search-repo">Repository:</label>
+                        <select id="search-repo" class="form-select">
+                            <option value="">Select a repository...</option>
+                        </select>
+                    </div>
+
+                    <!-- Basic Search Options -->
+                    <div class="grid-3">
+                        <div class="form-group">
+                            <label for="search-limit">Limit:</label>
+                            <input type="number" id="search-limit" class="form-control" value="20" min="1" max="1000">
+                        </div>
+                        <div class="form-group">
+                            <label for="search-order-by">Order By:</label>
+                            <select id="search-order-by" class="form-select">
+                                <option value="timestamp">Timestamp</option>
+                                <option value="confidence">Confidence</option>
+                                <option value="event_type">Event Type</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="search-order-desc">Order:</label>
+                            <select id="search-order-desc" class="form-select">
+                                <option value="true">Descending</option>
+                                <option value="false">Ascending</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Filters Toggle -->
+                    <div class="form-group">
+                        <button type="button" class="btn btn-secondary" onclick="toggleAdvancedFilters()">
+                            ⚙️ Advanced Filters
+                        </button>
+                    </div>
+
+                    <!-- Advanced Filters (Initially Hidden) -->
+                    <div id="advanced-filters" style="display: none; border: 1px solid #444; padding: 15px; margin: 10px 0; border-radius: 5px;">
+                        <h4>🔧 Advanced Search Options</h4>
+                        
+                        <!-- Event Types & Author -->
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label for="search-event-types">Event Types (comma-separated):</label>
+                                <input type="text" id="search-event-types" class="form-control" 
+                                       placeholder="function_created,class_modified,complexity_change">
+                                <small class="help-text">
+                                    Common types: function_created, function_modified, function_removed, 
+                                    class_created, class_modified, complexity_change, performance_optimization
+                                </small>
+                            </div>
+                            <div class="form-group">
+                                <label for="search-author">Author:</label>
+                                <input type="text" id="search-author" class="form-control" 
+                                       placeholder="john.doe">
+                                <small class="help-text">Filter by commit author (partial match)</small>
+                            </div>
+                        </div>
+
+                        <!-- Confidence Range -->
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label for="search-min-confidence">Min Confidence:</label>
+                                <input type="number" id="search-min-confidence" class="form-control" 
+                                       min="0" max="1" step="0.1" placeholder="0.0">
+                                <small class="help-text">Minimum confidence score (0.0 - 1.0)</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="search-max-confidence">Max Confidence:</label>
+                                <input type="number" id="search-max-confidence" class="form-control" 
+                                       min="0" max="1" step="0.1" placeholder="1.0">
+                                <small class="help-text">Maximum confidence score (0.0 - 1.0)</small>
+                            </div>
+                        </div>
+
+                        <!-- Date Range -->
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label for="search-since-date">Since Date:</label>
+                                <input type="text" id="search-since-date" class="form-control" 
+                                       placeholder="2024-01-01 or '7 days ago'">
+                                <small class="help-text">Start date (YYYY-MM-DD or relative like "7 days ago")</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="search-until-date">Until Date:</label>
+                                <input type="text" id="search-until-date" class="form-control" 
+                                       placeholder="2024-12-31 or '1 day ago'">
+                                <small class="help-text">End date (YYYY-MM-DD or relative like "1 day ago")</small>
+                            </div>
+                        </div>
+
+                        <!-- Location Pattern & Layers -->
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label for="search-location-pattern">Location Pattern:</label>
+                                <input type="text" id="search-location-pattern" class="form-control" 
+                                       placeholder="src/main.py or *.js">
+                                <small class="help-text">File path pattern to match</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="search-layers">Analysis Layers (comma-separated):</label>
+                                <input type="text" id="search-layers" class="form-control" 
+                                       placeholder="core,5a,5b">
+                                <small class="help-text">Analysis layers: core, 5a, 5b</small>
+                            </div>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label for="search-offset">Offset:</label>
+                                <input type="number" id="search-offset" class="form-control" 
+                                       value="0" min="0">
+                                <small class="help-text">Results offset for pagination</small>
+                            </div>
+                            <div class="form-group">
+                                <!-- Spacer -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search Buttons -->
+                    <div class="form-group">
+                        <button class="btn" onclick="searchEventsAdvanced()">🔍 Advanced Search</button>
+                        <button class="btn btn-info" onclick="searchEventsBasic()">🔍 Basic Search</button>
+                        <button class="btn btn-success" onclick="getRecentActivity()">⏰ Recent Activity</button>
+                        <button class="btn btn-warning" onclick="searchSemanticPatterns()">🎯 Pattern Search</button>
+                        <button class="btn btn-secondary" onclick="clearSearchFilters()">🧹 Clear Filters</button>
+                    </div>
+
+                    <!-- Pattern Search (Initially Hidden) -->
+                    <div id="pattern-search" style="display: none; border: 1px solid #ffc107; padding: 15px; margin: 10px 0; border-radius: 5px; background: #fff3cd;">
+                        <h4>🎯 Semantic Pattern Search</h4>
+                        <p class="help-text">Search for AI-detected semantic patterns like performance optimizations, architecture changes, etc.</p>
+                        
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label for="pattern-type">Pattern Type:</label>
+                                <select id="pattern-type" class="form-control">
+                                    <option value="">Select pattern type...</option>
+                                    <option value="performance">Performance Optimizations</option>
+                                    <option value="architecture">Architecture Changes</option>
+                                    <option value="error_handling">Error Handling</option>
+                                    <option value="readability">Readability Improvements</option>
+                                    <option value="security">Security Enhancements</option>
+                                    <option value="refactoring">Refactoring</option>
+                                    <option value="testing">Testing Improvements</option>
+                                    <option value="documentation">Documentation</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="pattern-confidence">Min Confidence:</label>
+                                <input type="number" id="pattern-confidence" class="form-control" 
+                                       value="0.7" min="0" max="1" step="0.1">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <button class="btn btn-warning" onclick="executePatternSearch()">🔍 Search Patterns</button>
+                            <button class="btn btn-secondary" onclick="hidePatternSearch()">❌ Cancel</button>
+                        </div>
+                    </div>
+
+                    <div id="search-results" class="result-container" style="display: none;">
+                        <h3>Search Results</h3>
+                        <div id="search-results-content" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- Natural Language Query Section -->
+                <div id="natural-query" class="tool-section">
+                    <h2>🤖 Natural Language Query</h2>
+                    
+                    <div class="form-group">
+                        <label for="nlq-repo">Repository:</label>
+                        <select id="nlq-repo" class="form-select">
+                            <option value="">Select a repository...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="natural-query-input">Ask a question about your code:</label>
+                        <textarea id="natural-query-input" class="form-control" rows="3" 
+                                  placeholder="Examples: 'show performance optimizations', 'what changed in main branch', 'find error handling patterns'"></textarea>
+                    </div>
+
+                    <button class="btn" onclick="executeNaturalQuery()">🤖 Ask Question</button>
+
+                    <div id="nlq-results" class="result-container" style="display: none;">
+                        <h3>Response</h3>
+                        <div id="nlq-results-content" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- Evolution Tracking Section -->
+                <div id="evolution" class="tool-section">
+                    <h2>📈 Evolution Tracking</h2>
+                    
+                    <div class="form-group">
+                        <label for="evolution-repo">Repository:</label>
+                        <select id="evolution-repo" class="form-select">
+                            <option value="">Select a repository...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="node-id">Node ID (e.g., func:function_name, class:ClassName):</label>
+                        <input type="text" id="node-id" class="form-control" placeholder="func:process_data">
+                    </div>
+
+                    <button class="btn" onclick="trackEvolution()">📈 Track Evolution</button>
+
+                    <div id="evolution-results" class="result-container" style="display: none;">
+                        <h3>Evolution History</h3>
+                        <div id="evolution-results-content" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- Analytics Section -->
+                <div id="analytics" class="tool-section">
+                    <h2>📋 Analytics</h2>
+                    
+                    <div class="form-group">
+                        <label for="analytics-repo">Repository:</label>
+                        <select id="analytics-repo" class="form-select">
+                            <option value="">Select a repository...</option>
+                        </select>
+                    </div>
+
+                    <button class="btn" onclick="generateAnalytics()">📊 Generate Analytics</button>
+
+                    <div id="analytics-results" class="result-container" style="display: none;">
+                        <h3>Analytics Report</h3>
+                        <div id="analytics-results-content" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- Quality Analysis Section -->
+                <div id="quality" class="tool-section">
+                    <h2>✅ Quality Analysis</h2>
+                    
+                    <div class="form-group">
+                        <label for="quality-repo">Repository:</label>
+                        <select id="quality-repo" class="form-select">
+                            <option value="">Select a repository...</option>
+                        </select>
+                    </div>
+
+                    <button class="btn" onclick="analyzeQuality()">🔍 Analyze Quality</button>
+
+                    <div id="quality-results" class="result-container" style="display: none;">
+                        <h3>Quality Metrics</h3>
+                        <div id="quality-results-content" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- Branch Comparison Section -->
+                <div id="compare" class="tool-section">
+                    <h2>🔄 Branch Comparison</h2>
+                    
+                    <div class="form-group">
+                        <label for="compare-repo">Repository:</label>
+                        <select id="compare-repo" class="form-select">
+                            <option value="">Select a repository...</option>
+                        </select>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="branch1">Branch 1:</label>
+                            <input type="text" id="branch1" class="form-control" placeholder="main" value="main">
+                        </div>
+                        <div class="form-group">
+                            <label for="branch2">Branch 2:</label>
+                            <input type="text" id="branch2" class="form-control" placeholder="develop">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="compare-limit">Limit per branch:</label>
+                        <input type="number" id="compare-limit" class="form-control" value="10" min="1" max="100">
+                    </div>
+
+                    <button class="btn" onclick="compareBranches()">🔄 Compare Branches</button>
+
+                    <div id="compare-results" class="result-container" style="display: none;">
+                        <h3>Branch Comparison</h3>
+                        <div id="compare-results-content" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- CI/CD Integration Section -->
+                <div id="ci-integration" class="tool-section">
+                    <h2>🚀 CI/CD Integration</h2>
+                    
+                    <!-- Documentation Panel -->
+                    <div class="info-panel" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #17a2b8;">
+                        <h4>📖 How to Use CI/CD Integration</h4>
+                        <div class="grid-2" style="gap: 20px;">
+                            <div>
+                                <h5>🔍 PR Analysis</h5>
+                                <ul style="margin: 10px 0; padding-left: 20px; font-size: 14px;">
+                                    <li><strong>Purpose:</strong> Analyze semantic changes in a pull request</li>
+                                    <li><strong>Usage:</strong> Compare current branch against target branch</li>
+                                    <li><strong>Example:</strong> feature-branch → main</li>
+                                    <li><strong>Results:</strong> Shows what semantic changes are being introduced</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5>✅ Quality Gate</h5>
+                                <ul style="margin: 10px 0; padding-left: 20px; font-size: 14px;">
+                                    <li><strong>Purpose:</strong> Check if code meets quality standards</li>
+                                    <li><strong>Normal Mode:</strong> At least 2 out of 3 checks must pass</li>
+                                    <li><strong>Strict Mode:</strong> ALL checks must pass</li>
+                                    <li><strong>Analysis:</strong> Focuses on changes since target branch</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 4px;">
+                            <h5>🌿 Branch Setup Instructions</h5>
+                            <p style="margin: 5px 0; font-size: 14px;"><strong>To switch branches:</strong></p>
+                            <code style="background: #fff; padding: 2px 6px; border-radius: 3px; font-size: 13px;">cd /path/to/your/repo && git checkout your-branch-name</code>
+                            <p style="margin: 10px 0 5px 0; font-size: 14px;"><strong>Common scenarios:</strong></p>
+                            <ul style="margin: 5px 0; padding-left: 20px; font-size: 13px;">
+                                <li><strong>Feature PR:</strong> Switch to feature branch, set target to "main"</li>
+                                <li><strong>Main branch quality:</strong> Stay on main, set target to "main" (analyzes recent commits)</li>
+                                <li><strong>Release branch:</strong> Switch to release branch, set target to "main" or "develop"</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ci-repo">Repository:</label>
+                        <select id="ci-repo" class="form-select">
+                            <option value="">Select a repository...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="target-branch">Target Branch:</label>
+                        <input type="text" id="target-branch" class="form-control" placeholder="main" value="main">
+                        <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
+                            💡 Tip: This is the branch you want to compare against (usually "main", "master", or "develop")
+                        </small>
+                    </div>
+
+                    <div class="grid-2">
+                        <div>
+                            <h3>📊 PR Analysis</h3>
+                            <p style="font-size: 13px; color: #666; margin: 10px 0;">
+                                Analyzes semantic changes between current branch and target branch.
+                            </p>
+                            <button class="btn" onclick="runPRAnalysis()">📊 Analyze PR Impact</button>
+                        </div>
+                        <div>
+                            <h3>✅ Quality Gate</h3>
+                            <p style="font-size: 13px; color: #666; margin: 10px 0;">
+                                Checks code quality based on semantic analysis.
+                            </p>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="strict-mode"> Strict Mode
+                                </label>
+                                <small style="color: #666; font-size: 11px; display: block; margin-left: 20px;">
+                                    (Requires ALL quality checks to pass)
+                                </small>
+                            </div>
+                            <button class="btn" onclick="runQualityGate()">✅ Run Quality Gate</button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions Panel -->
+                    <div style="background: #f1f3f4; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                        <h4>⚡ Quick Actions</h4>
+                        <div class="grid-3" style="gap: 10px;">
+                            <button class="btn btn-secondary" onclick="refreshBranchInfo()" style="font-size: 12px; padding: 8px 12px;">
+                                🔄 Refresh Branch Info
+                            </button>
+                            <button class="btn btn-secondary" onclick="showAvailableBranches()" style="font-size: 12px; padding: 8px 12px;">
+                                🌿 Show Available Branches
+                            </button>
+                            <button class="btn btn-secondary" onclick="showCurrentBranch()" style="font-size: 12px; padding: 8px 12px;">
+                                📍 Show Current Branch
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="ci-results" class="result-container" style="display: none;">
+                        <h3>CI/CD Results</h3>
+                        <div id="ci-results-content" class="result-content"></div>
+                    </div>
+                    
+                    <!-- Branch Info Panel -->
+                    <div id="branch-info" class="result-container" style="display: none; margin-top: 15px;">
+                        <h4>🌿 Branch Information</h4>
+                        <div id="branch-info-content" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- Git Notes Section -->
+                <div id="git-notes" class="tool-section">
+                    <h2>📝 Git Notes Management</h2>
+                    
+                    <div class="form-group">
+                        <label for="notes-repo">Repository:</label>
+                        <select id="notes-repo" class="form-select">
+                            <option value="">Select a repository...</option>
+                        </select>
+                    </div>
+
+                    <div class="grid-3">
+                        <div>
+                            <h3>Sync Notes</h3>
+                            <button class="btn" onclick="syncNotes()">🔄 Sync to Remote</button>
+                        </div>
+                        <div>
+                            <h3>Fetch Notes</h3>
+                            <button class="btn" onclick="fetchNotes()">📥 Fetch from Remote</button>
+                        </div>
+                        <div>
+                            <h3>Show Note</h3>
+                            <div class="form-group">
+                                <input type="text" id="commit-hash" class="form-control" placeholder="commit hash or HEAD">
+                            </div>
+                            <button class="btn" onclick="showNote()">📝 Show Note</button>
+                        </div>
+                    </div>
+
+                    <div id="notes-results" class="result-container" style="display: none;">
+                        <h3>Git Notes Results</h3>
+                        <div id="notes-results-content" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- Repository Cleanup Section -->
+                <div id="cleanup" class="tool-section">
+                    <h2>🧹 Repository Cleanup</h2>
+                    
+                    <div class="form-group">
+                        <label for="cleanup-repo">Repository:</label>
+                        <select id="cleanup-repo" class="form-select">
+                            <option value="">Select a repository...</option>
+                        </select>
+                    </div>
+
+                    <div class="grid-3">
+                        <div>
+                            <h3>Orphaned Data</h3>
+                            <button class="btn" onclick="cleanupOrphanedData()">🗑️ Clean Orphaned</button>
+                        </div>
+                        <div>
+                            <h3>Unreachable Commits</h3>
+                            <button class="btn" onclick="cleanupUnreachableCommits()">🔥 Clean Unreachable</button>
+                        </div>
+                        <div>
+                            <h3>Database Stats</h3>
+                            <button class="btn" onclick="getDatabaseStats()">📊 Show Stats</button>
+                        </div>
+                    </div>
+
+                    <div id="cleanup-results" class="result-container" style="display: none;">
+                        <h3>Cleanup Results</h3>
+                        <div id="cleanup-results-content" class="result-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let repositories = [];
+        let selectedRepository = null;
+        let systemStatus = {};
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSystemStatus();
+            discoverRepositories();
+        });
+
+        // Navigation
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.tool-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Add active class to clicked nav item
+            event.target.classList.add('active');
+            
+            // Update repository selects when switching to analysis sections
+            if (['semantic-search', 'evolution', 'analytics', 'quality', 'compare'].includes(sectionId)) {
+                updateRepositorySelects();
+            }
+        }
+
+        // API Communication
+        async function callAPI(endpoint, data = null) {
+            console.log(`Calling API: ${endpoint}`, data);
+            
+            try {
+                const options = {
+                    method: data ? 'POST' : 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(endpoint, options);
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'API call failed');
+                }
+                
+                return result.data || result;
+            } catch (error) {
+                console.error(`API call failed:`, error);
+                throw error;
+            }
+        }
+
+        // System Status
+        async function loadSystemStatus() {
+            try {
+                // Clear any existing capabilities section
+                const existingCapabilities = document.querySelector('.system-info').querySelector('div[style*="margin-top: 20px"]');
+                if (existingCapabilities) {
+                    existingCapabilities.remove();
+                }
+                
+                const status = await callAPI('/api/system/status');
+                systemStatus = status;
+                displaySystemStatus(status);
+            } catch (error) {
+                document.getElementById('system-info-grid').innerHTML = 
+                    `<div class="error">Failed to load system status: ${error.message}</div>`;
+            }
+        }
+
+        function displaySystemStatus(status) {
+            const grid = document.getElementById('system-info-grid');
+            
+            // Format capabilities list for display
+            const capabilitiesList = status.capabilities.map(cap => 
+                cap.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+            ).join('<br>• ');
+            
+            grid.innerHTML = `
+                <div class="info-item">
+                    <div class="value">${status.repositories.registered}</div>
+                    <div class="label">Registered Repos</div>
+                </div>
+                <div class="info-item">
+                    <div class="value">${status.repositories.discovered}</div>
+                    <div class="label">Discovered Repos</div>
+                </div>
+                <div class="info-item">
+                    <div class="value">${status.repo_local_available ? '✅' : '❌'}</div>
+                    <div class="label">Repo Local Available</div>
+                </div>
+            `;
+            
+            // Add capabilities as a separate section below the grid
+            const capabilitiesSection = document.createElement('div');
+            capabilitiesSection.style.cssText = `
+                margin-top: 20px;
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                border: 1px solid #dee2e6;
+            `;
+            capabilitiesSection.innerHTML = `
+                <h4 style="color: #2c3e50; margin-bottom: 15px; display: flex; align-items: center;">
+                    <span style="background: #007bff; color: white; padding: 3px 8px; border-radius: 12px; font-size: 0.8em; margin-right: 10px;">${status.capabilities.length}</span>
+                    System Capabilities
+                </h4>
+                <div style="
+                    columns: 2; 
+                    column-gap: 20px; 
+                    font-size: 0.9em; 
+                    line-height: 1.6;
+                    color: #495057;
+                ">
+                    • ${capabilitiesList}
+                </div>
+            `;
+            
+            // Insert after the grid
+            grid.parentNode.appendChild(capabilitiesSection);
+        }
+
+        // Repository Management
+        async function discoverRepositories() {
+            try {
+                document.getElementById('repositories-list').innerHTML = '<div class="loading">Discovering repositories...</div>';
+                
+                const result = await callAPI('/api/repositories/discover');
+                repositories = result.repositories;
+                displayRepositories(repositories);
+                updateRepositorySelects();
+            } catch (error) {
+                document.getElementById('repositories-list').innerHTML = 
+                    `<div class="error">Failed to discover repositories: ${error.message}</div>`;
+            }
+        }
+
+        function displayRepositories(repos) {
+            const container = document.getElementById('repositories-list');
+            
+            if (repos.length === 0) {
+                container.innerHTML = `
+                    <div class="no-repositories">
+                        <h3>No repositories found</h3>
+                        <p>Click "Add Repository" to register a new SVCS repository</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = repos.map(repo => `
+                <div class="repository-card ${repo.registered ? 'selected' : ''}" onclick="selectRepository('${repo.path}')">
+                    <div class="repo-header">
+                        <div class="repo-name">${repo.name}</div>
+                        <div class="repo-status ${repo.registered ? 'registered' : 'discovered'}">
+                            ${repo.registered ? 'Registered' : 'Discovered'}
+                        </div>
+                    </div>
+                    <div class="repo-info">
+                        Branch: ${repo.branch || 'unknown'} | 
+                        Events: ${repo.event_count || 0} | 
+                        Last Activity: ${repo.last_activity || 'unknown'}
+                    </div>
+                    <div class="repo-path">${repo.path}</div>
+                    <div style="margin-top: 15px;">
+                        ${!repo.registered ? `<button class="btn btn-success" onclick="event.stopPropagation(); registerRepositoryPath('${repo.path}')">📝 Register</button>` : ''}
+                        <button class="btn btn-warning" onclick="event.stopPropagation(); getRepositoryStatus('${repo.path}')">📊 Status</button>
+                        ${repo.registered ? `<button class="btn btn-danger" onclick="event.stopPropagation(); unregisterRepository('${repo.path}')">🗑️ Unregister</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateRepositorySelects() {
+            const selects = [
+                'search-repo', 'evolution-repo', 'analytics-repo', 
+                'quality-repo', 'compare-repo', 'nlq-repo', 'ci-repo', 'notes-repo', 'cleanup-repo'
+            ];
+            
+            const registeredRepos = repositories.filter(repo => repo.registered);
+            
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    select.innerHTML = '<option value="">Select a repository...</option>' +
+                        registeredRepos.map(repo => 
+                            `<option value="${repo.path}">${repo.name} (${repo.path})</option>`
+                        ).join('');
+                }
+            });
+        }
+
+        function selectRepository(path) {
+            selectedRepository = repositories.find(repo => repo.path === path);
+            console.log('Selected repository:', selectedRepository);
+        }
+
+        function showAddRepositoryForm() {
+            document.getElementById('add-repo-form').style.display = 'block';
+        }
+
+        function hideAddRepositoryForm() {
+            document.getElementById('add-repo-form').style.display = 'none';
+            document.getElementById('repo-path').value = '';
+            document.getElementById('repo-name').value = '';
+        }
+
+        async function registerRepository() {
+            const path = document.getElementById('repo-path').value;
+            const name = document.getElementById('repo-name').value;
+            
+            if (!path) {
+                alert('Please enter a repository path');
+                return;
+            }
+            
+            try {
+                await callAPI('/api/repositories/register', {
+                    path: path,
+                    name: name || undefined
+                });
+                
+                showSuccess('Repository registered successfully!');
+                hideAddRepositoryForm();
+                discoverRepositories();
+            } catch (error) {
+                showError(`Failed to register repository: ${error.message}`);
+            }
+        }
+
+        async function registerRepositoryPath(path) {
+            try {
+                await callAPI('/api/repositories/register', { path: path });
+                showSuccess('Repository registered successfully!');
+                discoverRepositories();
+            } catch (error) {
+                showError(`Failed to register repository: ${error.message}`);
+            }
+        }
+
+        async function initializeRepository() {
+            const path = document.getElementById('repo-path').value;
+            
+            if (!path) {
+                alert('Please enter a repository path');
+                return;
+            }
+            
+            try {
+                const result = await callAPI('/api/repositories/initialize', { path: path });
+                showSuccess('Repository initialized successfully!');
+                hideAddRepositoryForm();
+                discoverRepositories();
+            } catch (error) {
+                showError(`Failed to initialize repository: ${error.message}`);
+            }
+        }
+
+        async function unregisterRepository(path) {
+            if (!confirm('Are you sure you want to unregister this repository?')) {
+                return;
+            }
+            
+            try {
+                await callAPI('/api/repositories/unregister', { path: path });
+                showSuccess('Repository unregistered successfully!');
+                discoverRepositories();
+            } catch (error) {
+                showError(`Failed to unregister repository: ${error.message}`);
+            }
+        }
+
+        async function getRepositoryStatus(path) {
+            try {
+                const status = await callAPI('/api/repositories/status', { repository_path: path });
+                
+                if (status) {
+                    const statusText = `
+Repository Status: ${path}
+
+• Repository Name: ${status.repository_name}
+• Git Initialized: ${status.git_initialized ? '✅ Yes' : '❌ No'}
+• SVCS Initialized: ${status.svcs_initialized ? '✅ Yes' : '❌ No'}
+• Current Branch: ${status.current_branch}
+• Database Exists: ${status.database_exists ? '✅ Yes' : '❌ No'}
+• Recent Events (7 days): ${status.recent_events_count}
+• Registered in Registry: ${status.registered_in_central_registry ? '✅ Yes' : '❌ No'}
+                    `.trim();
+                    
+                    // Create a modal-like display for status
+                    showStatusModal('Repository Status', statusText);
+                } else {
+                    showError(`Failed to get repository status: No data returned`);
+                }
+            } catch (error) {
+                showError(`Failed to get repository status: ${error.message}`);
+            }
+        }
+
+        function showStatusModal(title, content) {
+            // Remove any existing status modal
+            const existingModal = document.getElementById('status-modal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Create status modal
+            const modal = document.createElement('div');
+            modal.id = 'status-modal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            `;
+            
+            modal.innerHTML = `
+                <div style="
+                    background: white;
+                    border-radius: 12px;
+                    padding: 30px;
+                    max-width: 600px;
+                    max-height: 80vh;
+                    overflow-y: auto;
+                    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+                ">
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 20px;
+                        border-bottom: 1px solid #e9ecef;
+                        padding-bottom: 15px;
+                    ">
+                        <h3 style="margin: 0; color: #2c3e50;">${title}</h3>
+                        <button onclick="closeStatusModal()" style="
+                            background: #dc3545;
+                            color: white;
+                            border: none;
+                            border-radius: 4px;
+                            padding: 8px 12px;
+                            cursor: pointer;
+                            font-size: 14px;
+                        ">✕ Close</button>
+                    </div>
+                    <pre style="
+                        background: #f8f9fa;
+                        padding: 20px;
+                        border-radius: 8px;
+                        font-family: 'Courier New', monospace;
+                        font-size: 14px;
+                        line-height: 1.6;
+                        margin: 0;
+                        white-space: pre-wrap;
+                    ">${content}</pre>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeStatusModal();
+                }
+            });
+        }
+
+        function closeStatusModal() {
+            const modal = document.getElementById('status-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Semantic Search
+        // Advanced Search Functions
+        function toggleAdvancedFilters() {
+            const filtersDiv = document.getElementById('advanced-filters');
+            if (filtersDiv.style.display === 'none' || filtersDiv.style.display === '') {
+                filtersDiv.style.display = 'block';
+            } else {
+                filtersDiv.style.display = 'none';
+            }
+        }
+
+        function clearSearchFilters() {
+            // Clear basic filters
+            document.getElementById('search-limit').value = '20';
+            document.getElementById('search-order-by').value = 'timestamp';
+            document.getElementById('search-order-desc').value = 'true';
+            
+            // Clear advanced filters
+            document.getElementById('search-event-types').value = '';
+            document.getElementById('search-author').value = '';
+            document.getElementById('search-min-confidence').value = '';
+            document.getElementById('search-max-confidence').value = '';
+            document.getElementById('search-since-date').value = '';
+            document.getElementById('search-until-date').value = '';
+            document.getElementById('search-location-pattern').value = '';
+            document.getElementById('search-layers').value = '';
+            document.getElementById('search-offset').value = '0';
+            
+            // Clear results
+            document.getElementById('search-results').style.display = 'none';
+        }
+
+        async function searchEventsBasic() {
+            const repoPath = document.getElementById('search-repo').value;
+            const limit = document.getElementById('search-limit').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository');
+                return;
+            }
+            
+            try {
+                const params = {
+                    repository_path: repoPath,
+                    limit: parseInt(limit)
+                };
+                
+                const result = await callAPI('/api/semantic/search_events', params);
+                displaySearchResults(result);
+            } catch (error) {
+                showError(`Search failed: ${error.message}`);
+            }
+        }
+
+        async function searchEventsAdvanced() {
+            const repoPath = document.getElementById('search-repo').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository');
+                return;
+            }
+            
+            try {
+                // Gather all search parameters
+                const params = {
+                    repository_path: repoPath,
+                    limit: parseInt(document.getElementById('search-limit').value) || 20,
+                    order_by: document.getElementById('search-order-by').value || 'timestamp',
+                    order_desc: document.getElementById('search-order-desc').value === 'true',
+                    offset: parseInt(document.getElementById('search-offset').value) || 0
+                };
+                
+                // Add advanced filters if they have values
+                const eventTypes = document.getElementById('search-event-types').value.trim();
+                if (eventTypes) {
+                    params.event_types = eventTypes.split(',').map(s => s.trim()).filter(s => s);
+                }
+                
+                const author = document.getElementById('search-author').value.trim();
+                if (author) params.author = author;
+                
+                const minConfidence = document.getElementById('search-min-confidence').value;
+                if (minConfidence) params.min_confidence = parseFloat(minConfidence);
+                
+                const maxConfidence = document.getElementById('search-max-confidence').value;
+                if (maxConfidence) params.max_confidence = parseFloat(maxConfidence);
+                
+                const sinceDate = document.getElementById('search-since-date').value.trim();
+                if (sinceDate) params.since_date = sinceDate;
+                
+                const untilDate = document.getElementById('search-until-date').value.trim();
+                if (untilDate) params.until_date = untilDate;
+                
+                const locationPattern = document.getElementById('search-location-pattern').value.trim();
+                if (locationPattern) params.location_pattern = locationPattern;
+                
+                const layers = document.getElementById('search-layers').value.trim();
+                if (layers) {
+                    params.layers = layers.split(',').map(s => s.trim()).filter(s => s);
+                }
+                
+                const result = await callAPI('/api/semantic/search_advanced', params);
+                displayAdvancedSearchResults(result);
+            } catch (error) {
+                showError(`Advanced search failed: ${error.message}`);
+            }
+        }
+
+        async function searchEvents() {
+            // Keep this for backwards compatibility, but redirect to basic search
+            await searchEventsBasic();
+        }
+
+        async function getRecentActivity() {
+            const repoPath = document.getElementById('search-repo').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository');
+                return;
+            }
+            
+            try {
+                const result = await callAPI('/api/semantic/recent_activity', {
+                    repository_path: repoPath,
+                    days: 7,
+                    limit: 20
+                });
+                displaySearchResults(result);
+            } catch (error) {
+                showError(`Failed to get recent activity: ${error.message}`);
+            }
+        }
+
+        function displaySearchResults(result) {
+            const container = document.getElementById('search-results');
+            const content = document.getElementById('search-results-content');
+            
+            if (result.events && result.events.length > 0) {
+                content.innerHTML = result.events.map(event => `
+                    <div class="event-item">
+                        <div class="event-type">${event.event_type || 'unknown'}</div>
+                        <div class="event-details">${event.details || 'No details available'}</div>
+                        <div class="event-meta">
+                            Location: ${event.location || 'unknown'} | 
+                            Commit: ${event.commit_hash ? event.commit_hash.substring(0, 8) : 'unknown'} |
+                            Time: ${event.created_at ? new Date(event.created_at * 1000).toLocaleString() : 'unknown'}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                content.innerHTML = '<div class="no-repositories">No events found</div>';
+            }
+            
+            container.style.display = 'block';
+        }
+
+        function displayAdvancedSearchResults(result) {
+            const container = document.getElementById('search-results');
+            const content = document.getElementById('search-results-content');
+            
+            // Handle different result formats
+            let events = [];
+            let searchInfo = '';
+            
+            if (result.results) {
+                if (result.results.formatted_output) {
+                    // If we have formatted output, display it
+                    content.innerHTML = `
+                        <div class="search-info">
+                            <strong>Search Parameters:</strong> ${JSON.stringify(result.search_params, null, 2)}
+                        </div>
+                        <pre class="formatted-output">${result.results.formatted_output}</pre>
+                    `;
+                    container.style.display = 'block';
+                    return;
+                } else if (result.results.events) {
+                    events = result.results.events;
+                } else if (Array.isArray(result.results)) {
+                    events = result.results;
+                }
+                
+                searchInfo = `
+                    <div class="search-info">
+                        <strong>Advanced Search Results</strong> - Found ${events.length} events
+                        <details style="margin-top: 10px;">
+                            <summary style="cursor: pointer; color: #4CAF50;">View Search Parameters</summary>
+                            <pre style="background: #333; padding: 10px; margin-top: 5px; border-radius: 3px; font-size: 0.9em;">${JSON.stringify(result.search_params, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+            } else if (result.events) {
+                events = result.events;
+            }
+            
+            if (events && events.length > 0) {
+                content.innerHTML = searchInfo + events.map(event => `
+                    <div class="event-item">
+                        <div class="event-type">${event.event_type || 'unknown'}</div>
+                        <div class="event-details">${event.details || 'No details available'}</div>
+                        <div class="event-meta">
+                            Location: ${event.location || 'unknown'} | 
+                            Confidence: ${event.confidence ? event.confidence.toFixed(2) : 'N/A'} |
+                            Layer: ${event.layer || 'N/A'} |
+                            Author: ${event.author || 'N/A'} |
+                            Commit: ${event.commit_hash ? event.commit_hash.substring(0, 8) : 'unknown'} |
+                            Time: ${event.created_at ? new Date(event.created_at * 1000).toLocaleString() : 
+                                   event.readable_date ? event.readable_date : 'unknown'}
+                        </div>
+                        ${event.reasoning ? `<div class="event-reasoning"><strong>Reasoning:</strong> ${event.reasoning}</div>` : ''}
+                        ${event.impact ? `<div class="event-impact"><strong>Impact:</strong> ${event.impact}</div>` : ''}
+                    </div>
+                `).join('');
+            } else {
+                content.innerHTML = searchInfo + '<div class="no-repositories">No events found</div>';
+            }
+            
+            container.style.display = 'block';
+        }
+
+        // Evolution Tracking
+        async function trackEvolution() {
+            const repoPath = document.getElementById('evolution-repo').value;
+            const nodeId = document.getElementById('node-id').value;
+            
+            if (!repoPath || !nodeId) {
+                alert('Please select a repository and enter a node ID');
+                return;
+            }
+            
+            try {
+                const result = await callAPI('/api/semantic/evolution', {
+                    repository_path: repoPath,
+                    node_id: nodeId
+                });
+                
+                const container = document.getElementById('evolution-results');
+                const content = document.getElementById('evolution-results-content');
+                
+                if (result.evolution && result.evolution.length > 0) {
+                    content.innerHTML = `
+                        <div><strong>Node:</strong> ${result.node_id}</div>
+                        <div><strong>Total Events:</strong> ${result.total}</div>
+                        <hr style="margin: 15px 0;">
+                        ${result.evolution.map(event => `
+                            <div class="event-item">
+                                <div class="event-type">${event.event_type || 'unknown'}</div>
+                                <div class="event-details">${event.details || 'No details available'}</div>
+                                <div class="event-meta">
+                                    Commit: ${event.commit_hash ? event.commit_hash.substring(0, 8) : 'unknown'} |
+                                    Time: ${event.created_at ? new Date(event.created_at * 1000).toLocaleString() : 'unknown'}
+                                </div>
+                            </div>
+                        `).join('')}
+                    `;
+                } else {
+                    content.innerHTML = '<div class="no-repositories">No evolution events found for this node</div>';
+                }
+                
+                container.style.display = 'block';
+            } catch (error) {
+                showError(`Evolution tracking failed: ${error.message}`);
+            }
+        }
+
+        // Analytics
+        async function generateAnalytics() {
+            const repoPath = document.getElementById('analytics-repo').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository');
+                return;
+            }
+            
+            try {
+                const result = await callAPI('/api/analytics/generate', {
+                    repository_path: repoPath
+                });
+                
+                showResult('Analytics Report', JSON.stringify(result.analytics, null, 2), 'analytics-results');
+            } catch (error) {
+                showError(`Analytics generation failed: ${error.message}`);
+            }
+        }
+
+        // Quality Analysis
+        async function analyzeQuality() {
+            const repoPath = document.getElementById('quality-repo').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository');
+                return;
+            }
+            
+            try {
+                const result = await callAPI('/api/quality/analyze', {
+                    repository_path: repoPath
+                });
+                
+                showResult('Quality Metrics', JSON.stringify(result.quality_metrics, null, 2), 'quality-results');
+            } catch (error) {
+                showError(`Quality analysis failed: ${error.message}`);
+            }
+        }
+
+        // Branch Comparison
+        async function compareBranches() {
+            const repoPath = document.getElementById('compare-repo').value;
+            const branch1 = document.getElementById('branch1').value;
+            const branch2 = document.getElementById('branch2').value;
+            const limit = document.getElementById('compare-limit').value;
+            
+            if (!repoPath || !branch1 || !branch2) {
+                alert('Please select a repository and enter both branch names');
+                return;
+            }
+            
+            try {
+                const result = await callAPI('/api/compare/branches', {
+                    repository_path: repoPath,
+                    branch1: branch1,
+                    branch2: branch2,
+                    limit: parseInt(limit)
+                });
+                
+                showResult('Branch Comparison', JSON.stringify(result.comparison, null, 2), 'compare-results');
+            } catch (error) {
+                showError(`Branch comparison failed: ${error.message}`);
+            }
+        }
+
+        // CI/CD Display Functions
+        function formatPRAnalysisResults(analysis) {
+            let html = '<div class="ci-results">';
+            html += `<h4>PR Analysis Status: <span class="status-${analysis.status}">${analysis.status}</span></h4>`;
+            html += `<p><strong>Message:</strong> ${analysis.message}</p>`;
+            
+            // Show additional details for errors
+            if (analysis.status === 'error') {
+                if (analysis.message.includes('Available branches:')) {
+                    html += '<div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #ffc107;">';
+                    html += '<h5>💡 How to Fix:</h5>';
+                    html += '<ol style="margin: 10px 0; padding-left: 20px; font-size: 13px;">';
+                    html += '<li>Use one of the available branches listed above as the target branch</li>';
+                    html += '<li>Or switch to a different branch using: <code>git checkout branch-name</code></li>';
+                    html += '<li>Click "🌿 Show Available Branches" for a complete list</li>';
+                    html += '</ol>';
+                    html += '</div>';
+                } else if (analysis.message.includes('not initialized')) {
+                    html += '<div style="background: #f8d7da; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #dc3545;">';
+                    html += '<h5>🚫 Repository Not Initialized:</h5>';
+                    html += '<p style="margin: 5px 0; font-size: 13px;">Initialize SVCS in your repository first:</p>';
+                    html += '<code style="background: #fff; padding: 5px; border-radius: 3px; display: block; margin: 5px 0;">cd /path/to/repo && svcs init</code>';
+                    html += '</div>';
+                }
+            }
+            
+            if (analysis.commits_analyzed !== undefined) {
+                html += `<p><strong>Commits Analyzed:</strong> ${analysis.commits_analyzed}</p>`;
+            }
+            
+            if (analysis.total_events !== undefined) {
+                html += `<p><strong>Semantic Events:</strong> ${analysis.total_events}</p>`;
+            }
+            
+            if (analysis.changes && analysis.changes.length > 0) {
+                html += '<h5>Changes Detected:</h5><ul>';
+                analysis.changes.forEach(change => {
+                    html += `<li>${change}</li>`;
+                });
+                html += '</ul>';
+            }
+            
+            if (analysis.quality_score !== undefined) {
+                html += `<p><strong>Quality Score:</strong> ${analysis.quality_score}/100</p>`;
+            }
+            
+            if (analysis.event_summary && Object.keys(analysis.event_summary).length > 0) {
+                html += '<h5>Event Summary:</h5><ul>';
+                Object.entries(analysis.event_summary).forEach(([eventType, count]) => {
+                    html += `<li><strong>${eventType}:</strong> ${count}</li>`;
+                });
+                html += '</ul>';
+            }
+            
+            html += '</div>';
+            return html;
+        }
+
+        function formatQualityGateResults(gate) {
+            let html = '<div class="ci-results">';
+            html += `<h4>Quality Gate: <span class="status-${gate.passed ? 'success' : 'error'}">${gate.passed ? 'PASSED' : 'FAILED'}</span></h4>`;
+            html += `<p><strong>Repository:</strong> ${gate.repository}</p>`;
+            html += `<p><strong>Branch:</strong> ${gate.branch}</p>`;
+            html += `<p><strong>Target Branch:</strong> ${gate.target_branch}</p>`;
+            
+            // Show analysis mode with helpful explanation
+            if (gate.analysis_mode) {
+                const modeExplanations = {
+                    'recent_commits': 'Analyzing recent commits (current branch same as target)',
+                    'since_target_branch': 'Analyzing commits since target branch',
+                    'fallback_recent': 'Analyzing recent events (target branch not found)'
+                };
+                const explanation = modeExplanations[gate.analysis_mode] || gate.analysis_mode;
+                html += `<p><strong>Analysis Mode:</strong> ${explanation}</p>`;
+            }
+            
+            html += `<p><strong>Commits Analyzed:</strong> ${gate.commits_analyzed}</p>`;
+            html += `<p><strong>Events Analyzed:</strong> ${gate.events_analyzed}</p>`;
+            html += `<p><strong>Strict Mode:</strong> ${gate.strict_mode ? 'Yes' : 'No'}</p>`;
+            
+            if (gate.checks) {
+                html += '<h5>Quality Checks:</h5><ul>';
+                Object.entries(gate.checks).forEach(([check, passed]) => {
+                    const status = passed ? '✅ PASS' : '❌ FAIL';
+                    const checkName = check.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    html += `<li><strong>${checkName}:</strong> ${status}</li>`;
+                });
+                html += '</ul>';
+                
+                // Add guidance based on results
+                if (!gate.passed) {
+                    html += '<div style="background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #ffc107;">';
+                    html += '<h5>💡 Quality Gate Failed - How to Improve:</h5>';
+                    html += '<ul style="margin: 10px 0; padding-left: 20px; font-size: 13px;">';
+                    
+                    if (!gate.checks.complexity_increases) {
+                        html += '<li><strong>Complexity Control:</strong> Reduce function complexity in recent changes</li>';
+                    }
+                    if (!gate.checks.error_handling_coverage) {
+                        html += '<li><strong>Error Handling:</strong> Add try-catch blocks or error checking to new functions</li>';
+                    }
+                    if (!gate.checks.modernization_progress) {
+                        html += '<li><strong>Modernization:</strong> Consider using modern patterns like type hints, async/await, or functional programming</li>';
+                    }
+                    
+                    html += '</ul>';
+                    
+                    if (gate.strict_mode) {
+                        html += '<p style="font-size: 13px; margin-top: 10px;"><strong>Strict Mode:</strong> All checks must pass. Consider using Normal Mode for more lenient requirements.</p>';
+                    } else {
+                        const passedCount = Object.values(gate.checks).filter(Boolean).length;
+                        html += `<p style="font-size: 13px; margin-top: 10px;"><strong>Normal Mode:</strong> ${passedCount}/3 checks passed. Need at least 2 to pass.</p>`;
+                    }
+                    html += '</div>';
+                } else {
+                    html += '<div style="background: #d4edda; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #28a745;">';
+                    html += '<p style="margin: 0; font-size: 13px;"><strong>✅ Quality Gate Passed!</strong> Your code meets the quality standards.</p>';
+                    html += '</div>';
+                }
+            }
+            
+            html += '</div>';
+            return html;
+        }
+
+        // CI/CD Integration
+        async function runPRAnalysis() {
+            const repoPath = document.getElementById('ci-repo').value;
+            const targetBranch = document.getElementById('target-branch').value;
+            
+            if (!repoPath || !targetBranch) {
+                alert('Please select a repository and target branch');
+                return;
+            }
+            
+            try {
+                const result = await callAPI('/api/ci/pr_analysis', {
+                    repository_path: repoPath,
+                    target_branch: targetBranch
+                });
+                
+                console.log('PR Analysis result:', result);
+                // result is already result.data from callAPI function
+                const formattedHtml = formatPRAnalysisResults(result.analysis);
+                showResultHtml('PR Analysis Results', formattedHtml, 'ci-results');
+            } catch (error) {
+                console.error('PR Analysis error:', error);
+                showError(`PR analysis failed: ${error.message}`);
+            }
+        }
+
+        async function runQualityGate() {
+            const repoPath = document.getElementById('ci-repo').value;
+            const targetBranch = document.getElementById('target-branch').value;
+            const strictMode = document.getElementById('strict-mode').checked;
+            
+            if (!repoPath) {
+                alert('Please select a repository');
+                return;
+            }
+            
+            try {
+                const result = await callAPI('/api/ci/quality_gate', {
+                    repository_path: repoPath,
+                    target_branch: targetBranch,
+                    strict: strictMode
+                });
+                
+                console.log('Quality Gate result:', result);
+                // result is already result.data from callAPI function
+                const formattedHtml = formatQualityGateResults(result.quality_gate);
+                showResultHtml('Quality Gate Results', formattedHtml, 'ci-results');
+            } catch (error) {
+                console.error('Quality Gate error:', error);
+                showError(`Quality gate execution failed: ${error.message}`);
+            }
+        }
+
+        // CI/CD Quick Actions
+        async function refreshBranchInfo() {
+            const repoPath = document.getElementById('ci-repo').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository first');
+                return;
+            }
+            
+            try {
+                // Get current status of the repository
+                const result = await callAPI('/api/repositories/status', {
+                    repository_path: repoPath
+                });
+                
+                console.log('Refresh branch info result:', result);
+                
+                if (!result) {
+                    throw new Error('No response data from repository status API');
+                }
+                
+                if (!result.current_branch) {
+                    throw new Error('Current branch information not available in API response');
+                }
+                
+                let html = '<div class="branch-info">';
+                html += `<p><strong>Current Branch:</strong> ${result.current_branch}</p>`;
+                html += `<p><strong>Repository:</strong> ${result.repository_name}</p>`;
+                html += `<p><strong>Git Initialized:</strong> ${result.git_initialized ? '✅' : '❌'}</p>`;
+                html += `<p><strong>SVCS Initialized:</strong> ${result.svcs_initialized ? '✅' : '❌'}</p>`;
+                html += `<p><strong>Recent Events:</strong> ${result.recent_events_count}</p>`;
+                html += '</div>';
+                
+                showResultHtml('Repository Status', html, 'branch-info');
+            } catch (error) {
+                console.error('Refresh branch info error:', error);
+                showError(`Failed to refresh branch info: ${error.message}`);
+            }
+        }
+        
+        async function showAvailableBranches() {
+            const repoPath = document.getElementById('ci-repo').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository first');
+                return;
+            }
+            
+            try {
+                // Try PR analysis with invalid branch to get available branches
+                const result = await callAPI('/api/ci/pr_analysis', {
+                    repository_path: repoPath,
+                    target_branch: '__invalid_branch_name__'
+                });
+                
+                if (result.analysis && result.analysis.status === 'error' && result.analysis.message.includes('Available branches:')) {
+                    const message = result.analysis.message;
+                    const branchesMatch = message.match(/Available branches: (.+)/);
+                    if (branchesMatch) {
+                        const branches = branchesMatch[1].split(', ');
+                        let html = '<div class="branch-info">';
+                        html += '<h4>🌿 Available Branches:</h4>';
+                        html += '<ul>';
+                        branches.forEach(branch => {
+                            html += `<li><code>${branch.trim()}</code></li>`;
+                        });
+                        html += '</ul>';
+                        html += '<p style="margin-top: 10px; font-size: 13px; color: #666;">💡 Use these branch names in the Target Branch field</p>';
+                        html += '</div>';
+                        
+                        showResultHtml('Available Branches', html, 'branch-info');
+                    }
+                } else {
+                    showError('Could not retrieve branch information');
+                }
+            } catch (error) {
+                console.error('Show available branches error:', error);
+                showError(`Failed to get available branches: ${error.message}`);
+            }
+        }
+        
+        async function showCurrentBranch() {
+            const repoPath = document.getElementById('ci-repo').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository first');
+                return;
+            }
+            
+            try {
+                const result = await callAPI('/api/repositories/status', {
+                    repository_path: repoPath
+                });
+                
+                console.log('Repository status result:', result);
+                
+                if (!result) {
+                    throw new Error('No response data from repository status API');
+                }
+                
+                if (!result.current_branch) {
+                    throw new Error('Current branch information not available in API response');
+                }
+                
+                let html = '<div class="branch-info">';
+                html += `<h4>📍 Current Branch Information</h4>`;
+                html += `<p><strong>Current Branch:</strong> <code>${result.current_branch}</code></p>`;
+                html += `<p><strong>Repository Path:</strong> <code>${result.repository_path}</code></p>`;
+                
+                const targetBranch = document.getElementById('target-branch').value;
+                if (targetBranch) {
+                    if (result.current_branch === targetBranch) {
+                        html += `<div style="background: #fff3cd; padding: 10px; border-radius: 4px; margin: 10px 0;">`;
+                        html += `<p style="margin: 0;"><strong>ℹ️ Same Branch Mode:</strong> Current branch and target branch are the same.</p>`;
+                        html += `<p style="margin: 5px 0 0 0; font-size: 13px;">Quality Gate will analyze recent commits on this branch.</p>`;
+                        html += `</div>`;
+                    } else {
+                        html += `<div style="background: #d1ecf1; padding: 10px; border-radius: 4px; margin: 10px 0;">`;
+                        html += `<p style="margin: 0;"><strong>🔄 Different Branch Mode:</strong> Comparing <code>${result.current_branch}</code> → <code>${targetBranch}</code></p>`;
+                        html += `<p style="margin: 5px 0 0 0; font-size: 13px;">Analysis will focus on changes since diverging from target branch.</p>`;
+                        html += `</div>`;
+                    }
+                }
+                
+                html += '</div>';
+                
+                showResultHtml('Current Branch Info', html, 'branch-info');
+            } catch (error) {
+                console.error('Show current branch error:', error);
+                showError(`Failed to get current branch info: ${error.message}`);
+            }
+        }
+
+        // Git Notes
+        async function syncNotes() {
+            const repoPath = document.getElementById('notes-repo').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository');
+                return;
+            }
+            
+            try {
+                const result = await callAPI('/api/notes/sync', {
+                    repository_path: repoPath
+                });
+                
+                showResult('Sync Results', JSON.stringify(result, null, 2), 'notes-results');
+            } catch (error) {
+                showError(`Syncing notes failed: ${error.message}`);
+            }
+        }
+
+        async function fetchNotes() {
+            const repoPath = document.getElementById('notes-repo').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository');
+                return;
+            }
+            
+            try {
+                const result = await callAPI('/api/notes/fetch', {
+                    repository_path: repoPath
+                });
+                
+                showResult('Fetch Results', JSON.stringify(result, null, 2), 'notes-results');
+            } catch (error) {
+                showError(`Fetching notes failed: ${error.message}`);
+            }
+        }
+
+        async function showNote() {
+            const repoPath = document.getElementById('notes-repo').value;
+            const commitHash = document.getElementById('commit-hash').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository');
+                return;
+            }
+            
+            try {
+                const result = await callAPI('/api/notes/show', {
+                    repository_path: repoPath,
+                    commit_hash: commitHash
+                });
+                
+                showResult('Note Details', JSON.stringify(result, null, 2), 'notes-results');
+            } catch (error) {
+                showError(`Showing note failed: ${error.message}`);
+            }
+        }
+
+        // Repository Cleanup
+        async function cleanupOrphanedData() {
+            const repoPath = document.getElementById('cleanup-repo').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository');
+                return;
+            }
+            
+            try {
+                const result = await callAPI('/api/cleanup/orphaned_data', {
+                    repository_path: repoPath
+                });
+                
+                showResult('Orphaned Data Cleanup', JSON.stringify(result, null, 2), 'cleanup-results');
+            } catch (error) {
+                showError(`Cleanup failed: ${error.message}`);
+            }
+        }
+
+        async function cleanupUnreachableCommits() {
+            const repoPath = document.getElementById('cleanup-repo').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository');
+                return;
+            }
+            
+            try {
+                const result = await callAPI('/api/cleanup/unreachable_commits', {
+                    repository_path: repoPath
+                });
+                
+                showResult('Unreachable Commits Cleanup', JSON.stringify(result, null, 2), 'cleanup-results');
+            } catch (error) {
+                showError(`Cleanup failed: ${error.message}`);
+            }
+        }
+
+        async function getDatabaseStats() {
+            const repoPath = document.getElementById('cleanup-repo').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository');
+                return;
+            }
+            
+            try {
+                const result = await callAPI('/api/cleanup/database_stats', {
+                    repository_path: repoPath
+                });
+                
+                showResult('Database Stats', JSON.stringify(result, null, 2), 'cleanup-results');
+            } catch (error) {
+                showError(`Failed to get stats: ${error.message}`);
+            }
+        }
+
+        // Utility Functions
+        function showResult(title, content, containerId = 'search-results') {
+            const container = document.getElementById(containerId);
+            const contentEl = document.getElementById(containerId + '-content');
+            
+            if (container && contentEl) {
+                contentEl.innerHTML = `<pre class="json-output">${content}</pre>`;
+                container.style.display = 'block';
+            }
+        }
+
+        function showResultHtml(title, htmlContent, containerId = 'search-results') {
+            const container = document.getElementById(containerId);
+            const contentEl = document.getElementById(containerId + '-content');
+            
+            if (container && contentEl) {
+                contentEl.innerHTML = htmlContent;
+                container.style.display = 'block';
+            }
+        }
+
+        function showError(message) {
+            // Create or update error display
+            let errorDiv = document.querySelector('.error');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                document.querySelector('.content-area').insertBefore(errorDiv, document.querySelector('.content-area').firstChild);
+            }
+            errorDiv.textContent = message;
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.parentNode.removeChild(errorDiv);
+                }
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            // Create or update success display
+            let successDiv = document.querySelector('.success');
+            if (!successDiv) {
+                successDiv = document.createElement('div');
+                successDiv.className = 'success';
+                document.querySelector('.content-area').insertBefore(successDiv, document.querySelector('.content-area').firstChild);
+            }
+            successDiv.textContent = message;
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                if (successDiv.parentNode) {
+                    successDiv.parentNode.removeChild(successDiv);
+                }
+            }, 3000);
+        }
+
+        // Semantic Pattern Search
+        function searchSemanticPatterns() {
+            const repoPath = document.getElementById('search-repo').value;
+            const patternType = document.getElementById('pattern-type').value;
+            const minConfidence = document.getElementById('pattern-confidence').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository');
+                return;
+            }
+            
+            // Show pattern search section
+            document.getElementById('pattern-search').style.display = 'block';
+            
+            // Hide advanced filters
+            document.getElementById('advanced-filters').style.display = 'none';
+        }
+
+        function hidePatternSearch() {
+            document.getElementById('pattern-search').style.display = 'none';
+        }
+
+        async function executePatternSearch() {
+            const repoPath = document.getElementById('search-repo').value;
+            const patternType = document.getElementById('pattern-type').value;
+            const minConfidence = document.getElementById('pattern-confidence').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository');
+                return;
+            }
+            
+            try {
+                const params = {
+                    repository_path: repoPath,
+                    pattern_type: patternType,
+                    min_confidence: parseFloat(minConfidence) || 0.7
+                };
+                
+                const result = await callAPI('/api/semantic/pattern_search', params);
+                displaySearchResults(result);
+                
+                // Hide pattern search section after search
+                document.getElementById('pattern-search').style.display = 'none';
+            } catch (error) {
+                showError(`Pattern search failed: ${error.message}`);
+            }
+        }
+
+        // Natural Language Query
+        async function executeNaturalQuery() {
+            const repoPath = document.getElementById('nlq-repo').value;
+            const query = document.getElementById('natural-query-input').value;
+            
+            if (!repoPath || !query) {
+                alert('Please select a repository and enter a query');
+                return;
+            }
+            
+            try {
+                const result = await callAPI('/api/query/natural_language', {
+                    repository_path: repoPath,
+                    query: query
+                });
+                
+                const content = document.getElementById('nlq-results-content');
+                content.innerHTML = `
+                    <div><strong>Query:</strong> ${query}</div>
+                    <div><strong>Response:</strong> ${result.response || 'No response'}</div>
+                `;
+                
+                document.getElementById('nlq-results').style.display = 'block';
+            } catch (error) {
+                showError(`Query execution failed: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>
