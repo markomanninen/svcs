@@ -877,6 +877,43 @@
                 <div id="ci-integration" class="tool-section">
                     <h2>🚀 CI/CD Integration</h2>
                     
+                    <!-- Documentation Panel -->
+                    <div class="info-panel" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #17a2b8;">
+                        <h4>📖 How to Use CI/CD Integration</h4>
+                        <div class="grid-2" style="gap: 20px;">
+                            <div>
+                                <h5>🔍 PR Analysis</h5>
+                                <ul style="margin: 10px 0; padding-left: 20px; font-size: 14px;">
+                                    <li><strong>Purpose:</strong> Analyze semantic changes in a pull request</li>
+                                    <li><strong>Usage:</strong> Compare current branch against target branch</li>
+                                    <li><strong>Example:</strong> feature-branch → main</li>
+                                    <li><strong>Results:</strong> Shows what semantic changes are being introduced</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5>✅ Quality Gate</h5>
+                                <ul style="margin: 10px 0; padding-left: 20px; font-size: 14px;">
+                                    <li><strong>Purpose:</strong> Check if code meets quality standards</li>
+                                    <li><strong>Normal Mode:</strong> At least 2 out of 3 checks must pass</li>
+                                    <li><strong>Strict Mode:</strong> ALL checks must pass</li>
+                                    <li><strong>Analysis:</strong> Focuses on changes since target branch</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 4px;">
+                            <h5>🌿 Branch Setup Instructions</h5>
+                            <p style="margin: 5px 0; font-size: 14px;"><strong>To switch branches:</strong></p>
+                            <code style="background: #fff; padding: 2px 6px; border-radius: 3px; font-size: 13px;">cd /path/to/your/repo && git checkout your-branch-name</code>
+                            <p style="margin: 10px 0 5px 0; font-size: 14px;"><strong>Common scenarios:</strong></p>
+                            <ul style="margin: 5px 0; padding-left: 20px; font-size: 13px;">
+                                <li><strong>Feature PR:</strong> Switch to feature branch, set target to "main"</li>
+                                <li><strong>Main branch quality:</strong> Stay on main, set target to "main" (analyzes recent commits)</li>
+                                <li><strong>Release branch:</strong> Switch to release branch, set target to "main" or "develop"</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
                     <div class="form-group">
                         <label for="ci-repo">Repository:</label>
                         <select id="ci-repo" class="form-select">
@@ -887,27 +924,61 @@
                     <div class="form-group">
                         <label for="target-branch">Target Branch:</label>
                         <input type="text" id="target-branch" class="form-control" placeholder="main" value="main">
+                        <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
+                            💡 Tip: This is the branch you want to compare against (usually "main", "master", or "develop")
+                        </small>
                     </div>
 
                     <div class="grid-2">
                         <div>
-                            <h3>PR Analysis</h3>
+                            <h3>📊 PR Analysis</h3>
+                            <p style="font-size: 13px; color: #666; margin: 10px 0;">
+                                Analyzes semantic changes between current branch and target branch.
+                            </p>
                             <button class="btn" onclick="runPRAnalysis()">📊 Analyze PR Impact</button>
                         </div>
                         <div>
-                            <h3>Quality Gate</h3>
+                            <h3>✅ Quality Gate</h3>
+                            <p style="font-size: 13px; color: #666; margin: 10px 0;">
+                                Checks code quality based on semantic analysis.
+                            </p>
                             <div class="form-group">
                                 <label>
                                     <input type="checkbox" id="strict-mode"> Strict Mode
                                 </label>
+                                <small style="color: #666; font-size: 11px; display: block; margin-left: 20px;">
+                                    (Requires ALL quality checks to pass)
+                                </small>
                             </div>
                             <button class="btn" onclick="runQualityGate()">✅ Run Quality Gate</button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions Panel -->
+                    <div style="background: #f1f3f4; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                        <h4>⚡ Quick Actions</h4>
+                        <div class="grid-3" style="gap: 10px;">
+                            <button class="btn btn-secondary" onclick="refreshBranchInfo()" style="font-size: 12px; padding: 8px 12px;">
+                                🔄 Refresh Branch Info
+                            </button>
+                            <button class="btn btn-secondary" onclick="showAvailableBranches()" style="font-size: 12px; padding: 8px 12px;">
+                                🌿 Show Available Branches
+                            </button>
+                            <button class="btn btn-secondary" onclick="showCurrentBranch()" style="font-size: 12px; padding: 8px 12px;">
+                                📍 Show Current Branch
+                            </button>
                         </div>
                     </div>
 
                     <div id="ci-results" class="result-container" style="display: none;">
                         <h3>CI/CD Results</h3>
                         <div id="ci-results-content" class="result-content"></div>
+                    </div>
+                    
+                    <!-- Branch Info Panel -->
+                    <div id="branch-info" class="result-container" style="display: none; margin-top: 15px;">
+                        <h4>🌿 Branch Information</h4>
+                        <div id="branch-info-content" class="result-content"></div>
                     </div>
                 </div>
 
@@ -1713,10 +1784,23 @@ Repository Status: ${path}
             html += `<p><strong>Message:</strong> ${analysis.message}</p>`;
             
             // Show additional details for errors
-            if (analysis.status === 'error' && analysis.message.includes('Available branches:')) {
-                html += '<div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">';
-                html += '<p><strong>💡 Tip:</strong> Try using one of the available branches as the target branch.</p>';
-                html += '</div>';
+            if (analysis.status === 'error') {
+                if (analysis.message.includes('Available branches:')) {
+                    html += '<div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #ffc107;">';
+                    html += '<h5>💡 How to Fix:</h5>';
+                    html += '<ol style="margin: 10px 0; padding-left: 20px; font-size: 13px;">';
+                    html += '<li>Use one of the available branches listed above as the target branch</li>';
+                    html += '<li>Or switch to a different branch using: <code>git checkout branch-name</code></li>';
+                    html += '<li>Click "🌿 Show Available Branches" for a complete list</li>';
+                    html += '</ol>';
+                    html += '</div>';
+                } else if (analysis.message.includes('not initialized')) {
+                    html += '<div style="background: #f8d7da; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #dc3545;">';
+                    html += '<h5>🚫 Repository Not Initialized:</h5>';
+                    html += '<p style="margin: 5px 0; font-size: 13px;">Initialize SVCS in your repository first:</p>';
+                    html += '<code style="background: #fff; padding: 5px; border-radius: 3px; display: block; margin: 5px 0;">cd /path/to/repo && svcs init</code>';
+                    html += '</div>';
+                }
             }
             
             if (analysis.commits_analyzed !== undefined) {
@@ -1756,6 +1840,19 @@ Repository Status: ${path}
             html += `<h4>Quality Gate: <span class="status-${gate.passed ? 'success' : 'error'}">${gate.passed ? 'PASSED' : 'FAILED'}</span></h4>`;
             html += `<p><strong>Repository:</strong> ${gate.repository}</p>`;
             html += `<p><strong>Branch:</strong> ${gate.branch}</p>`;
+            html += `<p><strong>Target Branch:</strong> ${gate.target_branch}</p>`;
+            
+            // Show analysis mode with helpful explanation
+            if (gate.analysis_mode) {
+                const modeExplanations = {
+                    'recent_commits': 'Analyzing recent commits (current branch same as target)',
+                    'since_target_branch': 'Analyzing commits since target branch',
+                    'fallback_recent': 'Analyzing recent events (target branch not found)'
+                };
+                const explanation = modeExplanations[gate.analysis_mode] || gate.analysis_mode;
+                html += `<p><strong>Analysis Mode:</strong> ${explanation}</p>`;
+            }
+            
             html += `<p><strong>Commits Analyzed:</strong> ${gate.commits_analyzed}</p>`;
             html += `<p><strong>Events Analyzed:</strong> ${gate.events_analyzed}</p>`;
             html += `<p><strong>Strict Mode:</strong> ${gate.strict_mode ? 'Yes' : 'No'}</p>`;
@@ -1768,6 +1865,37 @@ Repository Status: ${path}
                     html += `<li><strong>${checkName}:</strong> ${status}</li>`;
                 });
                 html += '</ul>';
+                
+                // Add guidance based on results
+                if (!gate.passed) {
+                    html += '<div style="background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #ffc107;">';
+                    html += '<h5>💡 Quality Gate Failed - How to Improve:</h5>';
+                    html += '<ul style="margin: 10px 0; padding-left: 20px; font-size: 13px;">';
+                    
+                    if (!gate.checks.complexity_increases) {
+                        html += '<li><strong>Complexity Control:</strong> Reduce function complexity in recent changes</li>';
+                    }
+                    if (!gate.checks.error_handling_coverage) {
+                        html += '<li><strong>Error Handling:</strong> Add try-catch blocks or error checking to new functions</li>';
+                    }
+                    if (!gate.checks.modernization_progress) {
+                        html += '<li><strong>Modernization:</strong> Consider using modern patterns like type hints, async/await, or functional programming</li>';
+                    }
+                    
+                    html += '</ul>';
+                    
+                    if (gate.strict_mode) {
+                        html += '<p style="font-size: 13px; margin-top: 10px;"><strong>Strict Mode:</strong> All checks must pass. Consider using Normal Mode for more lenient requirements.</p>';
+                    } else {
+                        const passedCount = Object.values(gate.checks).filter(Boolean).length;
+                        html += `<p style="font-size: 13px; margin-top: 10px;"><strong>Normal Mode:</strong> ${passedCount}/3 checks passed. Need at least 2 to pass.</p>`;
+                    }
+                    html += '</div>';
+                } else {
+                    html += '<div style="background: #d4edda; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #28a745;">';
+                    html += '<p style="margin: 0; font-size: 13px;"><strong>✅ Quality Gate Passed!</strong> Your code meets the quality standards.</p>';
+                    html += '</div>';
+                }
             }
             
             html += '</div>';
@@ -1824,6 +1952,139 @@ Repository Status: ${path}
             } catch (error) {
                 console.error('Quality Gate error:', error);
                 showError(`Quality gate execution failed: ${error.message}`);
+            }
+        }
+
+        // CI/CD Quick Actions
+        async function refreshBranchInfo() {
+            const repoPath = document.getElementById('ci-repo').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository first');
+                return;
+            }
+            
+            try {
+                // Get current status of the repository
+                const result = await callAPI('/api/repositories/status', {
+                    repository_path: repoPath
+                });
+                
+                console.log('Refresh branch info result:', result);
+                
+                if (!result) {
+                    throw new Error('No response data from repository status API');
+                }
+                
+                if (!result.current_branch) {
+                    throw new Error('Current branch information not available in API response');
+                }
+                
+                let html = '<div class="branch-info">';
+                html += `<p><strong>Current Branch:</strong> ${result.current_branch}</p>`;
+                html += `<p><strong>Repository:</strong> ${result.repository_name}</p>`;
+                html += `<p><strong>Git Initialized:</strong> ${result.git_initialized ? '✅' : '❌'}</p>`;
+                html += `<p><strong>SVCS Initialized:</strong> ${result.svcs_initialized ? '✅' : '❌'}</p>`;
+                html += `<p><strong>Recent Events:</strong> ${result.recent_events_count}</p>`;
+                html += '</div>';
+                
+                showResultHtml('Repository Status', html, 'branch-info');
+            } catch (error) {
+                console.error('Refresh branch info error:', error);
+                showError(`Failed to refresh branch info: ${error.message}`);
+            }
+        }
+        
+        async function showAvailableBranches() {
+            const repoPath = document.getElementById('ci-repo').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository first');
+                return;
+            }
+            
+            try {
+                // Try PR analysis with invalid branch to get available branches
+                const result = await callAPI('/api/ci/pr_analysis', {
+                    repository_path: repoPath,
+                    target_branch: '__invalid_branch_name__'
+                });
+                
+                if (result.analysis && result.analysis.status === 'error' && result.analysis.message.includes('Available branches:')) {
+                    const message = result.analysis.message;
+                    const branchesMatch = message.match(/Available branches: (.+)/);
+                    if (branchesMatch) {
+                        const branches = branchesMatch[1].split(', ');
+                        let html = '<div class="branch-info">';
+                        html += '<h4>🌿 Available Branches:</h4>';
+                        html += '<ul>';
+                        branches.forEach(branch => {
+                            html += `<li><code>${branch.trim()}</code></li>`;
+                        });
+                        html += '</ul>';
+                        html += '<p style="margin-top: 10px; font-size: 13px; color: #666;">💡 Use these branch names in the Target Branch field</p>';
+                        html += '</div>';
+                        
+                        showResultHtml('Available Branches', html, 'branch-info');
+                    }
+                } else {
+                    showError('Could not retrieve branch information');
+                }
+            } catch (error) {
+                console.error('Show available branches error:', error);
+                showError(`Failed to get available branches: ${error.message}`);
+            }
+        }
+        
+        async function showCurrentBranch() {
+            const repoPath = document.getElementById('ci-repo').value;
+            
+            if (!repoPath) {
+                alert('Please select a repository first');
+                return;
+            }
+            
+            try {
+                const result = await callAPI('/api/repositories/status', {
+                    repository_path: repoPath
+                });
+                
+                console.log('Repository status result:', result);
+                
+                if (!result) {
+                    throw new Error('No response data from repository status API');
+                }
+                
+                if (!result.current_branch) {
+                    throw new Error('Current branch information not available in API response');
+                }
+                
+                let html = '<div class="branch-info">';
+                html += `<h4>📍 Current Branch Information</h4>`;
+                html += `<p><strong>Current Branch:</strong> <code>${result.current_branch}</code></p>`;
+                html += `<p><strong>Repository Path:</strong> <code>${result.repository_path}</code></p>`;
+                
+                const targetBranch = document.getElementById('target-branch').value;
+                if (targetBranch) {
+                    if (result.current_branch === targetBranch) {
+                        html += `<div style="background: #fff3cd; padding: 10px; border-radius: 4px; margin: 10px 0;">`;
+                        html += `<p style="margin: 0;"><strong>ℹ️ Same Branch Mode:</strong> Current branch and target branch are the same.</p>`;
+                        html += `<p style="margin: 5px 0 0 0; font-size: 13px;">Quality Gate will analyze recent commits on this branch.</p>`;
+                        html += `</div>`;
+                    } else {
+                        html += `<div style="background: #d1ecf1; padding: 10px; border-radius: 4px; margin: 10px 0;">`;
+                        html += `<p style="margin: 0;"><strong>🔄 Different Branch Mode:</strong> Comparing <code>${result.current_branch}</code> → <code>${targetBranch}</code></p>`;
+                        html += `<p style="margin: 5px 0 0 0; font-size: 13px;">Analysis will focus on changes since diverging from target branch.</p>`;
+                        html += `</div>`;
+                    }
+                }
+                
+                html += '</div>';
+                
+                showResultHtml('Current Branch Info', html, 'branch-info');
+            } catch (error) {
+                console.error('Show current branch error:', error);
+                showError(`Failed to get current branch info: ${error.message}`);
             }
         }
 

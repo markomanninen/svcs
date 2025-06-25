@@ -279,32 +279,57 @@ class RepositoryLocalCIIntegration:
         # Get current branch
         current_branch = self.svcs.get_current_branch()
         
-        # Get commits since diverging from target branch (like PR analysis)
-        try:
-            # Check if target branch exists
-            subprocess.run(["git", "rev-parse", "--verify", target_branch], 
-                         cwd=self.repo_path, capture_output=True, text=True, check=True)
+        # Handle same branch scenario
+        if current_branch == target_branch:
+            print(f"ℹ️  Current branch ({current_branch}) is same as target branch ({target_branch})")
+            print("📊 Analyzing recent commits for quality assessment")
             
-            # Get commits between target branch and current HEAD
-            cmd = ["git", "rev-list", f"{target_branch}..HEAD", "--reverse"]
-            result = subprocess.run(cmd, cwd=self.repo_path, capture_output=True, text=True, check=True)
-            commits_since_target = result.stdout.strip().split('\n') if result.stdout.strip() else []
-            
-            if commits_since_target:
-                # Focus on events from commits since target branch
-                all_events = self.svcs.get_branch_events(current_branch, limit=1000)
-                recent_events = [e for e in all_events if e.get('commit_hash') in commits_since_target]
-                print(f"📊 Analyzing {len(commits_since_target)} commits since {target_branch}")
-                print(f"🔍 Found {len(recent_events)} semantic events in these commits")
-            else:
-                # No commits since target branch - check recent events on current branch
-                recent_events = self.svcs.get_branch_events(current_branch, limit=50)
-                print(f"ℹ️  No commits since {target_branch}, analyzing recent events on {current_branch}")
+            # For same-branch scenario, analyze recent commits (last 10 or last 24 hours)
+            try:
+                # Get recent commits (last 10 commits)
+                cmd = ["git", "log", "--oneline", "-10", "--pretty=format:%H"]
+                result = subprocess.run(cmd, cwd=self.repo_path, capture_output=True, text=True, check=True)
+                recent_commit_hashes = result.stdout.strip().split('\n') if result.stdout.strip() else []
                 
-        except subprocess.CalledProcessError:
-            # Target branch doesn't exist, fall back to recent events
-            recent_events = self.svcs.get_branch_events(current_branch, limit=50)
-            print(f"⚠️  Target branch '{target_branch}' not found, analyzing recent events on {current_branch}")
+                # Get events from these recent commits
+                all_events = self.svcs.get_branch_events(current_branch, limit=1000)
+                recent_events = [e for e in all_events if e.get('commit_hash') in recent_commit_hashes]
+                
+                print(f"🔍 Analyzing last {len(recent_commit_hashes)} commits on {current_branch}")
+                print(f"📊 Found {len(recent_events)} semantic events in recent commits")
+                
+            except subprocess.CalledProcessError:
+                # Fallback to time-based recent events
+                recent_events = self.svcs.get_branch_events(current_branch, limit=50)
+                print(f"⚠️  Using fallback: analyzing {len(recent_events)} recent events")
+        
+        else:
+            # Different branches - get commits since diverging from target branch (like PR analysis)
+            try:
+                # Check if target branch exists
+                subprocess.run(["git", "rev-parse", "--verify", target_branch], 
+                             cwd=self.repo_path, capture_output=True, text=True, check=True)
+                
+                # Get commits between target branch and current HEAD
+                cmd = ["git", "rev-list", f"{target_branch}..HEAD", "--reverse"]
+                result = subprocess.run(cmd, cwd=self.repo_path, capture_output=True, text=True, check=True)
+                commits_since_target = result.stdout.strip().split('\n') if result.stdout.strip() else []
+                
+                if commits_since_target:
+                    # Focus on events from commits since target branch
+                    all_events = self.svcs.get_branch_events(current_branch, limit=1000)
+                    recent_events = [e for e in all_events if e.get('commit_hash') in commits_since_target]
+                    print(f"📊 Analyzing {len(commits_since_target)} commits since {target_branch}")
+                    print(f"🔍 Found {len(recent_events)} semantic events in these commits")
+                else:
+                    # No commits since target branch - analyze recent events
+                    recent_events = self.svcs.get_branch_events(current_branch, limit=50)
+                    print(f"ℹ️  No commits since {target_branch}, analyzing recent events on {current_branch}")
+                    
+            except subprocess.CalledProcessError:
+                # Target branch doesn't exist, fall back to recent events
+                recent_events = self.svcs.get_branch_events(current_branch, limit=50)
+                print(f"⚠️  Target branch '{target_branch}' not found, analyzing recent events on {current_branch}")
         
         # Quality checks (strict mode affects thresholds)
         checks = {
@@ -327,8 +352,22 @@ class RepositoryLocalCIIntegration:
         
         print(f"\n🏁 Quality Gate: {'✅ PASSED' if all_passed else '❌ FAILED'}")
         
-        # Calculate commits analyzed based on approach used
-        commits_analyzed = len(commits_since_target) if 'commits_since_target' in locals() and commits_since_target else len(set(e.get('commit_hash') for e in recent_events if e.get('commit_hash')))
+        # Calculate commits analyzed based on analysis mode
+        if current_branch == target_branch:
+            # Same branch mode - get unique commit hashes from events analyzed
+            commits_analyzed = len(set(e.get('commit_hash') for e in recent_events if e.get('commit_hash')))
+            analysis_mode = "recent_commits"
+        else:
+            # Different branch mode - count commits since target
+            try:
+                cmd = ["git", "rev-list", f"{target_branch}..HEAD"]
+                result = subprocess.run(cmd, cwd=self.repo_path, capture_output=True, text=True, check=True)
+                commits_since_target = result.stdout.strip().split('\n') if result.stdout.strip() else []
+                commits_analyzed = len(commits_since_target)
+                analysis_mode = "since_target_branch"
+            except subprocess.CalledProcessError:
+                commits_analyzed = len(set(e.get('commit_hash') for e in recent_events if e.get('commit_hash')))
+                analysis_mode = "fallback_recent"
         
         return {
             "status": "success",
@@ -337,6 +376,7 @@ class RepositoryLocalCIIntegration:
             "target_branch": target_branch,
             "branch": current_branch,
             "repository": str(self.repo_path),
+            "analysis_mode": analysis_mode,
             "checks": checks,
             "events_analyzed": len(recent_events),
             "commits_analyzed": commits_analyzed
