@@ -59,27 +59,19 @@ def cmd_web(args):
     repo_path = Path(args.path or Path.cwd()).resolve()
     
     if args.action == 'start':
-        if not ensure_svcs_initialized(repo_path):
-            print_svcs_error("SVCS not initialized. Run 'svcs init' first.")
-            return
-            
-        print(f"🚀 Starting web dashboard for repository: {repo_path.name}")
+        # No need to check SVCS initialization - web server can manage multiple repos
+        print(f"🚀 Starting SVCS web server (repository-local architecture)")
         
         try:
-            # Try to start repository-local web server
-            import os
-            original_dir = os.getcwd()
-            os.chdir(repo_path)
-            
-            # Start web server in background
+            # Start new repository-local web server
             def run_server():
                 try:
-                    sys.path.insert(0, str(repo_path.parent))
-                    import svcs_web_server
+                    # Add parent directory to path to find the new web server
+                    parent_dir = Path(__file__).parent.parent.parent
+                    sys.path.insert(0, str(parent_dir))
                     
-                    # Configure for repository-local operation
-                    svcs_web_server.REPOSITORY_PATH = str(repo_path)
-                    svcs_web_server.run_server(host=args.host, port=args.port, debug=args.debug)
+                    import svcs_repo_web_server
+                    svcs_repo_web_server.run_server(host=args.host, port=args.port, debug=args.debug)
                 except Exception as e:
                     print(f"❌ Web server error: {e}")
             
@@ -89,8 +81,9 @@ def cmd_web(args):
             # Give server time to start
             time.sleep(2)
             
-            print(f"✅ Web dashboard started on http://{args.host}:{args.port}")
-            print(f"🌐 Open in browser to explore semantic data")
+            print(f"✅ Web server started on http://{args.host}:{args.port}")
+            print(f"🌐 Open in browser to manage multiple repositories")
+            print(f"📊 Features: repository discovery, semantic search, evolution tracking")
             print(f"⏹️ Press Ctrl+C to stop or run 'svcs web stop'")
             
             # Keep main thread alive if not running in background
@@ -99,14 +92,10 @@ def cmd_web(args):
                     while web_server_thread.is_alive():
                         web_server_thread.join(1)
                 except KeyboardInterrupt:
-                    print("\n⏹️ Stopping web dashboard...")
+                    print("\n⏹️ Stopping web server...")
                     
-            os.chdir(original_dir)
-            
         except Exception as e:
             print_svcs_error(f"Error starting web server: {e}")
-            import os
-            os.chdir(original_dir)
             
     elif args.action == 'stop':
         print("⏹️ Stopping web dashboard...")

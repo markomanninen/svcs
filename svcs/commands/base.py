@@ -48,9 +48,17 @@ except ImportError:
     try:
         from centralized_utils import smart_init_svcs
     except ImportError:
-        # Fallback to a simple implementation
-        def smart_init_svcs(repo_path):
-            return "Smart init not available - using fallback"
+        try:
+            # Look in parent directory
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from centralized_utils import smart_init_svcs
+        except ImportError:
+            # Final fallback - inline implementation
+            def smart_init_svcs(repo_path):
+                """Fallback smart init implementation"""
+                from svcs_repo_hooks import SVCSRepositoryManager
+                manager = SVCSRepositoryManager(str(repo_path))
+                return manager.setup_repository()
 
 
 def ensure_svcs_initialized(repo_path: Path) -> bool:

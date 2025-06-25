@@ -81,6 +81,9 @@ class RepositoryLocalHookManager:
         """Generate repository-local hook content."""
         python_path = sys.executable
         
+        # Get the SVCS installation directory from environment
+        svcs_install_dir = os.environ.get('SVCS_INSTALL_DIR', '')
+        
         base_content = f'''#!/bin/bash
 #
 # SVCS Repository-Local Hook: {hook_name}
@@ -101,8 +104,9 @@ if [ ! -f "$REPO_ROOT/.svcs/semantic.db" ]; then
     exit 0
 fi
 
-# Set PYTHONPATH to include SVCS modules
-export PYTHONPATH="$REPO_ROOT:$PYTHONPATH"
+# Set PYTHONPATH to include SVCS installation and local modules
+export PYTHONPATH="$REPO_ROOT/.svcs:{svcs_install_dir}:$PYTHONPATH"
+export SVCS_INSTALL_DIR="{svcs_install_dir}"
 
 '''
         
@@ -118,16 +122,25 @@ COMMIT_HASH=$(git rev-parse HEAD)
 # Run semantic analysis
 {python_path} -c "
 import sys
-sys.path.insert(0, '$REPO_ROOT')
-from svcs_repo_local import RepositoryLocalSVCS
-from svcs_repo_analyzer import RepositoryLocalSemanticAnalyzer
+import os
 
-# Initialize repository-local SVCS and analyzer
-svcs = RepositoryLocalSVCS('$REPO_ROOT')
-analyzer = RepositoryLocalSemanticAnalyzer('$REPO_ROOT')
+# Add SVCS paths to Python path
+svcs_dir = os.environ.get('SVCS_INSTALL_DIR', '')
+repo_svcs_dir = '$REPO_ROOT/.svcs'
+if svcs_dir and svcs_dir not in sys.path:
+    sys.path.insert(0, svcs_dir)
+if repo_svcs_dir not in sys.path:
+    sys.path.insert(0, repo_svcs_dir)
 
-# Analyze the commit
 try:
+    from svcs_repo_local import RepositoryLocalSVCS
+    from svcs_repo_analyzer import RepositoryLocalSemanticAnalyzer
+
+    # Initialize repository-local SVCS and analyzer
+    svcs = RepositoryLocalSVCS('$REPO_ROOT')
+    analyzer = RepositoryLocalSemanticAnalyzer('$REPO_ROOT')
+
+    # Analyze the commit
     semantic_events = analyzer.analyze_commit('$COMMIT_HASH')
     if semantic_events:
         stored_count, notes_success = svcs.analyze_and_store_commit('$COMMIT_HASH', semantic_events)
@@ -140,6 +153,8 @@ try:
         print('ℹ️ SVCS: No semantic changes detected')
 except Exception as error:
     print('❌ SVCS: Analysis error: ' + str(error))
+    import traceback
+    traceback.print_exc()
 "
 '''
         
@@ -151,22 +166,55 @@ echo "🔄 SVCS: Processing merge..."
 # Get merge info
 MERGE_HEAD=$(git rev-parse MERGE_HEAD 2>/dev/null)
 HEAD=$(git rev-parse HEAD)
+CURRENT_BRANCH=$(git branch --show-current)
 
 if [ -n "$MERGE_HEAD" ]; then
     echo "📥 SVCS: Syncing semantic data from merge"
     
+    # Pass current branch as environment variable
+    export CURRENT_BRANCH_NAME="$CURRENT_BRANCH"
+    
     {python_path} -c "
 import sys
-sys.path.insert(0, '$REPO_ROOT')
-from svcs_repo_local import RepositoryLocalSVCS
+import os
 
-# Initialize repository-local SVCS
-svcs = RepositoryLocalSVCS('$REPO_ROOT')
+# Add SVCS paths to Python path
+svcs_dir = os.environ.get('SVCS_INSTALL_DIR', '')
+repo_svcs_dir = '$REPO_ROOT/.svcs'
+if svcs_dir and svcs_dir not in sys.path:
+    sys.path.insert(0, svcs_dir)
+if repo_svcs_dir not in sys.path:
+    sys.path.insert(0, repo_svcs_dir)
 
-# Fetch semantic notes from merged commits
 try:
-    # This would implement merge semantic data integration
-    print('✅ SVCS: Merge semantic data processed')
+    from svcs_repo_local import RepositoryLocalSVCS
+
+    # Initialize repository-local SVCS
+    svcs = RepositoryLocalSVCS('$REPO_ROOT')
+    current_branch = os.environ.get('CURRENT_BRANCH_NAME', 'main')
+
+    # Automatically process merge - find the source branch
+    # This is a simplified approach - in practice you'd want more sophisticated detection
+    try:
+        # Get all branches that were merged
+        import subprocess
+        result = subprocess.run(['git', 'branch', '--merged', 'HEAD'], 
+                              cwd='$REPO_ROOT', capture_output=True, text=True)
+        branches = [b.strip().replace('* ', '') for b in result.stdout.split('\\n') if b.strip()]
+        
+        # Find non-main branches that might be the source
+        source_candidates = [b for b in branches if b not in ['main', 'master', current_branch] and b != '']
+        
+        if source_candidates:
+            source_branch = source_candidates[-1]  # Take the most recently merged
+            result = svcs.process_merge(source_branch=source_branch, target_branch=current_branch)
+            print('✅ SVCS: ' + result)
+        else:
+            print('✅ SVCS: Merge semantic data processed')
+    except Exception as e:
+        print('⚠️ SVCS: Could not auto-detect merge source: ' + str(e))
+        print('💡 SVCS: Use \"svcs events process-merge --source-branch <SOURCE>\" manually if needed')
+        
 except Exception as error:
     print('❌ SVCS: Merge processing error: ' + str(error))
 "
@@ -279,12 +327,22 @@ class SVCSRepositoryManager:
         """Complete SVCS setup for a repository."""
         from svcs_repo_local import RepositoryLocalSVCS
         
+        # Check if SVCS is already initialized
+        svcs_db_path = self.repo_path / ".svcs" / "semantic.db"
+        is_new_init = not svcs_db_path.exists()
+        
         # Initialize SVCS
         svcs = RepositoryLocalSVCS(self.repo_path)
         init_result = svcs.initialize_repository()
         
         if "❌" in init_result:
             return init_result
+        
+        # If this is a new initialization, try to fetch remote semantic notes
+        if is_new_init:
+            notes_result = self._fetch_remote_notes()
+            if notes_result:
+                init_result += f"\n{notes_result}"
         
         # Install git hooks
         hook_manager = RepositoryLocalHookManager(self.repo_path)
@@ -299,6 +357,78 @@ class SVCSRepositoryManager:
             result += f"\n⚠️ Failed to install hooks: {', '.join(failed_hooks)}"
         
         return result
+    
+    def _fetch_remote_notes(self) -> str:
+        """Fetch remote semantic notes if available."""
+        try:
+            # Check if remote exists
+            remotes_result = subprocess.run(
+                ["git", "remote"],
+                cwd=self.repo_path,
+                capture_output=True,
+                text=True,
+                check=False
+            )
+            
+            if remotes_result.returncode != 0 or not remotes_result.stdout.strip():
+                return ""  # No remotes configured
+            
+            remotes = remotes_result.stdout.strip().splitlines()
+            if "origin" not in remotes:
+                return ""  # No origin remote
+            
+            # Try to fetch semantic notes from origin
+            fetch_result = subprocess.run(
+                ["git", "fetch", "origin", "refs/notes/svcs-semantic:refs/notes/svcs-semantic"],
+                cwd=self.repo_path,
+                capture_output=True,
+                text=True,
+                check=False
+            )
+            
+            if fetch_result.returncode == 0:
+                # Notes fetched successfully, now import them to database
+                from svcs_repo_local import RepositoryLocalSVCS
+                svcs = RepositoryLocalSVCS(self.repo_path)
+                
+                # Get all commits with notes and import their semantic data
+                notes_commits_result = subprocess.run(
+                    ["git", "notes", "--ref=svcs-semantic", "list"],
+                    cwd=self.repo_path,
+                    capture_output=True,
+                    text=True,
+                    check=False
+                )
+                
+                if notes_commits_result.returncode == 0 and notes_commits_result.stdout.strip():
+                    commits_with_notes = []
+                    for line in notes_commits_result.stdout.strip().splitlines():
+                        if line.strip():
+                            commit_hash = line.split()[1] if len(line.split()) > 1 else line.strip()
+                            commits_with_notes.append(commit_hash)
+                    
+                    imported_count = 0
+                    for commit_hash in commits_with_notes:
+                        semantic_data = svcs.git_notes.get_semantic_data_from_note(commit_hash)
+                        if semantic_data and "semantic_events" in semantic_data:
+                            stored_count, _ = svcs.analyze_and_store_commit(
+                                commit_hash, semantic_data["semantic_events"]
+                            )
+                            imported_count += stored_count
+                    
+                    if imported_count > 0:
+                        return f"🔄 Fetched remote semantic notes and imported {imported_count} events"
+                    else:
+                        return "🔄 Fetched remote semantic notes (no events to import)"
+                else:
+                    return "🔄 Fetched remote semantic notes (empty)"
+            else:
+                # Notes fetch failed (likely no notes exist on remote)
+                return ""
+        
+        except Exception as e:
+            logger.warning(f"Failed to fetch remote notes: {e}")
+            return ""
     
     def teardown_repository(self) -> str:
         """Remove SVCS from a repository."""

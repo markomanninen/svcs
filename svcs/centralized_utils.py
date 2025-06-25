@@ -11,6 +11,11 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+# Add parent directory to sys.path to find svcs_repo_registry_integration
+parent_dir = Path(__file__).parent.parent
+if str(parent_dir) not in sys.path:
+    sys.path.insert(0, str(parent_dir))
+
 
 def smart_init_svcs(repo_path: Path):
     """Smart SVCS initialization with auto-detection."""
@@ -81,6 +86,14 @@ def init_svcs_centralized(repo_path: Path):
         from svcs_repo_local import RepositoryLocalSVCS
         svcs = RepositoryLocalSVCS(str(repo_path))
         init_result = svcs.initialize_repository()
+        
+        # Register the repository in the central registry
+        try:
+            from svcs_repo_registry_integration import auto_register_after_init
+            registration_result = auto_register_after_init(str(repo_path))
+            print(f"📝 {registration_result}")
+        except Exception as reg_error:
+            print(f"⚠️ Warning: Failed to register repository in central registry: {reg_error}")
         
         # Get current branch for display
         try:

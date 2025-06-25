@@ -25,8 +25,14 @@ def cmd_ci(args):
         original_dir = os.getcwd()
         os.chdir(repo_path)
         
-        sys.path.insert(0, str(repo_path.parent))
-        import svcs_ci
+        # Try to use new repository-local CI integration first
+        try:
+            sys.path.insert(0, str(repo_path.parent))
+            import svcs_repo_ci as svcs_ci
+        except ImportError:
+            # Fallback to legacy CI integration
+            sys.path.insert(0, str(repo_path.parent))
+            import svcs_ci
         
         if args.ci_command == 'pr-analysis':
             target_branch = args.target or 'main'

@@ -168,11 +168,13 @@ class RepositoryLocalDatabase:
         
         with self.get_connection() as conn:
             cursor = conn.execute("""
-                SELECT event_id, commit_hash, branch, event_type, node_id, location,
-                       details, layer, confidence, reasoning, impact, created_at
-                FROM semantic_events
-                WHERE branch = ?
-                ORDER BY created_at DESC
+                SELECT se.event_id, se.commit_hash, se.branch, se.event_type, se.node_id, se.location,
+                       se.details, se.layer, se.confidence, se.reasoning, se.impact, se.created_at,
+                       c.author, c.timestamp as commit_timestamp, c.message as commit_message
+                FROM semantic_events se
+                LEFT JOIN commits c ON se.commit_hash = c.commit_hash
+                WHERE se.branch = ?
+                ORDER BY se.created_at DESC
                 LIMIT ?
             """, (branch, limit))
             
@@ -340,9 +342,50 @@ class RepositoryLocalSVCS:
         
         return f"✅ SVCS initialized for repository at {self.repo_path} (branch: {current_branch})"
     
+    def store_commit_metadata(self, commit_hash: str) -> bool:
+        """Store commit metadata (author, timestamp, message) in the commits table."""
+        try:
+            import subprocess
+            
+            # Get commit info from git
+            result = subprocess.run([
+                'git', 'show', '--format=%an%n%at%n%s', '--no-patch', commit_hash
+            ], cwd=self.repo_path, capture_output=True, text=True, check=True)
+            
+            lines = result.stdout.strip().split('\n')
+            if len(lines) >= 3:
+                author = lines[0]
+                timestamp = int(lines[1])
+                message = lines[2]
+                
+                current_branch = self.db.get_current_branch()
+                created_at = int(datetime.now().timestamp())
+                
+                with self.db.get_connection() as conn:
+                    # Check if commit already exists
+                    cursor = conn.execute("SELECT commit_hash FROM commits WHERE commit_hash = ?", (commit_hash,))
+                    if cursor.fetchone():
+                        return True  # Already exists
+                    
+                    # Insert new commit
+                    conn.execute("""
+                        INSERT INTO commits (commit_hash, branch, author, timestamp, message, created_at, git_notes_synced)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """, (commit_hash, current_branch, author, timestamp, message, created_at, 0))
+                    conn.commit()
+                    return True
+            return False
+            
+        except Exception as e:
+            print(f"Warning: Could not store commit metadata: {e}")
+            return False
+
     def analyze_and_store_commit(self, commit_hash: str, semantic_events: List[Dict[str, Any]]) -> Tuple[int, bool]:
         """Analyze a commit and store both locally and as git notes."""
-        # Store in local database
+        # Store commit metadata first
+        self.store_commit_metadata(commit_hash)
+        
+        # Store semantic events in local database
         stored_count = 0
         for event_data in semantic_events:
             event_data["commit_hash"] = commit_hash
@@ -354,6 +397,28 @@ class RepositoryLocalSVCS:
         
         return stored_count, notes_success
     
+    def get_branch_events(self, branch: str = None, limit: int = 100) -> List[Dict[str, Any]]:
+        """Get semantic events for a specific branch."""
+        return self.db.get_branch_events(branch, limit)
+    
+    def get_current_branch(self) -> str:
+        """Get current git branch."""
+        return self.db.get_current_branch()
+    
+    def compare_branches(self, branch1: str, branch2: str, limit: int = 100) -> Dict[str, Any]:
+        """Compare semantic events between two branches."""
+        branch1_events = self.get_branch_events(branch1, limit)
+        branch2_events = self.get_branch_events(branch2, limit)
+        
+        return {
+            "branch1": branch1,
+            "branch2": branch2,
+            "branch1_count": len(branch1_events),
+            "branch2_count": len(branch2_events),
+            "branch1_events": branch1_events,
+            "branch2_events": branch2_events
+        }
+
     def get_repository_status(self) -> Dict[str, Any]:
         """Get repository SVCS status."""
         current_branch = self.db.get_current_branch()
@@ -382,7 +447,262 @@ class RepositoryLocalSVCS:
                 "commits_analyzed": commits_count,
                 "created_at": repo_info[0]
             }
+    
+    def process_merge(self, source_branch: str = None, target_branch: str = None) -> str:
+        """Process semantic events after a git merge. Ensures all unique events from source branch are copied to target branch."""
+        if target_branch is None:
+            target_branch = self.get_current_branch()
+        if source_branch is None:
+            # Try to detect the merged branch from git (handle both merge commits and fast-forward merges)
+            try:
+                # First, try to detect from merge commit (non-fast-forward merges)
+                result = subprocess.run(
+                    ["git", "log", "--merges", "-1", "--pretty=format:%P"],
+                    cwd=self.repo_path,
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                if result.stdout.strip():
+                    merge_parents = result.stdout.strip().split()
+                    if len(merge_parents) >= 2:
+                        # Find the parent that is NOT the current branch tip
+                        current_commit = subprocess.run(
+                            ["git", "rev-parse", target_branch],
+                            cwd=self.repo_path,
+                            capture_output=True,
+                            text=True,
+                            check=True
+                        ).stdout.strip()
+                        source_commit = [c for c in merge_parents if c != current_commit]
+                        if source_commit:
+                            source_commit = source_commit[0]
+                            # Find branch name for this commit
+                            branch_result = subprocess.run(
+                                ["git", "branch", "--contains", source_commit],
+                                cwd=self.repo_path,
+                                capture_output=True,
+                                text=True,
+                                check=True
+                            )
+                            branches = [b.strip().replace('* ', '') for b in branch_result.stdout.strip().split('\n')]
+                            for branch in branches:
+                                if branch != target_branch and not branch.startswith('('):
+                                    source_branch = branch
+                                    break
+                
+                # If no merge commit found, try to detect from git reflog (fast-forward merges)
+                if not source_branch:
+                    reflog_result = subprocess.run(
+                        ["git", "reflog", "-1", "--grep=merge", "--pretty=format:%gs"],
+                        cwd=self.repo_path,
+                        capture_output=True,
+                        text=True,
+                        check=True
+                    )
+                    if reflog_result.stdout.strip():
+                        # Parse reflog message like "merge feature/branch: Fast-forward"
+                        reflog_msg = reflog_result.stdout.strip()
+                        if "merge" in reflog_msg.lower():
+                            # Extract branch name from reflog message
+                            parts = reflog_msg.split()
+                            for i, part in enumerate(parts):
+                                if part == "merge" and i + 1 < len(parts):
+                                    potential_branch = parts[i + 1].rstrip(':')
+                                    # Verify this branch exists in our database
+                                    with self.db.get_connection() as conn:
+                                        cursor = conn.execute("SELECT COUNT(*) FROM semantic_events WHERE branch = ?", (potential_branch,))
+                                        if cursor.fetchone()[0] > 0:
+                                            source_branch = potential_branch
+                                            break
+                
+                # Alternative approach: check for recently updated branches
+                if not source_branch:
+                    # Get all branches in the database that have semantic events
+                    with self.db.get_connection() as conn:
+                        cursor = conn.execute("""
+                            SELECT DISTINCT branch FROM semantic_events 
+                            WHERE branch != ? AND branch IS NOT NULL
+                            ORDER BY created_at DESC
+                        """, (target_branch,))
+                        potential_branches = [row[0] for row in cursor.fetchall()]
+                        
+                        # For each potential branch, check if it has events not in target
+                        for branch in potential_branches:
+                            cursor = conn.execute("""
+                                SELECT COUNT(*) FROM (
+                                    SELECT event_type, node_id, location FROM semantic_events WHERE branch = ?
+                                    EXCEPT
+                                    SELECT event_type, node_id, location FROM semantic_events WHERE branch = ?
+                                )
+                            """, (branch, target_branch))
+                            unique_count = cursor.fetchone()[0]
+                            if unique_count > 0:
+                                source_branch = branch
+                                break
+                                
+            except subprocess.CalledProcessError:
+                pass
+        if not source_branch:
+            return "ℹ️ SVCS: No source branch detected for merge processing"
+        with self.db.get_connection() as conn:
+            # Find all unique (event_type, node_id, location) in source branch not present in target branch
+            cursor = conn.execute("""
+                SELECT se1.event_type, se1.node_id, se1.location
+                FROM semantic_events se1
+                WHERE se1.branch = ?
+                EXCEPT
+                SELECT se2.event_type, se2.node_id, se2.location
+                FROM semantic_events se2
+                WHERE se2.branch = ?
+            """, (source_branch, target_branch))
+            unique_keys = cursor.fetchall()
+            if not unique_keys:
+                return f"ℹ️ SVCS: No new semantic events to merge from {source_branch} to {target_branch}"
+            merged_count = 0
+            for event_type, node_id, location in unique_keys:
+                # Get the most recent event for this key from the source branch
+                event_cursor = conn.execute("""
+                    SELECT commit_hash, event_type, node_id, location, details, layer, layer_description, confidence, reasoning, impact, created_at
+                    FROM semantic_events
+                    WHERE branch = ? AND event_type = ? AND node_id = ? AND location = ?
+                    ORDER BY created_at DESC LIMIT 1
+                """, (source_branch, event_type, node_id, location))
+                event = event_cursor.fetchone()
+                if event:
+                    new_event_id = str(uuid.uuid4())
+                    conn.execute("""
+                        INSERT INTO semantic_events 
+                        (event_id, commit_hash, branch, event_type, node_id, location,
+                        details, layer, layer_description, confidence, reasoning, impact, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        new_event_id,
+                        event[0],  # commit_hash
+                        target_branch,
+                        event[1],  # event_type
+                        event[2],  # node_id
+                        event[3],  # location
+                        event[4],  # details
+                        event[5],  # layer
+                        event[6],  # layer_description
+                        event[7],  # confidence
+                        event[8],  # reasoning
+                        event[9],  # impact
+                        event[10]  # created_at
+                    ))
+                    merged_count += 1
+            conn.commit()
+            return f"✅ SVCS: Merged {merged_count} semantic events from {source_branch} to {target_branch}"
 
+    def import_semantic_events_from_notes(self, commit_hashes: List[str] = None) -> int:
+        """Import semantic events from git notes for specified commits or recent commits."""
+        if commit_hashes is None:
+            # Get recent commits that might have notes but no local semantic events
+            try:
+                result = subprocess.run([
+                    "git", "log", "--format=%H", "-10"
+                ], cwd=self.repo_path, capture_output=True, text=True, check=True)
+                commit_hashes = result.stdout.strip().split('\n')
+            except subprocess.CalledProcessError:
+                return 0
+        
+        imported_count = 0
+        current_branch = self.get_current_branch()
+        
+        for commit_hash in commit_hashes:
+            if not commit_hash.strip():
+                continue
+                
+            # Check if we already have semantic events for this commit
+            with self.db.get_connection() as conn:
+                cursor = conn.execute(
+                    "SELECT COUNT(*) FROM semantic_events WHERE commit_hash = ?", 
+                    (commit_hash,)
+                )
+                if cursor.fetchone()[0] > 0:
+                    continue  # Already have events for this commit
+                
+                # Try to get semantic data from git notes
+                note_data = self.git_notes.get_semantic_data_from_note(commit_hash)
+                if note_data and 'semantic_events' in note_data:
+                    # Store commit metadata
+                    self.store_commit_metadata(commit_hash)
+                    
+                    # Import semantic events
+                    for event_data in note_data['semantic_events']:
+                        event_data['commit_hash'] = commit_hash
+                        event_id = str(uuid.uuid4())
+                        created_at = event_data.get('created_at', int(datetime.now().timestamp()))
+                        
+                        conn.execute("""
+                            INSERT INTO semantic_events (
+                                event_id, commit_hash, branch, event_type, node_id, location,
+                                details, layer, layer_description, confidence, reasoning, impact, created_at
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (
+                            event_id,
+                            commit_hash,
+                            current_branch,
+                            event_data.get("event_type"),
+                            event_data.get("node_id"),
+                            event_data.get("location"),
+                            event_data.get("details"),
+                            event_data.get("layer", "core"),
+                            event_data.get("layer_description"),
+                            event_data.get("confidence", 1.0),
+                            event_data.get("reasoning"),
+                            event_data.get("impact"),
+                            created_at
+                        ))
+                        imported_count += 1
+                    
+                    conn.commit()
+        
+        return imported_count
+
+    def auto_resolve_merge(self) -> str:
+        """Automatically resolve common post-merge scenarios and semantic event issues."""
+        results = []
+        
+        # Check if we're in a post-merge state
+        try:
+            # Check for recent merge in git log
+            merge_check = subprocess.run([
+                "git", "log", "-1", "--merges", "--pretty=format:%s"
+            ], cwd=self.repo_path, capture_output=True, text=True, check=True)
+            
+            if merge_check.stdout.strip():
+                results.append("🔍 Recent merge detected")
+                
+                # Import semantic events from git notes
+                imported = self.import_semantic_events_from_notes()
+                if imported > 0:
+                    results.append(f"📥 Imported {imported} semantic events from git notes")
+                
+                # Process merge event transfer
+                merge_result = self.process_merge()
+                results.append(f"🔄 {merge_result}")
+            else:
+                # Check for uncommitted merge changes
+                status_result = subprocess.run([
+                    "git", "status", "--porcelain"
+                ], cwd=self.repo_path, capture_output=True, text=True, check=True)
+                
+                if status_result.stdout.strip():
+                    results.append("ℹ️ Uncommitted changes detected - run 'git commit' then 'svcs sync'")
+                else:
+                    # Just import any missing semantic events
+                    imported = self.import_semantic_events_from_notes()
+                    if imported > 0:
+                        results.append(f"📥 Imported {imported} semantic events from git notes")
+                    else:
+                        results.append("✅ No pending merge operations or missing events")
+        
+        except subprocess.CalledProcessError:
+            results.append("⚠️ Could not determine git state")
+        
+        return " | ".join(results) if results else "✅ No issues detected"
 
 # Migration tools for moving from global to repository-local architecture
 class SVCSMigrator:

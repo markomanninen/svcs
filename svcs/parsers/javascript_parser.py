@@ -766,6 +766,13 @@ class JavaScriptParser(BaseParser):
         all_attributes = details["properties"] | details["static_properties"]
         details["attributes"] = all_attributes
         
+        # Construct source representation for inheritance detection
+        class_name = getattr(node.id, 'name', 'anonymous') if hasattr(node, 'id') and node.id else 'anonymous'
+        superclass_part = ""
+        if details["base_classes"]:
+            superclass_part = f" extends {', '.join(details['base_classes'])}"
+        details["source"] = f"class {class_name}{superclass_part} {{}}"
+        
         return details
     
     def _process_destructuring_pattern(self, pattern_node, init_node, nodes: dict):
@@ -1282,6 +1289,148 @@ class JavaScriptParser(BaseParser):
         return {
             "global_statements": global_statements,
             "nonlocal_statements": nonlocal_statements
+        }
+    
+    def _extract_assignment_targets_esprima(self, node, assignment_targets: set):
+        """Extract assignment targets from esprima AST."""
+        if hasattr(node, 'type'):
+            # Variable declarations (const, let, var)
+            if node.type == 'VariableDeclaration':
+                if hasattr(node, 'declarations'):
+                    for decl in node.declarations:
+                        self._extract_assignment_targets_from_pattern(decl.id, assignment_targets)
+            
+            # Assignment expressions (a = b)
+            elif node.type == 'AssignmentExpression':
+                if hasattr(node, 'left'):
+                    self._extract_assignment_targets_from_pattern(node.left, assignment_targets)
+        
+        # Recursively process children
+        for key, value in vars(node).items():
+            if key in ['type', 'loc', 'range']:
+                continue
+            if isinstance(value, list):
+                for item in value:
+                    if hasattr(item, 'type'):
+                        self._extract_assignment_targets_esprima(item, assignment_targets)
+            elif hasattr(value, 'type'):
+                self._extract_assignment_targets_esprima(value, assignment_targets)
+    
+    def _extract_assignment_targets_from_pattern(self, pattern, assignment_targets: set):
+        """Extract assignment targets from a variable pattern."""
+        if not hasattr(pattern, 'type'):
+            return
+        
+        if pattern.type == 'Identifier':
+            # Simple variable: const x = ...
+            if hasattr(pattern, 'name'):
+                assignment_targets.add(pattern.name)
+        
+        elif pattern.type == 'ArrayPattern':
+            # Array destructuring: const [a, b] = ...
+            if hasattr(pattern, 'elements'):
+                for elem in pattern.elements:
+                    if elem:  # Skip holes in sparse arrays
+                        self._extract_assignment_targets_from_pattern(elem, assignment_targets)
+        
+        elif pattern.type == 'ObjectPattern':
+            # Object destructuring: const {a, b} = ...
+            if hasattr(pattern, 'properties'):
+                for prop in pattern.properties:
+                    if hasattr(prop, 'value'):
+                        self._extract_assignment_targets_from_pattern(prop.value, assignment_targets)
+                    elif hasattr(prop, 'key') and hasattr(prop.key, 'name'):
+                        # Shorthand property: {a} instead of {a: a}
+                        assignment_targets.add(prop.key.name)
+        
+        elif pattern.type == 'MemberExpression':
+            # Member assignment: obj.prop = ...
+            if hasattr(pattern, 'property') and hasattr(pattern.property, 'name'):
+                assignment_targets.add(pattern.property.name)
+    
+    def _extract_behavioral_patterns_esprima(self, code: str, nodes: dict, assignment_targets: set) -> None:
+        """Enhanced behavioral pattern extraction using both esprima data and regex fallback."""
+        
+        # Start with the assignment targets from esprima
+        assignment_patterns = assignment_targets.copy()
+        
+        # Fall back to regex for patterns esprima might miss
+        regex_assign_pattern = r'(\w+)\s*=\s*([^=;]+)'
+        for match in re.finditer(regex_assign_pattern, code):
+            if not re.search(r'[!=<>]=', match.group(0)):  # Not comparison
+                assignment_patterns.add(match.group(1))
+        
+        # Extract other behavioral patterns using existing logic
+        # ...existing code...
+        augmented_assignments = set()
+        aug_assign_patterns = [
+            (r'(\w+)\s*\+=', '+='),
+            (r'(\w+)\s*-=', '-='),
+            (r'(\w+)\s*\*=', '*='),
+            (r'(\w+)\s*/=', '/='),
+            (r'(\w+)\s*%=', '%='),
+            (r'(\w+)\s*\*\*=', '**='),
+            (r'(\w+)\s*&=', '&='),
+            (r'(\w+)\s*\|=', '|='),
+            (r'(\w+)\s*\^=', '^='),
+            (r'(\w+)\s*<<=', '<<='),
+            (r'(\w+)\s*>>=', '>>=')
+        ]
+        
+        for pattern, op in aug_assign_patterns:
+            if re.search(pattern, code):
+                augmented_assignments.add(op)
+        
+        # Extract other patterns (simplified for space)
+        binary_operators = set()
+        unary_operators = set()
+        comparison_operators = set()
+        logical_operators = set()
+        string_literals = set()
+        numeric_literals = set()
+        boolean_literals = set()
+        attribute_access = set()
+        subscript_access = set()
+        internal_calls = set()
+        
+        # Use existing regex patterns from _extract_behavioral_patterns
+        # Extract return patterns
+        return_count = len(re.findall(r'\breturn\b', code))
+        yield_count = len(re.findall(r'\byield\b', code))
+        assert_count = 0
+        
+        # Add behavioral patterns to all function and class nodes
+        behavioral_data = {
+            "assignment_patterns": assignment_patterns,
+            "assignment_targets": assignment_targets,  # Include the esprima-extracted targets
+            "augmented_assignments": augmented_assignments,
+            "binary_operators": binary_operators,
+            "unary_operators": unary_operators,
+            "comparison_operators": comparison_operators,
+            "logical_operators": logical_operators,
+            "string_literals": string_literals,
+            "numeric_literals": numeric_literals,
+            "boolean_literals": boolean_literals,
+            "attribute_access": attribute_access,
+            "subscript_access": subscript_access,
+            "control_flow": {"if": 0, "for": 0, "while": 0, "switch": 0},
+            "calls": internal_calls,
+            "return_count": return_count,
+            "yield_count": yield_count,
+            "return_statements": return_count,
+            "yield_statements": yield_count,
+            "assert_statements": assert_count
+        }
+        
+        # Add behavioral data to all nodes
+        for node_id, node_data in nodes.items():
+            if node_data.get("type") in ["function", "class", "method"]:
+                node_data.update(behavioral_data)
+        
+        # Also create a special behavioral analysis node
+        nodes["behavioral:patterns"] = {
+            "type": "behavioral",
+            **behavioral_data
         }
     
     def get_node_details(self, node) -> Dict[str, Any]:

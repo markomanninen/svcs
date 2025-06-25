@@ -200,13 +200,19 @@ class CIAdapter(RepositoryLocalAdapter):
     def run_ci_command(self, command: str, **kwargs) -> Dict[str, Any]:
         """Run CI command for the current repository."""
         self.ensure_svcs_initialized()
-        original_dir = self.setup_legacy_module_context('svcs_ci')
+        original_dir = self.setup_legacy_module_context('svcs_repo_ci')
         
         try:
-            import svcs_ci
+            # Try to use new repository-local CI integration first
+            try:
+                import svcs_repo_ci as svcs_ci
+            except ImportError:
+                # Fallback to legacy CI integration
+                import svcs_ci
             
             # Set repository context
-            svcs_ci.CURRENT_REPOSITORY = str(self.repo_path)
+            if hasattr(svcs_ci, 'CURRENT_REPOSITORY'):
+                svcs_ci.CURRENT_REPOSITORY = str(self.repo_path)
             
             if command == 'pr-analysis':
                 target_branch = kwargs.get('target', 'main')

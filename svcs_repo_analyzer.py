@@ -60,12 +60,28 @@ class RepositoryLocalSemanticAnalyzer:
             return []
         
         try:
-            # Get file content before and after the commit
-            before_content = self._get_file_content_at_commit(filepath, f"{commit_hash}~1")
-            after_content = self._get_file_content_at_commit(filepath, commit_hash)
+            # Check if this is the initial commit
+            is_initial_commit = False
+            try:
+                subprocess.run(
+                    ["git", "rev-parse", f"{commit_hash}~1"],
+                    cwd=self.repo_path,
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+            except subprocess.CalledProcessError:
+                is_initial_commit = True
             
-            if before_content is None:
-                before_content = ""  # New file
+            # Get file content before and after the commit
+            if is_initial_commit:
+                before_content = ""  # No previous version in initial commit
+            else:
+                before_content = self._get_file_content_at_commit(filepath, f"{commit_hash}~1")
+                if before_content is None:
+                    before_content = ""  # New file
+            
+            after_content = self._get_file_content_at_commit(filepath, commit_hash)
             
             if after_content is None:
                 # File was deleted
@@ -147,8 +163,23 @@ class RepositoryLocalSemanticAnalyzer:
     def get_changed_files(self, commit_hash: str) -> List[str]:
         """Get list of files changed in a commit."""
         try:
+            # First, check if this is the initial commit
+            try:
+                subprocess.run(
+                    ["git", "rev-parse", f"{commit_hash}~1"],
+                    cwd=self.repo_path,
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                # Parent exists, use normal diff
+                cmd = ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", commit_hash]
+            except subprocess.CalledProcessError:
+                # No parent commit (initial commit), list all files in this commit
+                cmd = ["git", "ls-tree", "--name-only", "-r", commit_hash]
+            
             result = subprocess.run(
-                ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", commit_hash],
+                cmd,
                 cwd=self.repo_path,
                 capture_output=True,
                 text=True,
