@@ -364,7 +364,7 @@ class SVCSWebRepositoryManager:
             return {'error': str(e)}
     
     def search_events(self, repo_path: str, limit: int = 20, event_type: str = None, 
-                     since_days: int = None) -> List[Dict[str, Any]]:
+                     since_days: int = None, order_by: str = 'timestamp', order_desc: bool = True) -> List[Dict[str, Any]]:
         """Search semantic events in repository."""
         svcs = self.get_repository(repo_path)
         if not svcs:
@@ -380,6 +380,24 @@ class SVCSWebRepositoryManager:
             if since_days:
                 cutoff = int((datetime.now() - timedelta(days=since_days)).timestamp())
                 events = [e for e in events if e.get('created_at', 0) > cutoff]
+            
+            # Apply ordering
+            sort_field = order_by
+            if sort_field == 'timestamp':
+                sort_field = 'created_at'  # Map to actual field name in basic search
+            
+            def get_sort_key(event):
+                value = event.get(sort_field, 0)
+                if sort_field == 'created_at' and value:
+                    return value
+                elif sort_field == 'confidence':
+                    return event.get('confidence', 0)
+                elif sort_field == 'event_type':
+                    return event.get('event_type', '')
+                else:
+                    return value or 0
+            
+            events.sort(key=get_sort_key, reverse=order_desc)
             
             return events[:limit]
         except Exception:

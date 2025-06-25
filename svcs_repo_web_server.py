@@ -709,6 +709,83 @@ def get_repository_branches():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/api/repository/metadata', methods=['POST'])
+def get_repository_metadata():
+    """Get available event types, layers, and other metadata from repository data."""
+    try:
+        data = request.get_json()
+        repo_path = data.get('repository_path')
+        
+        if not repo_path:
+            return jsonify({'success': False, 'error': 'repository_path required'}), 400
+        
+        # Get repository instance
+        svcs = web_repository_manager.get_repository(repo_path)
+        if not svcs:
+            return jsonify({'success': False, 'error': 'Repository not found or not initialized'}), 404
+        
+        # Get all events to extract metadata
+        events = svcs.get_branch_events(limit=5000)  # Get more events for comprehensive metadata
+        
+        # Extract unique values from ACTUAL data
+        event_types = set()
+        layers = set()
+        authors = set()
+        
+        for event in events:
+            if event.get('event_type'):
+                event_types.add(event['event_type'])
+            if event.get('layer'):
+                layers.add(event['layer'])
+            if event.get('author'):
+                authors.add(event['author'])
+        
+        # If no events exist yet, provide the REAL event types from SVCS layer system (69 types)
+        if not event_types:
+            event_types = {
+                'algorithm_optimized', 'api_breaking_change', 'api_enhancement', 'architecture_change',
+                'assertion_usage_changed', 'assignment_pattern_changed', 'attribute_access_changed',
+                'augmented_assignment_changed', 'binary_operator_usage_changed', 'boolean_literal_usage_changed',
+                'class_attributes_changed', 'class_methods_changed', 'code_complication', 'code_simplification',
+                'comparison_operator_usage_changed', 'comprehension_usage_changed', 'concurrency_introduction',
+                'control_flow_changed', 'decorator_added', 'decorator_removed', 'default_parameters_added',
+                'default_parameters_removed', 'dependency_added', 'dependency_removed', 'design_pattern_applied',
+                'design_pattern_implementation', 'design_pattern_removal', 'error_handling_improvement',
+                'error_handling_introduced', 'error_handling_removed', 'exception_handling_added',
+                'exception_handling_changed', 'exception_handling_removed', 'file_added', 'file_removed',
+                'function_complexity_changed', 'function_made_async', 'function_made_generator',
+                'function_made_sync', 'functional_programming_adopted', 'functional_programming_changed',
+                'functional_programming_removed', 'generator_made_function', 'global_scope_changed',
+                'inheritance_changed', 'internal_call_added', 'internal_call_removed', 'lambda_usage_changed',
+                'logical_operator_usage_changed', 'manual_analysis', 'memory_optimization', 'node_added',
+                'node_removed', 'nonlocal_scope_changed', 'numeric_literal_usage_changed',
+                'optimization_algorithm', 'optimization_data_structure', 'performance_improvement',
+                'performance_regression', 'refactoring_extract_method', 'refactoring_inline_method',
+                'return_pattern_changed', 'security_improvement', 'security_vulnerability',
+                'signature_changed', 'string_literal_usage_changed', 'subscript_access_changed',
+                'unary_operator_usage_changed', 'yield_pattern_changed'
+            }
+        
+        # If no layers exist yet, provide the standard SVCS layers from the layer system
+        if not layers:
+            layers = {'core', '1', '2', '3', '4', '5a', '5b'}
+        
+        metadata = {
+            'event_types': sorted(list(event_types)),
+            'layers': sorted(list(layers)),
+            'authors': sorted(list(authors)),
+            'total_events': len(events),
+            'repository_path': repo_path
+        }
+        
+        return jsonify({
+            'success': True,
+            'data': metadata
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 # Analytics Endpoints
 @app.route('/api/analytics/generate', methods=['POST'])
 def generate_analytics():

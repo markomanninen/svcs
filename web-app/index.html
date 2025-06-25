@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVCS Dashboard - Repository-Local Architecture</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <h1>🚀 SVCS Dashboard</h1>
+                <p>Semantic Version Control System</p>
+            </div>
+            
+            <nav class="main-nav">
+                <button class="nav-item active" onclick="showSection('repositories')">🏠 Repositories</button>
+                <button class="nav-item" onclick="showSection('semantic-search')">🔍 Search</button>
+                <button class="nav-item" onclick="showSection('natural-query')">💬 AI Query</button>
+                <button class="nav-item" onclick="showSection('evolution')">🔄 Evolution</button>
+                <button class="nav-item" onclick="showSection('analytics')">📊 Analytics</button>
+                <button class="nav-item" onclick="showSection('quality')">✅ Quality</button>
+                <button class="nav-item" onclick="showSection('compare')">🔀 Compare</button>
+                <button class="nav-item" onclick="showSection('ci-integration')">🚀 CI/CD</button>
+                <button class="nav-item" onclick="showSection('git-notes')">📝 Notes</button>
+                <button class="nav-item" onclick="showSection('cleanup')">🧹 Cleanup</button>
+            </nav>
+        </div>
+
+        <div class="main-content">
+            <div class="content-area">
+                <!-- Repositories Section -->
+                <div id="repositories" class="tool-section active">
+                    <h2>📂 Repository Management</h2>
+                    
+                    <div class="dashboard-overview">
+                        <div class="system-info">
+                            <h3>System Status</h3>
+                            <div id="system-info-grid" class="info-grid"></div>
+                        </div>
+                    </div>
+
+                    <div class="repository-management">
+                        <div class="section-header">
+                            <h3>Repositories</h3>
+                            <button class="btn" onclick="showAddRepositoryForm()">➕ Add Repository</button>
+                        </div>
+                        
+                        <div id="repositories-list" class="repository-list">
+                            <div class="loading">Loading repositories...</div>
+                        </div>
+                        
+                        <div id="add-repo-form" class="modal" style="display: none;">
+                            <div class="modal-content">
+                                <h3>Add New Repository</h3>
+                                <div class="form-group">
+                                    <label for="repo-path">Repository Path:</label>
+                                    <input type="text" id="repo-path" class="form-control" placeholder="/path/to/repository">
+                                </div>
+                                <div class="form-group">
+                                    <label for="repo-name">Repository Name (optional):</label>
+                                    <input type="text" id="repo-name" class="form-control" placeholder="My Project">
+                                </div>
+                                <div class="form-actions">
+                                    <button class="btn" onclick="registerRepository()">📝 Register</button>
+                                    <button class="btn" onclick="initializeRepository()">🚀 Initialize</button>
+                                    <button class="btn btn-secondary" onclick="hideAddRepositoryForm()">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Semantic Search Section -->
+                <div id="semantic-search" class="tool-section">
+                    <h2>🔍 Semantic Search</h2>
+                    
+                    <div class="form-group">
+                        <label for="search-repo">Repository:</label>
+                        <select id="search-repo" class="form-select">
+                            <option value="">Select a repository...</option>
+                        </select>
+                    </div>
+
+                    <div class="search-controls">
+                        <!-- Basic Controls Row 1 -->
+                        <div class="grid-3">
+                            <div class="form-group">
+                                <label for="search-event-type">Event Type:</label>
+                                <select id="search-event-type" class="form-select">
+                                    <option value="">All Event Types</option>
+                                    <!-- Will be populated with ACTUAL data from repository -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="search-layer">Layer:</label>
+                                <select id="search-layer" class="form-select">
+                                    <option value="">All Layers</option>
+                                    <!-- Will be populated with ACTUAL data from repository -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="search-author">Author:</label>
+                                <input type="text" id="search-author" class="form-control" placeholder="john.doe">
+                            </div>
+                        </div>
+                        
+                        <!-- Basic Controls Row 2 -->
+                        <div class="grid-4">
+                            <div class="form-group">
+                                <label for="search-since-days">Since Days:</label>
+                                <input type="number" id="search-since-days" class="form-control" placeholder="7" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="search-limit">Limit:</label>
+                                <input type="number" id="search-limit" class="form-control" value="20" min="1" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="search-order-by">Order By:</label>
+                                <select id="search-order-by" class="form-select">
+                                    <option value="timestamp">Timestamp</option>
+                                    <option value="confidence">Confidence</option>
+                                    <option value="event_type">Event Type</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="search-order-desc">Order:</label>
+                                <select id="search-order-desc" class="form-select">
+                                    <option value="true">Descending</option>
+                                    <option value="false">Ascending</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button class="btn search-button" onclick="performSearch()">🔍 Search</button>
+                            <button class="btn" onclick="toggleAdvancedFilters()">⚙️ More Filters</button>
+                            <button class="btn" onclick="getRecentActivity()">📅 Recent Activity</button>
+                            <button class="btn btn-secondary" onclick="clearSearchFilters()">🗑️ Clear</button>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Filters Panel -->
+                    <div id="advanced-filters" class="advanced-panel" style="display: none;">
+                        <h4>Advanced Filters</h4>
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label for="adv-confidence">Min Confidence:</label>
+                                <input type="number" id="adv-confidence" class="form-control" min="0" max="1" step="0.1" placeholder="0.7">
+                            </div>
+                            <div class="form-group">
+                                <label for="adv-since-date">Since Date:</label>
+                                <input type="text" id="adv-since-date" class="form-control" placeholder="2024-01-01 or '7 days ago'">
+                            </div>
+                            <div class="form-group">
+                                <label for="adv-location">Location Pattern:</label>
+                                <input type="text" id="adv-location" class="form-control" placeholder="src/main/*">
+                            </div>
+                            <div class="form-group">
+                                <label for="adv-max-confidence">Max Confidence:</label>
+                                <input type="number" id="adv-max-confidence" class="form-control" min="0" max="1" step="0.1" placeholder="1.0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="search-results" class="result-container" style="display: none;">
+                        <h3>Search Results</h3>
+                        <div id="search-results-content" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- Natural Language Query Section -->
+                <div id="natural-query" class="tool-section">
+                    <h2>💬 Natural Language Query</h2>
+                    
+                    <div class="form-group">
+                        <label for="nlq-repo">Repository:</label>
+                        <select id="nlq-repo" class="form-select">
+                            <option value="">Select a repository...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="natural-query-input">Query:</label>
+                        <textarea id="natural-query-input" class="form-control" rows="3" 
+                                  placeholder="Ask about your codebase: 'What functions were added recently?' or 'Show me all error handling improvements'"></textarea>
+                    </div>
+
+                    <button class="btn" onclick="executeNaturalQuery()">💬 Ask AI</button>
+
+                    <div id="nlq-results" class="result-container" style="display: none;">
+                        <h3>AI Response</h3>
+                        <div id="nlq-results-content" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- Evolution Tracking Section -->
+                <div id="evolution" class="tool-section">
+                    <h2>🔄 Evolution Tracking</h2>
+                    
+                    <div class="form-group">
+                        <label for="evolution-repo">Repository:</label>
+                        <select id="evolution-repo" class="form-select">
+                            <option value="">Select a repository...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="node-id">Node ID (e.g., func:function_name):</label>
+                        <input type="text" id="node-id" class="form-control" placeholder="func:calculate_score">
+                    </div>
+
+                    <button class="btn" onclick="trackEvolution()">🔄 Track Evolution</button>
+
+                    <div id="evolution-results" class="result-container" style="display: none;">
+                        <h3>Evolution History</h3>
+                        <div id="evolution-results-content" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- Analytics Section -->
+                <div id="analytics" class="tool-section">
+                    <h2>📊 Analytics</h2>
+                    
+                    <div class="form-group">
+                        <label for="analytics-repo">Repository:</label>
+                        <select id="analytics-repo" class="form-select">
+                            <option value="">Select a repository...</option>
+                        </select>
+                    </div>
+
+                    <button class="btn" onclick="generateAnalytics()">📊 Generate Analytics</button>
+
+                    <div id="analytics-results" class="result-container" style="display: none;">
+                        <h3>Analytics Report</h3>
+                        <div id="analytics-results-content" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- Quality Analysis Section -->
+                <div id="quality" class="tool-section">
+                    <h2>✅ Quality Analysis</h2>
+                    
+                    <div class="form-group">
+                        <label for="quality-repo">Repository:</label>
+                        <select id="quality-repo" class="form-select">
+                            <option value="">Select a repository...</option>
+                        </select>
+                    </div>
+
+                    <button class="btn" onclick="analyzeQuality()">✅ Analyze Quality</button>
+
+                    <div id="quality-results" class="result-container" style="display: none;">
+                        <h3>Quality Metrics</h3>
+                        <div id="quality-results-content" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- Branch Comparison Section -->
+                <div id="compare" class="tool-section">
+                    <h2>🔀 Branch Comparison</h2>
+                    
+                    <div class="form-group">
+                        <label for="compare-repo">Repository:</label>
+                        <select id="compare-repo" class="form-select">
+                            <option value="">Select a repository...</option>
+                        </select>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="branch1">Branch 1:</label>
+                            <select id="branch1" class="form-control">
+                                <option value="">Select branch...</option>
+                            </select>
+                            <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
+                                💡 If no branches appear, you can type branch names manually by switching to text mode
+                            </small>
+                        </div>
+                        <div class="form-group">
+                            <label for="branch2">Branch 2:</label>
+                            <select id="branch2" class="form-control">
+                                <option value="">Select branch...</option>
+                            </select>
+                            <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
+                                💡 Common branches: main, master, develop, feature/*
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <button class="btn btn-info" onclick="toggleBranchInputMode()" style="font-size: 12px; padding: 6px 12px;">
+                            ⚙️ Switch to Text Input Mode
+                        </button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="compare-limit">Limit per branch:</label>
+                        <input type="number" id="compare-limit" class="form-control" value="10" min="1" max="100">
+                    </div>
+
+                    <button class="btn" onclick="compareBranches()">🔄 Compare Branches</button>
+
+                    <div id="compare-results" class="result-container" style="display: none;">
+                        <h3>Branch Comparison</h3>
+                        <div id="compare-results-content" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- CI/CD Integration Section -->
+                <div id="ci-integration" class="tool-section">
+                    <h2>🚀 CI/CD Integration</h2>
+                    
+                    <div class="form-group">
+                        <label for="ci-repo">Repository:</label>
+                        <select id="ci-repo" class="form-select">
+                            <option value="">Select a repository...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="target-branch">Target Branch:</label>
+                        <select id="target-branch" class="form-control">
+                            <option value="">Select branch...</option>
+                        </select>
+                        <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
+                            💡 Tip: This is the branch you want to compare against (usually "main", "master", or "develop")
+                        </small>
+                    </div>
+
+                    <div class="grid-2">
+                        <div>
+                            <h3>📊 PR Analysis</h3>
+                            <p style="font-size: 13px; color: #666; margin: 10px 0;">
+                                Analyzes semantic changes between current branch and target branch.
+                            </p>
+                            <button class="btn" onclick="runPRAnalysis()">📊 Analyze PR Impact</button>
+                        </div>
+                        <div>
+                            <h3>✅ Quality Gate</h3>
+                            <p style="font-size: 13px; color: #666; margin: 10px 0;">
+                                Checks code quality based on semantic analysis.
+                            </p>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="strict-mode"> Strict Mode
+                                </label>
+                                <small style="color: #666; font-size: 11px; display: block; margin-left: 20px;">
+                                    (Requires ALL quality checks to pass)
+                                </small>
+                            </div>
+                            <button class="btn" onclick="runQualityGate()">✅ Run Quality Gate</button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions Panel -->
+                    <div style="background: #f1f3f4; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                        <h4>Quick Actions</h4>
+                        <div class="grid-3">
+                            <button class="btn btn-info" onclick="refreshBranchInfo()">🔄 Refresh Branch Info</button>
+                            <button class="btn btn-info" onclick="showAvailableBranches()">🌿 Show Available Branches</button>
+                            <button class="btn btn-info" onclick="showCurrentBranch()">📍 Current Branch Info</button>
+                        </div>
+                    </div>
+
+                    <div id="ci-results" class="result-container" style="display: none;">
+                        <h3>CI/CD Results</h3>
+                        <div id="ci-results-content" class="result-content"></div>
+                    </div>
+                    
+                    <!-- Branch Info Panel -->
+                    <div id="branch-info" class="result-container" style="display: none; margin-top: 15px;">
+                        <h3>Branch Information</h3>
+                        <div id="branch-info-content" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- Git Notes Section -->
+                <div id="git-notes" class="tool-section">
+                    <h2>📝 Git Notes Management</h2>
+                    
+                    <div class="form-group">
+                        <label for="notes-repo">Repository:</label>
+                        <select id="notes-repo" class="form-select">
+                            <option value="">Select a repository...</option>
+                        </select>
+                    </div>
+
+                    <div class="grid-3">
+                        <button class="btn" onclick="syncNotes()">🔄 Sync Notes</button>
+                        <button class="btn" onclick="fetchNotes()">📥 Fetch Notes</button>
+                        <div class="form-group">
+                            <input type="text" id="commit-hash" class="form-control" placeholder="Commit hash (optional)">
+                            <button class="btn" onclick="showNote()">👁️ Show Note</button>
+                        </div>
+                    </div>
+
+                    <div id="notes-results" class="result-container" style="display: none;">
+                        <h3>Notes Results</h3>
+                        <div id="notes-results-content" class="result-content"></div>
+                    </div>
+                </div>
+
+                <!-- Repository Cleanup Section -->
+                <div id="cleanup" class="tool-section">
+                    <h2>🧹 Repository Cleanup</h2>
+                    
+                    <div class="form-group">
+                        <label for="cleanup-repo">Repository:</label>
+                        <select id="cleanup-repo" class="form-select">
+                            <option value="">Select a repository...</option>
+                        </select>
+                    </div>
+
+                    <div class="grid-3">
+                        <button class="btn" onclick="cleanupOrphanedData()">🗑️ Cleanup Orphaned Data</button>
+                        <button class="btn" onclick="cleanupUnreachableCommits()">🧹 Cleanup Unreachable Commits</button>
+                        <button class="btn" onclick="getDatabaseStats()">📊 Database Stats</button>
+                    </div>
+
+                    <div id="cleanup-results" class="result-container" style="display: none;">
+                        <h3>Cleanup Results</h3>
+                        <div id="cleanup-results-content" class="result-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Modules -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/components/system-status.js"></script>
+    <script src="js/components/repository-manager.js"></script>
+    <script src="js/components/branch-manager.js"></script>
+    <script src="js/components/semantic-search.js"></script>
+    <script src="js/components/natural-language-query.js"></script>
+    <script src="js/components/evolution-tracker.js"></script>
+    <script src="js/components/analytics.js"></script>
+    <script src="js/components/quality-analysis.js"></script>
+    <script src="js/components/branch-comparison.js"></script>
+    <script src="js/components/ci-integration.js"></script>
+    <script src="js/components/git-notes-manager.js"></script>
+    <script src="js/components/cleanup-manager.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
