@@ -64,7 +64,7 @@
                                 </div>
                                 <div class="form-actions">
                                     <button class="btn" onclick="registerRepository()">📝 Register</button>
-                                    <button class="btn" onclick="initializeRepository()">🚀 Initialize</button>
+                                    <button class="btn" onclick="initializeRepository()">Initialize</button>
                                     <button class="btn btn-secondary" onclick="hideAddRepositoryForm()">Cancel</button>
                                 </div>
                             </div>
@@ -134,10 +134,10 @@
                         </div>
 
                         <div class="action-buttons">
-                            <button class="btn search-button" onclick="performSearch()">🔍 Search</button>
-                            <button class="btn" onclick="toggleAdvancedFilters()">⚙️ More Filters</button>
-                            <button class="btn" onclick="getRecentActivity()">📅 Recent Activity</button>
-                            <button class="btn btn-secondary" onclick="clearSearchFilters()">🗑️ Clear</button>
+                            <button class="btn search-button" onclick="performSearch()">Search</button>
+                            <button class="btn" onclick="toggleAdvancedFilters()">More Filters</button>
+                            <button class="btn" onclick="getRecentActivity()">Recent Activity</button>
+                            <button class="btn btn-secondary" onclick="clearSearchFilters()">Clear</button>
                         </div>
                     </div>
 
@@ -187,7 +187,7 @@
                                   placeholder="Ask about your codebase: 'What functions were added recently?' or 'Show me all error handling improvements'"></textarea>
                     </div>
 
-                    <button class="btn" onclick="executeNaturalQuery()">💬 Ask AI</button>
+                    <button class="btn" onclick="executeNaturalQuery()">Ask AI</button>
 
                     <div id="nlq-results" class="result-container" style="display: none;">
                         <h3>AI Response</h3>
@@ -211,7 +211,25 @@
                         <input type="text" id="node-id" class="form-control" placeholder="func:calculate_score">
                     </div>
 
-                    <button class="btn" onclick="trackEvolution()">🔄 Track Evolution</button>
+                    <!-- Evolution Filters -->
+                    <div class="form-group">
+                        <label for="evolution-event-types">Event Types (comma-separated, optional):</label>
+                        <input type="text" id="evolution-event-types" class="form-control" 
+                               placeholder="signature_changed,function_made_async">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="evolution-since">Since Date (YYYY-MM-DD, optional):</label>
+                        <input type="date" id="evolution-since" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="evolution-confidence">Minimum Confidence (0.0-1.0, optional):</label>
+                        <input type="number" id="evolution-confidence" class="form-control" 
+                               min="0" max="1" step="0.1" placeholder="0.7">
+                    </div>
+
+                    <button class="btn" onclick="trackEvolution()">Track Evolution</button>
 
                     <div id="evolution-results" class="result-container" style="display: none;">
                         <h3>Evolution History</h3>
@@ -230,7 +248,7 @@
                         </select>
                     </div>
 
-                    <button class="btn" onclick="generateAnalytics()">📊 Generate Analytics</button>
+                    <button class="btn" onclick="generateAnalytics()">Generate Analytics</button>
 
                     <div id="analytics-results" class="result-container" style="display: none;">
                         <h3>Analytics Report</h3>
@@ -249,7 +267,7 @@
                         </select>
                     </div>
 
-                    <button class="btn" onclick="analyzeQuality()">✅ Analyze Quality</button>
+                    <button class="btn" onclick="analyzeQuality()">Analyze Quality</button>
 
                     <div id="quality-results" class="result-container" style="display: none;">
                         <h3>Quality Metrics</h3>
@@ -300,7 +318,7 @@
                         <input type="number" id="compare-limit" class="form-control" value="10" min="1" max="100">
                     </div>
 
-                    <button class="btn" onclick="compareBranches()">🔄 Compare Branches</button>
+                    <button class="btn" onclick="compareBranches()">Compare Branches</button>
 
                     <div id="compare-results" class="result-container" style="display: none;">
                         <h3>Branch Comparison</h3>
@@ -335,7 +353,7 @@
                             <p style="font-size: 13px; color: #666; margin: 10px 0;">
                                 Analyzes semantic changes between current branch and target branch.
                             </p>
-                            <button class="btn" onclick="runPRAnalysis()">📊 Analyze PR Impact</button>
+                            <button class="btn" onclick="runPRAnalysis()">Analyze PR Impact</button>
                         </div>
                         <div>
                             <h3>✅ Quality Gate</h3>
@@ -350,7 +368,7 @@
                                     (Requires ALL quality checks to pass)
                                 </small>
                             </div>
-                            <button class="btn" onclick="runQualityGate()">✅ Run Quality Gate</button>
+                            <button class="btn" onclick="runQualityGate()">Run Quality Gate</button>
                         </div>
                     </div>
 
@@ -358,9 +376,9 @@
                     <div style="background: #f1f3f4; padding: 15px; border-radius: 8px; margin-top: 20px;">
                         <h4>Quick Actions</h4>
                         <div class="grid-3">
-                            <button class="btn btn-info" onclick="refreshBranchInfo()">🔄 Refresh Branch Info</button>
-                            <button class="btn btn-info" onclick="showAvailableBranches()">🌿 Show Available Branches</button>
-                            <button class="btn btn-info" onclick="showCurrentBranch()">📍 Current Branch Info</button>
+                            <button class="btn btn-info" onclick="refreshBranchInfo()">Refresh Branch Info</button>
+                            <button class="btn btn-info" onclick="showAvailableBranches()">Show Available Branches</button>
+                            <button class="btn btn-info" onclick="showCurrentBranch()">Current Branch Info</button>
                         </div>
                     </div>
 
@@ -388,11 +406,11 @@
                     </div>
 
                     <div class="grid-3">
-                        <button class="btn" onclick="syncNotes()">🔄 Sync Notes</button>
-                        <button class="btn" onclick="fetchNotes()">📥 Fetch Notes</button>
+                        <button class="btn" onclick="syncNotes()">Sync Notes</button>
+                        <button class="btn" onclick="fetchNotes()">Fetch Notes</button>
                         <div class="form-group">
                             <input type="text" id="commit-hash" class="form-control" placeholder="Commit hash (optional)">
-                            <button class="btn" onclick="showNote()">👁️ Show Note</button>
+                            <button class="btn" onclick="showNote()">Show Note</button>
                         </div>
                     </div>
 
@@ -414,9 +432,9 @@
                     </div>
 
                     <div class="grid-3">
-                        <button class="btn" onclick="cleanupOrphanedData()">🗑️ Cleanup Orphaned Data</button>
+                        <button class="btn" onclick="cleanupOrphanedData()">Cleanup Orphaned Data</button>
                         <button class="btn" onclick="cleanupUnreachableCommits()">🧹 Cleanup Unreachable Commits</button>
-                        <button class="btn" onclick="getDatabaseStats()">📊 Database Stats</button>
+                        <button class="btn" onclick="getDatabaseStats()">Database Stats</button>
                     </div>
 
                     <div id="cleanup-results" class="result-container" style="display: none;">
@@ -430,20 +448,20 @@
 
     <!-- JavaScript Modules -->
     <script src="js/config.js"></script>
-    <script src="js/api.js"></script>
+    <script src="js/api.js?v=1735131001"></script>
     <script src="js/utils.js"></script>
     <script src="js/components/system-status.js"></script>
-    <script src="js/components/repository-manager.js"></script>
-    <script src="js/components/branch-manager.js"></script>
-    <script src="js/components/semantic-search.js"></script>
-    <script src="js/components/natural-language-query.js"></script>
-    <script src="js/components/evolution-tracker.js"></script>
-    <script src="js/components/analytics.js"></script>
-    <script src="js/components/quality-analysis.js"></script>
-    <script src="js/components/branch-comparison.js"></script>
-    <script src="js/components/ci-integration.js"></script>
-    <script src="js/components/git-notes-manager.js"></script>
-    <script src="js/components/cleanup-manager.js"></script>
+    <script src="js/components/repository-manager.js?v=1735170626"></script>
+    <script src="js/components/branch-manager.js?v=1735131004"></script>
+    <script src="js/components/semantic-search.js?v=1735131005"></script>
+    <script src="js/components/natural-language-query.js?v=1735131006"></script>
+    <script src="js/components/evolution-tracker.js?v=1735131005"></script>
+    <script src="js/components/analytics.js?v=1735131005"></script>
+    <script src="js/components/quality-analysis.js?v=1735131005"></script>
+    <script src="js/components/branch-comparison.js?v=1735170625"></script>
+    <script src="js/components/ci-integration.js?v=1735131005"></script>
+    <script src="js/components/git-notes-manager.js?v=1735131006"></script>
+    <script src="js/components/cleanup-manager.js?v=1735131006"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

@@ -262,21 +262,33 @@ class SemanticSearch {
         resultsDiv.innerHTML = html;
     }
 
-    updateRepositorySelect(repositories) {
+    async updateRepositorySelect(repositories) {
         // Update the repository dropdown with the latest repositories
         const select = this.utils.$('search-repo');
         if (select) {
             // Clear existing options except the default
             select.innerHTML = '<option value="">Select a repository...</option>';
             
-            // Add registered repositories
+            // Add registered repositories with current branch info
             const registeredRepos = repositories.filter(repo => repo.registered);
-            registeredRepos.forEach(repo => {
+            for (const repo of registeredRepos) {
                 const option = document.createElement('option');
                 option.value = repo.path;
-                option.textContent = repo.name || repo.path.split('/').pop();
+                
+                // Try to get current branch info
+                let label = repo.name || repo.path.split('/').pop();
+                try {
+                    const branchInfo = await this.api.getRepositoryBranches(repo.path);
+                    if (branchInfo && branchInfo.current_branch) {
+                        label = `${label}:(${branchInfo.current_branch})`;
+                    }
+                } catch (error) {
+                    console.warn(`Failed to get branch info for ${repo.path}:`, error);
+                }
+                
+                option.textContent = label;
                 select.appendChild(option);
-            });
+            }
 
             // Add event listener for repository selection changes
             select.removeEventListener('change', this.handleRepositoryChange.bind(this)); // Remove any existing listener

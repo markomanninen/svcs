@@ -46,7 +46,7 @@ class BranchComparison {
             branch1.outerHTML = `<input type="text" id="branch1" class="form-control" placeholder="main" value="${currentValue1}">`;
             branch2.outerHTML = `<input type="text" id="branch2" class="form-control" placeholder="develop" value="${currentValue2}">`;
             
-            toggleButton.innerHTML = '🔽 Switch to Dropdown Mode';
+            toggleButton.innerHTML = 'Switch to Dropdown Mode';
         } else {
             // Switch to select dropdowns
             const currentValue1 = branch1.value;
@@ -63,7 +63,7 @@ class BranchComparison {
                 document.getElementById('branch2').innerHTML += `<option value="${currentValue2}" selected>${currentValue2}</option>`;
             }
             
-            toggleButton.innerHTML = '⚙️ Switch to Text Input Mode';
+            toggleButton.innerHTML = 'Switch to Text Input Mode';
             
             // Try to load branches
             this.loadBranches();
@@ -226,13 +226,32 @@ class BranchComparison {
         });
     }
 
-    updateRepositorySelect(repositories) {
+    async updateRepositorySelect(repositories) {
         if (this.repoSelect) {
             const registeredRepos = repositories.filter(repo => repo.registered);
-            this.repoSelect.innerHTML = '<option value="">Select a repository...</option>' +
-                registeredRepos.map(repo => 
-                    `<option value="${repo.path}">${repo.name} (${repo.path})</option>`
-                ).join('');
+            
+            // Clear existing options
+            this.repoSelect.innerHTML = '<option value="">Select a repository...</option>';
+            
+            // Add repository options with current branch info
+            for (const repo of registeredRepos) {
+                const option = document.createElement('option');
+                option.value = repo.path;
+                
+                // Try to get current branch info
+                let label = repo.name || repo.path;
+                try {
+                    const branchInfo = await this.api.getRepositoryBranches(repo.path);
+                    if (branchInfo && branchInfo.current_branch) {
+                        label = `${label}:(${branchInfo.current_branch})`;
+                    }
+                } catch (error) {
+                    console.warn(`Failed to get branch info for ${repo.path}:`, error);
+                }
+                
+                option.textContent = label;
+                this.repoSelect.appendChild(option);
+            }
         }
     }
 }

@@ -61,11 +61,17 @@ class CIIntegration {
         }
 
         try {
+            console.log('CI Integration: Loading branches for repo:', repoPath);
             const result = await this.api.getRepositoryBranches(repoPath);
-            if (result.success && result.data && result.data.branches) {
-                this.populateTargetBranchSelect(result.data.branches, result.data.current_branch);
+            console.log('CI Integration: API result:', result);
+            
+            // The API client returns result.data directly, so we get the unwrapped data
+            if (result && result.branches) {
+                console.log('CI Integration: Found branches:', result.branches);
+                this.populateTargetBranchSelect(result.branches, result.current_branch);
             } else {
-                throw new Error(result.error || 'Failed to load branches');
+                console.error('CI Integration: Invalid result structure:', result);
+                throw new Error('Failed to load branches - invalid response structure');
             }
         } catch (error) {
             console.error('Error loading branches:', error);
@@ -81,11 +87,12 @@ class CIIntegration {
 
     populateTargetBranchSelect(branches, currentBranch) {
         if (this.targetBranchSelect) {
-            this.targetBranchSelect.innerHTML = '<option value="">Select branch...</option>' +
-                branches.map(branch => {
-                    const isSelected = branch === currentBranch ? ' selected' : '';
-                    const label = branch === currentBranch ? `${branch} (current)` : branch;
-                    return `<option value="${branch}"${isSelected}>${label}</option>`;
+            // Filter out current branch since comparing current to current doesn't make sense
+            const targetBranches = branches.filter(branch => branch !== currentBranch);
+            
+            this.targetBranchSelect.innerHTML = '<option value="">Select target branch...</option>' +
+                targetBranches.map(branch => {
+                    return `<option value="${branch}">${branch}</option>`;
                 }).join('');
         }
     }
@@ -330,12 +337,13 @@ class CIIntegration {
     }
 
     displayBranchInfo(result) {
-        if (!result.success || !result.data) {
+        // The API client returns unwrapped data directly
+        if (!result || !result.branches) {
             this.branchInfoContent.innerHTML = '<div class="error">Failed to load branch information</div>';
             return;
         }
 
-        const data = result.data;
+        const data = result;
         let html = `
             <div class="branch-info-summary">
                 <h5>🌿 Repository Branch Information</h5>
@@ -369,7 +377,8 @@ class CIIntegration {
     }
 
     displayCurrentBranch(result) {
-        if (!result.success || !result.data) {
+        // The API client returns unwrapped data directly
+        if (!result || !result.current_branch) {
             this.branchInfoContent.innerHTML = '<div class="error">Failed to get current branch</div>';
             return;
         }
@@ -377,19 +386,41 @@ class CIIntegration {
         this.branchInfoContent.innerHTML = `
             <div class="current-branch-info">
                 <h5>📍 Current Branch</h5>
-                <div class="current-branch-name">${result.data.current_branch || 'Unknown'}</div>
+                <div class="current-branch-name">${result.current_branch || 'Unknown'}</div>
                 <div class="branch-tip">💡 This is the currently active branch in your repository</div>
             </div>
         `;
     }
 
-    updateRepositorySelect(repositories) {
+    async updateRepositorySelect(repositories) {
         if (this.repoSelect) {
             const registeredRepos = repositories.filter(repo => repo.registered);
-            this.repoSelect.innerHTML = '<option value="">Select a repository...</option>' +
-                registeredRepos.map(repo => 
-                    `<option value="${repo.path}">${repo.name} (${repo.path})</option>`
-                ).join('');
+            
+            // Clear existing options
+            this.repoSelect.innerHTML = '<option value="">Select a repository...</option>';
+            
+            // Add repository options with current branch info
+            for (const repo of registeredRepos) {
+                const option = document.createElement('option');
+                option.value = repo.path;
+                
+                // Try to get current branch info
+                let label = `${repo.name}:(loading...)`;
+                try {
+                    const branchInfo = await this.api.getRepositoryBranches(repo.path);
+                    if (branchInfo && branchInfo.current_branch) {
+                        label = `${repo.name}:(${branchInfo.current_branch})`;
+                    } else {
+                        label = `${repo.name}:(unknown)`;
+                    }
+                } catch (error) {
+                    console.warn(`Failed to get branch info for ${repo.path}:`, error);
+                    label = `${repo.name}:(error)`;
+                }
+                
+                option.textContent = label;
+                this.repoSelect.appendChild(option);
+            }
         }
     }
 }

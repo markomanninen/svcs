@@ -26,63 +26,31 @@ class QualityAnalysis {
         resultsDiv.innerHTML = '<div class="loading">Analyzing code quality...</div>';
 
         try {
-            // Search for quality-related semantic patterns
-            const patterns = await Promise.all([
-                this.searchPattern(repoPath, 'performance'),
-                this.searchPattern(repoPath, 'architecture'),
-                this.searchPattern(repoPath, 'error_handling'),
-                this.searchPattern(repoPath, 'testing'),
-                this.searchPattern(repoPath, 'documentation'),
-                this.searchPattern(repoPath, 'security')
-            ]);
+            // Use the actual quality analysis endpoint
+            const qualityData = await this.api.analyzeQuality(repoPath);
+            console.log('Quality analysis data:', qualityData);
 
-            const [performance, architecture, errorHandling, testing, documentation, security] = patterns;
-
-            this.displayQualityAnalysis({
-                performance,
-                architecture,
-                errorHandling,
-                testing,
-                documentation,
-                security
-            });
+            this.displayQualityAnalysis(qualityData.quality_metrics);
         } catch (error) {
+            console.error('Quality analysis error:', error);
             resultsDiv.innerHTML = `<div class="error">Quality analysis failed: ${error.message}</div>`;
         }
     }
 
-    async searchPattern(repoPath, patternType) {
-        try {
-            return await this.api.searchSemanticPatterns({
-                repository_path: repoPath,
-                pattern_type: patternType,
-                min_confidence: 0.6,
-                limit: 20,
-                since_date: '30 days ago'
-            });
-        } catch (error) {
-            console.warn(`Failed to search ${patternType} patterns:`, error);
-            return { events: [] };
-        }
-    }
+    // Quality analysis methods removed - using backend quality analysis instead
 
-    displayQualityAnalysis(patterns) {
+    displayQualityAnalysis(qualityMetrics) {
         const resultsDiv = document.getElementById('quality-results');
         
-        const overallScore = this.calculateOverallQualityScore(patterns);
+        const overallScore = Math.round(qualityMetrics.quality_score * 100);
         
         resultsDiv.innerHTML = `
             <div class="quality-analysis-dashboard">
                 <h3>Code Quality Analysis</h3>
                 
                 ${this.renderOverallScore(overallScore)}
-                ${this.renderPatternAnalysis('Performance', patterns.performance, 'performance')}
-                ${this.renderPatternAnalysis('Architecture', patterns.architecture, 'architecture')}
-                ${this.renderPatternAnalysis('Error Handling', patterns.errorHandling, 'error-handling')}
-                ${this.renderPatternAnalysis('Testing', patterns.testing, 'testing')}
-                ${this.renderPatternAnalysis('Documentation', patterns.documentation, 'documentation')}
-                ${this.renderPatternAnalysis('Security', patterns.security, 'security')}
-                ${this.renderRecommendations(patterns)}
+                ${this.renderQualityMetrics(qualityMetrics)}
+                ${this.renderQualityInsights(qualityMetrics)}
             </div>
         `;
     }
@@ -106,70 +74,106 @@ class QualityAnalysis {
         `;
     }
 
-    renderPatternAnalysis(title, patternData, cssClass) {
-        const events = patternData.events || [];
-        const score = this.calculatePatternScore(events);
-        const scoreClass = score >= 80 ? 'excellent' : score >= 60 ? 'good' : score >= 40 ? 'fair' : 'poor';
-
-        const recentEvents = events
-            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-            .slice(0, 5);
-
-        const eventsHtml = recentEvents.map(event => `
-            <div class="quality-event">
-                <div class="event-info">
-                    <span class="event-type">${event.event_type}</span>
-                    <span class="event-confidence">${(event.confidence * 100).toFixed(1)}%</span>
-                </div>
-                <div class="event-description">${event.description || 'No description'}</div>
-                <div class="event-location">${event.location || 'N/A'}</div>
-            </div>
-        `).join('');
-
+    renderQualityMetrics(metrics) {
         return `
-            <div class="quality-pattern-section ${cssClass}">
-                <div class="pattern-header">
-                    <h4>${title}</h4>
-                    <div class="pattern-score ${scoreClass}">${score}/100</div>
-                </div>
-                <div class="pattern-summary">
-                    <div class="pattern-stats">
-                        <span class="stat">📊 ${events.length} events found</span>
-                        <span class="stat">⭐ Avg confidence: ${this.calculateAvgConfidence(events)}%</span>
+            <div class="quality-metrics-section">
+                <h4>Quality Metrics</h4>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-number">${metrics.total_events}</div>
+                        <div class="metric-label">Total Events</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-number">${metrics.performance_events}</div>
+                        <div class="metric-label">Performance Events</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-number">${metrics.refactoring_events}</div>
+                        <div class="metric-label">Refactoring Events</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-number">${metrics.error_handling_events}</div>
+                        <div class="metric-label">Error Handling</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-number">${metrics.complexity_events}</div>
+                        <div class="metric-label">Complexity Events</div>
                     </div>
                 </div>
-                ${events.length > 0 ? `
-                    <div class="pattern-events">
-                        <h5>Recent Events</h5>
-                        ${eventsHtml}
-                    </div>
-                ` : '<div class="no-events">No recent events found</div>'}
             </div>
         `;
     }
 
-    renderRecommendations(patterns) {
-        const recommendations = this.generateRecommendations(patterns);
+    renderQualityInsights(metrics) {
+        const insights = [];
         
-        const recommendationsHtml = recommendations.map(rec => `
-            <div class="recommendation ${rec.priority}">
-                <div class="rec-header">
-                    <span class="rec-icon">${rec.icon}</span>
-                    <span class="rec-title">${rec.title}</span>
-                    <span class="rec-priority">${rec.priority}</span>
-                </div>
-                <div class="rec-description">${rec.description}</div>
-            </div>
-        `).join('');
-
+        if (metrics.performance_events > 0) {
+            insights.push(`✅ Found ${metrics.performance_events} performance-related improvements`);
+        }
+        
+        if (metrics.refactoring_events > 0) {
+            insights.push(`🔄 Detected ${metrics.refactoring_events} refactoring activities`);
+        }
+        
+        if (metrics.error_handling_events > 0) {
+            insights.push(`🛡️ Found ${metrics.error_handling_events} error handling improvements`);
+        }
+        
+        if (metrics.complexity_events > 0) {
+            insights.push(`⚠️ Identified ${metrics.complexity_events} complexity-related events`);
+        }
+        
+        if (metrics.total_events === 0) {
+            insights.push(`ℹ️ No semantic events found - consider analyzing more code activity`);
+        }
+        
+        const insightsHtml = insights.map(insight => 
+            `<div class="quality-insight">${insight}</div>`
+        ).join('');
+        
+        const recommendations = this.generateRecommendations(metrics);
+        
         return `
-            <div class="recommendations-section">
+            <div class="quality-insights-section">
+                <h4>Quality Insights</h4>
+                <div class="insights-list">
+                    ${insightsHtml}
+                </div>
+                
                 <h4>Recommendations</h4>
                 <div class="recommendations-list">
-                    ${recommendationsHtml}
+                    ${recommendations}
                 </div>
             </div>
         `;
+    }
+
+    generateRecommendations(metrics) {
+        const recommendations = [];
+        
+        if (metrics.performance_events === 0) {
+            recommendations.push(`🚀 Consider adding performance monitoring and optimization`);
+        }
+        
+        if (metrics.error_handling_events === 0) {
+            recommendations.push(`🛡️ Improve error handling and exception management`);
+        }
+        
+        if (metrics.refactoring_events === 0) {
+            recommendations.push(`🔄 Regular refactoring can improve code maintainability`);
+        }
+        
+        if (metrics.quality_score < 0.5) {
+            recommendations.push(`📈 Focus on code quality improvements and best practices`);
+        }
+        
+        if (recommendations.length === 0) {
+            recommendations.push(`✨ Code quality looks good! Keep up the excellent work.`);
+        }
+        
+        return recommendations.map(rec => 
+            `<div class="quality-recommendation">${rec}</div>`
+        ).join('');
     }
 
     calculateOverallQualityScore(patterns) {
@@ -207,91 +211,32 @@ class QualityAnalysis {
         return "Poor code quality. Significant improvements needed across multiple areas.";
     }
 
-    generateRecommendations(patterns) {
-        const recommendations = [];
-        
-        // Performance recommendations
-        const perfEvents = patterns.performance.events || [];
-        if (perfEvents.length < 3) {
-            recommendations.push({
-                icon: '⚡',
-                title: 'Improve Performance Monitoring',
-                priority: 'medium',
-                description: 'Add more performance optimizations and monitoring to identify bottlenecks.'
-            });
-        }
-
-        // Testing recommendations
-        const testEvents = patterns.testing.events || [];
-        if (testEvents.length < 5) {
-            recommendations.push({
-                icon: '🧪',
-                title: 'Increase Test Coverage',
-                priority: 'high',
-                description: 'Add more comprehensive tests to improve code reliability and maintainability.'
-            });
-        }
-
-        // Documentation recommendations
-        const docEvents = patterns.documentation.events || [];
-        if (docEvents.length < 3) {
-            recommendations.push({
-                icon: '📚',
-                title: 'Enhance Documentation',
-                priority: 'medium',
-                description: 'Add more inline documentation and code comments for better maintainability.'
-            });
-        }
-
-        // Security recommendations
-        const secEvents = patterns.security.events || [];
-        if (secEvents.length < 2) {
-            recommendations.push({
-                icon: '🔒',
-                title: 'Security Review Needed',
-                priority: 'high',
-                description: 'Conduct security analysis and implement security best practices.'
-            });
-        }
-
-        // Error handling recommendations
-        const errorEvents = patterns.errorHandling.events || [];
-        if (errorEvents.length < 3) {
-            recommendations.push({
-                icon: '⚠️',
-                title: 'Improve Error Handling',
-                priority: 'medium',
-                description: 'Add more robust error handling and validation throughout the codebase.'
-            });
-        }
-
-        // If no specific recommendations, add general ones
-        if (recommendations.length === 0) {
-            recommendations.push({
-                icon: '✅',
-                title: 'Maintain Current Quality',
-                priority: 'low',
-                description: 'Continue following current development practices and monitor for regressions.'
-            });
-        }
-
-        return recommendations.slice(0, 5); // Limit to top 5 recommendations
-    }
-
-    updateRepositorySelect(repositories) {
+    async updateRepositorySelect(repositories) {
         const select = document.getElementById('quality-repo');
         if (!select) return;
         
         // Clear existing options except the first placeholder
         select.innerHTML = '<option value="">Select a repository...</option>';
         
-        // Add repository options
-        repositories.forEach(repo => {
+        // Add repository options with current branch info
+        for (const repo of repositories) {
             const option = document.createElement('option');
             option.value = repo.path;
-            option.textContent = repo.name || repo.path;
+            
+            // Try to get current branch info
+            let label = repo.name || repo.path;
+            try {
+                const branchInfo = await this.api.getRepositoryBranches(repo.path);
+                if (branchInfo && branchInfo.current_branch) {
+                    label = `${label}:(${branchInfo.current_branch})`;
+                }
+            } catch (error) {
+                console.warn(`Failed to get branch info for ${repo.path}:`, error);
+            }
+            
+            option.textContent = label;
             select.appendChild(option);
-        });
+        }
     }
 }
 

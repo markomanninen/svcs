@@ -90,10 +90,6 @@ class APIClient {
         });
     }
 
-    async searchSemanticPatterns(params) {
-        return this.callAPI('/api/semantic/pattern_search', params);
-    }
-
     // Evolution tracking
     async trackEvolution(repositoryPath, nodeId, filters = {}) {
         return this.callAPI('/api/semantic/evolution', {
@@ -104,16 +100,12 @@ class APIClient {
     }
 
     async getFilteredEvolution(params) {
-        return this.callAPI('/api/semantic/filtered_evolution', params);
+        return this.callAPI('/api/semantic/evolution', params);
     }
 
     // Analytics endpoints
     async generateAnalytics(repositoryPath) {
         return this.callAPI('/api/analytics/generate', { repository_path: repositoryPath });
-    }
-
-    async getProjectStatistics(params) {
-        return this.callAPI('/api/analytics/project_statistics', params);
     }
 
     // Quality analysis

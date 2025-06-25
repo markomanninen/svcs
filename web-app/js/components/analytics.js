@@ -26,16 +26,19 @@ class Analytics {
         resultsDiv.innerHTML = '<div class="loading">Generating analytics...</div>';
 
         try {
-            // Get project statistics
-            const stats = await this.api.getProjectStatistics({
-                repository_path: repoPath
-            });
+            // Generate analytics (this includes project statistics)
+            console.log('Calling analytics API for:', repoPath);
+            const analyticsData = await this.api.generateAnalytics(repoPath);
+            console.log('Analytics data received:', analyticsData);
 
             // Get recent activity for trends
+            console.log('Calling recent activity API for:', repoPath);
             const recentActivity = await this.api.getRecentActivity(repoPath, 30, 100);
+            console.log('Recent activity received:', recentActivity);
 
-            this.displayAnalytics(stats, recentActivity);
+            this.displayAnalytics(analyticsData.analytics, recentActivity);
         } catch (error) {
+            console.error('Analytics error:', error);
             resultsDiv.innerHTML = `<div class="error">Analytics generation failed: ${error.message}</div>`;
         }
     }
@@ -46,7 +49,9 @@ class Analytics {
         // Process recent activity for trends
         const activityTrends = this.processActivityTrends(recentActivity.events || []);
         const authorStats = this.processAuthorStats(recentActivity.events || []);
-        const eventTypeStats = this.processEventTypeStats(recentActivity.events || []);
+        
+        // Use the event type counts from analytics data directly
+        const eventTypeStats = this.processEventTypeStatsFromAnalytics(stats.event_types || {});
 
         resultsDiv.innerHTML = `
             <div class="analytics-dashboard">
@@ -62,6 +67,10 @@ class Analytics {
     }
 
     renderOverviewStats(stats) {
+        // Calculate derived statistics from available data
+        const eventTypesCount = stats.event_types ? Object.keys(stats.event_types).length : 0;
+        const topFilesCount = stats.top_files ? Object.keys(stats.top_files).length : 0;
+        
         return `
             <div class="analytics-section">
                 <h4>Overview Statistics</h4>
@@ -71,16 +80,16 @@ class Analytics {
                         <div class="stat-label">Total Events</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">${stats.total_commits || 0}</div>
-                        <div class="stat-label">Analyzed Commits</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">${stats.unique_authors || 0}</div>
-                        <div class="stat-label">Contributors</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">${stats.event_types_count || 0}</div>
+                        <div class="stat-number">${eventTypesCount}</div>
                         <div class="stat-label">Event Types</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${topFilesCount}</div>
+                        <div class="stat-label">Active Files</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.patterns ? stats.patterns.length : 0}</div>
+                        <div class="stat-label">Patterns</div>
                     </div>
                 </div>
             </div>
@@ -207,9 +216,13 @@ class Analytics {
 
         // Count events by day
         events.forEach(event => {
-            const date = new Date(event.timestamp).toISOString().split('T')[0];
-            if (dailyCounts.hasOwnProperty(date)) {
-                dailyCounts[date]++;
+            // Use created_at (Unix timestamp in seconds) and convert to milliseconds
+            const timestamp = event.created_at || event.commit_timestamp;
+            if (timestamp) {
+                const date = new Date(timestamp * 1000).toISOString().split('T')[0];
+                if (dailyCounts.hasOwnProperty(date)) {
+                    dailyCounts[date]++;
+                }
             }
         });
 
@@ -264,6 +277,20 @@ class Analytics {
         return eventCounts;
     }
 
+    processEventTypeStatsFromAnalytics(eventTypeCounts) {
+        const maxCount = Math.max(...Object.values(eventTypeCounts), 1);
+        const eventTypeStats = {};
+        
+        Object.entries(eventTypeCounts).forEach(([eventType, count]) => {
+            eventTypeStats[eventType] = {
+                count: count,
+                percentage: (count / maxCount) * 100
+            };
+        });
+
+        return eventTypeStats;
+    }
+
     calculateQualityScore(stats) {
         // Simple quality score calculation based on available metrics
         let score = 70; // Base score
@@ -276,20 +303,32 @@ class Analytics {
         return Math.min(score, 100);
     }
 
-    updateRepositorySelect(repositories) {
+    async updateRepositorySelect(repositories) {
         const select = document.getElementById('analytics-repo');
         if (!select) return;
         
         // Clear existing options except the first placeholder
         select.innerHTML = '<option value="">Select a repository...</option>';
         
-        // Add repository options
-        repositories.forEach(repo => {
+        // Add repository options with current branch info
+        for (const repo of repositories) {
             const option = document.createElement('option');
             option.value = repo.path;
-            option.textContent = repo.name || repo.path;
+            
+            // Try to get current branch info
+            let label = repo.name || repo.path;
+            try {
+                const branchInfo = await this.api.getRepositoryBranches(repo.path);
+                if (branchInfo && branchInfo.current_branch) {
+                    label = `${label}:(${branchInfo.current_branch})`;
+                }
+            } catch (error) {
+                console.warn(`Failed to get branch info for ${repo.path}:`, error);
+            }
+            
+            option.textContent = label;
             select.appendChild(option);
-        });
+        }
     }
 }
 

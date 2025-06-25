@@ -86,9 +86,9 @@ class RepositoryManager {
                 </div>
                 <div class="repo-path">${repo.path}</div>
                 <div style="margin-top: 15px;">
-                    ${!repo.registered ? `<button class="btn btn-success" onclick="event.stopPropagation(); registerRepositoryPath('${repo.path}')">📝 Register</button>` : ''}
-                    <button class="btn btn-warning" onclick="event.stopPropagation(); getRepositoryStatus('${repo.path}')">📊 Status</button>
-                    ${repo.registered ? `<button class="btn btn-danger" onclick="event.stopPropagation(); unregisterRepository('${repo.path}')">🗑️ Unregister</button>` : ''}
+                    ${!repo.registered ? `<button class="btn btn-success" onclick="event.stopPropagation(); registerRepositoryPath('${repo.path}')">Register</button>` : ''}
+                    <button class="btn btn-warning" onclick="event.stopPropagation(); getRepositoryStatus('${repo.path}')">Status</button>
+                    ${repo.registered ? `<button class="btn btn-danger" onclick="event.stopPropagation(); unregisterRepository('${repo.path}')">Unregister</button>` : ''}
                 </div>
             </div>
         `;
@@ -270,7 +270,7 @@ Repository Status: ${path}
                         padding: 8px 12px;
                         cursor: pointer;
                         font-size: 14px;
-                    ">✕ Close</button>
+                    ">Close</button>
                 </div>
                 <pre style="
                     background: #f8f9fa;

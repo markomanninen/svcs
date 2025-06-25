@@ -323,13 +323,32 @@ class CleanupManager {
         this.resultsContent.innerHTML = html;
     }
 
-    updateRepositorySelect(repositories) {
+    async updateRepositorySelect(repositories) {
         if (this.repoSelect) {
             const registeredRepos = repositories.filter(repo => repo.registered);
-            this.repoSelect.innerHTML = '<option value="">Select a repository...</option>' +
-                registeredRepos.map(repo => 
-                    `<option value="${repo.path}">${repo.name} (${repo.path})</option>`
-                ).join('');
+            
+            // Clear existing options
+            this.repoSelect.innerHTML = '<option value="">Select a repository...</option>';
+            
+            // Add repository options with current branch info
+            for (const repo of registeredRepos) {
+                const option = document.createElement('option');
+                option.value = repo.path;
+                
+                // Try to get current branch info
+                let label = repo.name || repo.path;
+                try {
+                    const branchInfo = await this.api.getRepositoryBranches(repo.path);
+                    if (branchInfo && branchInfo.current_branch) {
+                        label = `${label}:(${branchInfo.current_branch})`;
+                    }
+                } catch (error) {
+                    console.warn(`Failed to get branch info for ${repo.path}:`, error);
+                }
+                
+                option.textContent = label;
+                this.repoSelect.appendChild(option);
+            }
         }
     }
 }

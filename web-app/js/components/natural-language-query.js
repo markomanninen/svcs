@@ -87,20 +87,32 @@ class NaturalLanguageQuery {
         resultsDiv.innerHTML = html;
     }
 
-    updateRepositorySelect(repositories) {
+    async updateRepositorySelect(repositories) {
         const select = document.getElementById('nlq-repo');
         if (!select) return;
         
         // Clear existing options except the first placeholder
         select.innerHTML = '<option value="">Select a repository...</option>';
         
-        // Add repository options
-        repositories.forEach(repo => {
+        // Add repository options with current branch info
+        for (const repo of repositories) {
             const option = document.createElement('option');
             option.value = repo.path;
-            option.textContent = repo.name || repo.path;
+            
+            // Try to get current branch info
+            let label = repo.name || repo.path;
+            try {
+                const branchInfo = await this.api.getRepositoryBranches(repo.path);
+                if (branchInfo && branchInfo.current_branch) {
+                    label = `${label}:(${branchInfo.current_branch})`;
+                }
+            } catch (error) {
+                console.warn(`Failed to get branch info for ${repo.path}:`, error);
+            }
+            
+            option.textContent = label;
             select.appendChild(option);
-        });
+        }
     }
 }
 

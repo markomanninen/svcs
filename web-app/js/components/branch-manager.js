@@ -13,14 +13,6 @@ class BranchManager {
     }
 
     setupRepositoryListeners() {
-        // CI/CD sections - target branch dropdown
-        const ciRepoSelect = this.utils.$('ci-repo');
-        if (ciRepoSelect) {
-            ciRepoSelect.addEventListener('change', () => {
-                this.loadBranches(ciRepoSelect.value, ['target-branch']);
-            });
-        }
-
         // Branch comparison - both branch dropdowns
         const compareRepoSelect = this.utils.$('compare-repo');
         if (compareRepoSelect) {
@@ -28,6 +20,9 @@ class BranchManager {
                 this.loadBranches(compareRepoSelect.value, ['branch1', 'branch2']);
             });
         }
+
+        // Note: CI repo select is handled by CIIntegration component
+        // to avoid duplicate event listeners
     }
 
     async loadBranches(repoPath, targetSelectIds = []) {
@@ -40,11 +35,12 @@ class BranchManager {
         }
 
         try {
-            const result = await API.getRepositoryBranches(repoPath);
+            const result = await this.api.getRepositoryBranches(repoPath);
             
-            if (result.success && result.data && result.data.branches) {
-                const branches = result.data.branches;
-                const currentBranch = result.data.current_branch;
+            // The API client returns unwrapped data directly
+            if (result && result.branches) {
+                const branches = result.branches;
+                const currentBranch = result.current_branch;
                 
                 // Cache branches for this repository
                 this.branches[repoPath] = {
@@ -64,7 +60,7 @@ class BranchManager {
                 
                 console.log(`Loaded ${branches.length} branches for ${repoPath}`, branches);
             } else {
-                throw new Error(result.error || 'Failed to load branches');
+                throw new Error('Failed to load branches - invalid response structure');
             }
         } catch (error) {
             console.error('Error loading branches:', error);
@@ -86,18 +82,19 @@ class BranchManager {
         }
 
         try {
-            const result = await API.getRepositoryBranches(repoPath);
+            const result = await this.api.getRepositoryBranches(repoPath);
             
-            if (result.success && result.data) {
+            // The API client returns unwrapped data directly
+            if (result && result.branches) {
                 const branchInfoHtml = `
                     <div class="branch-info">
                         <h4>Branch Information</h4>
-                        <p><strong>Current Branch:</strong> <code>${result.data.current_branch}</code></p>
-                        <p><strong>Total Branches:</strong> ${result.data.branches.length}</p>
+                        <p><strong>Current Branch:</strong> <code>${result.current_branch}</code></p>
+                        <p><strong>Total Branches:</strong> ${result.branches.length}</p>
                         <h5>Available Branches:</h5>
                         <ul>
-                            ${result.data.branches.map(branch => 
-                                `<li>${branch === result.data.current_branch ? 
+                            ${result.branches.map(branch => 
+                                `<li>${branch === result.current_branch ? 
                                     `<strong>${branch} (current)</strong>` : 
                                     branch
                                 }</li>`
