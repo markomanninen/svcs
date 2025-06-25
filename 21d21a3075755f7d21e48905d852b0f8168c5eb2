@@ -1,0 +1,140 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-25T17:43:01.355208",
+  "semantic_events": [
+    {
+      "event_type": "dependency_added",
+      "node_id": "module",
+      "location": "svcs_repo_web_server.py",
+      "details": "Added: datetime, re",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "21d21a3075755f7d21e48905d852b0f8168c5eb2",
+      "created_at": 1750862581
+    },
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "func:search_events",
+      "location": "svcs_repo_web_server.py",
+      "details": "The implementation of this node has changed.",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "21d21a3075755f7d21e48905d852b0f8168c5eb2",
+      "created_at": 1750862581
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:serve_js_components",
+      "location": "svcs_repo_web_server.py",
+      "details": "Added func:serve_js_components",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "21d21a3075755f7d21e48905d852b0f8168c5eb2",
+      "created_at": 1750862581
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:get_repositories_status",
+      "location": "svcs_repo_web_server.py",
+      "details": "Added func:get_repositories_status",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "21d21a3075755f7d21e48905d852b0f8168c5eb2",
+      "created_at": 1750862581
+    },
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "func:search_events_advanced",
+      "location": "svcs_repo_web_server.py",
+      "details": "The implementation of this node has changed.",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "21d21a3075755f7d21e48905d852b0f8168c5eb2",
+      "created_at": 1750862581
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:get_repository_branches",
+      "location": "svcs_repo_web_server.py",
+      "details": "Added func:get_repository_branches",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "21d21a3075755f7d21e48905d852b0f8168c5eb2",
+      "created_at": 1750862581
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:get_sort_key",
+      "location": "svcs_repo_web_server.py",
+      "details": "Added func:get_sort_key",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "21d21a3075755f7d21e48905d852b0f8168c5eb2",
+      "created_at": 1750862581
+    },
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "func:get_repository_status",
+      "location": "svcs_repo_web_server.py",
+      "details": "The implementation of this node has changed.",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "21d21a3075755f7d21e48905d852b0f8168c5eb2",
+      "created_at": 1750862581
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:serve_css",
+      "location": "svcs_repo_web_server.py",
+      "details": "Added func:serve_css",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "21d21a3075755f7d21e48905d852b0f8168c5eb2",
+      "created_at": 1750862581
+    },
+    {
+      "event_type": "node_logic_changed",
+      "node_id": "func:dashboard",
+      "location": "svcs_repo_web_server.py",
+      "details": "The implementation of this node has changed.",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "21d21a3075755f7d21e48905d852b0f8168c5eb2",
+      "created_at": 1750862581
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:serve_js",
+      "location": "svcs_repo_web_server.py",
+      "details": "Added func:serve_js",
+      "language": "py",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "Multi-language AST analysis",
+      "commit_hash": "21d21a3075755f7d21e48905d852b0f8168c5eb2",
+      "created_at": 1750862581
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "21d21a3075755f7d21e48905d852b0f8168c5eb2"
+}
