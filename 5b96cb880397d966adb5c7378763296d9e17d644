@@ -1,0 +1,195 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-27T01:51:47.282024",
+  "semantic_events": [
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:.svcs/api.py",
+      "location": ".svcs/api.py",
+      "details": "File .svcs/api.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "5b96cb880397d966adb5c7378763296d9e17d644",
+      "created_at": 1750978307
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:.svcs/layer5_ai.py",
+      "location": ".svcs/layer5_ai.py",
+      "details": "File .svcs/layer5_ai.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "5b96cb880397d966adb5c7378763296d9e17d644",
+      "created_at": 1750978307
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:.svcs/layer5_true_ai.py",
+      "location": ".svcs/layer5_true_ai.py",
+      "details": "File .svcs/layer5_true_ai.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "5b96cb880397d966adb5c7378763296d9e17d644",
+      "created_at": 1750978307
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:.svcs/llm_logger.py",
+      "location": ".svcs/llm_logger.py",
+      "details": "File .svcs/llm_logger.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "5b96cb880397d966adb5c7378763296d9e17d644",
+      "created_at": 1750978307
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:.svcs/main.py",
+      "location": ".svcs/main.py",
+      "details": "File .svcs/main.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "5b96cb880397d966adb5c7378763296d9e17d644",
+      "created_at": 1750978307
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:.svcs/main_complete.py",
+      "location": ".svcs/main_complete.py",
+      "details": "File .svcs/main_complete.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "5b96cb880397d966adb5c7378763296d9e17d644",
+      "created_at": 1750978307
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:.svcs/parser.py",
+      "location": ".svcs/parser.py",
+      "details": "File .svcs/parser.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "5b96cb880397d966adb5c7378763296d9e17d644",
+      "created_at": 1750978307
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:.svcs/storage.py",
+      "location": ".svcs/storage.py",
+      "details": "File .svcs/storage.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "5b96cb880397d966adb5c7378763296d9e17d644",
+      "created_at": 1750978307
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:.svcs/svcs_complete_5layer.py",
+      "location": ".svcs/svcs_complete_5layer.py",
+      "details": "File .svcs/svcs_complete_5layer.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "5b96cb880397d966adb5c7378763296d9e17d644",
+      "created_at": 1750978307
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:.svcs/svcs_multilang.py",
+      "location": ".svcs/svcs_multilang.py",
+      "details": "File .svcs/svcs_multilang.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "5b96cb880397d966adb5c7378763296d9e17d644",
+      "created_at": 1750978307
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:collect_layer_events.py",
+      "location": "collect_layer_events.py",
+      "details": "File collect_layer_events.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "5b96cb880397d966adb5c7378763296d9e17d644",
+      "created_at": 1750978307
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:language_coverage_analysis.py",
+      "location": "language_coverage_analysis.py",
+      "details": "File language_coverage_analysis.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "5b96cb880397d966adb5c7378763296d9e17d644",
+      "created_at": 1750978307
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:run_targeted_tests.py",
+      "location": "run_targeted_tests.py",
+      "details": "File run_targeted_tests.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "5b96cb880397d966adb5c7378763296d9e17d644",
+      "created_at": 1750978307
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:svcs_discuss.py",
+      "location": "svcs_discuss.py",
+      "details": "File svcs_discuss.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "5b96cb880397d966adb5c7378763296d9e17d644",
+      "created_at": 1750978307
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:svcs_registry_integration.py",
+      "location": "svcs_registry_integration.py",
+      "details": "File svcs_registry_integration.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "5b96cb880397d966adb5c7378763296d9e17d644",
+      "created_at": 1750978307
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:test_collaborative_semantic_sync.py",
+      "location": "test_collaborative_semantic_sync.py",
+      "details": "File test_collaborative_semantic_sync.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "5b96cb880397d966adb5c7378763296d9e17d644",
+      "created_at": 1750978307
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:test_three_developer_scenario.py",
+      "location": "test_three_developer_scenario.py",
+      "details": "File test_three_developer_scenario.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "5b96cb880397d966adb5c7378763296d9e17d644",
+      "created_at": 1750978307
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "5b96cb880397d966adb5c7378763296d9e17d644"
+}
