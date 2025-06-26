@@ -154,42 +154,57 @@ def cmd_sync_all(args):
 
 
 def cmd_pull(args):
-    """Enhanced git pull with semantic event sync."""
+    """Enhanced git pull that automatically handles semantic notes sync."""
     repo_path = Path(args.path or Path.cwd()).resolve()
     
     if not ensure_svcs_initialized(repo_path):
         print_svcs_error("SVCS not initialized. Run 'svcs init' first.")
         return
     
-    print("📥 SVCS: Enhanced pull with semantic notes sync...")
-    
     try:
-        # Perform git pull
-        pull_result = subprocess.run(['git', 'pull'], cwd=repo_path, capture_output=True, text=True, check=True)
+        svcs = RepositoryLocalSVCS(repo_path)
         
-        print("✅ Git pull completed:")
-        print(pull_result.stdout)
+        print("🔄 Enhanced git pull with semantic data sync...")
         
-        # Fetch semantic notes
-        notes_result = subprocess.run([
-            'git', 'fetch', 'origin', 'refs/notes/svcs-semantic:refs/notes/svcs-semantic'
-        ], cwd=repo_path, capture_output=True, text=True)
-        
-        if notes_result.returncode == 0:
-            print("📝 Semantic notes fetched from remote")
-            
-            # Import semantic events from notes
-            svcs = RepositoryLocalSVCS(repo_path)
-            imported = svcs.import_semantic_events_from_notes()
-            if imported > 0:
-                print(f"📊 Imported {imported} semantic events")
+        # Step 1: Regular git pull
+        print("📥 Step 1: Pulling latest changes from remote...")
+        result = subprocess.run(['git', 'pull'], cwd=repo_path, capture_output=True, text=True)
+        if result.returncode == 0:
+            print("✅ Git pull completed successfully")
+            if result.stdout.strip():
+                print(f"ℹ️  {result.stdout.strip()}")
         else:
-            print("ℹ️ No semantic notes found on remote")
-            
-    except subprocess.CalledProcessError as e:
-        print_svcs_error(f"Git pull failed: {e.stderr}")
+            print(f"⚠️  Git pull had issues: {result.stderr}")
+            # Continue with semantic sync even if pull had issues
+        
+        # Step 2: Fetch semantic notes from remote
+        print("📥 Step 2: Fetching semantic notes from remote...")
+        fetch_result = svcs.git_notes.fetch_notes_from_remote()
+        if fetch_result:
+            print("✅ Semantic notes fetched successfully")
+        else:
+            print("ℹ️  No new semantic notes to fetch")
+        
+        # Step 3: Import semantic events from notes
+        print("📊 Step 3: Importing semantic events from notes...")
+        imported_count = svcs.import_semantic_events_from_notes()
+        if imported_count > 0:
+            print(f"✅ Imported {imported_count} semantic events")
+        else:
+            print("ℹ️  No new semantic events to import")
+        
+        # Step 4: Process any merge operations
+        print("🔀 Step 4: Processing merge operations...")
+        merge_result = svcs.process_merge()
+        if "No source branch detected" not in merge_result:
+            print(f"✅ {merge_result}")
+        else:
+            print("ℹ️  No merge operations needed")
+        
+        print("🎉 Enhanced pull completed! Code and semantic data are now synchronized.")
+        
     except Exception as e:
-        print_svcs_error(f"Error during enhanced pull: {e}")
+        print_svcs_error(f"Enhanced pull error: {e}")
 
 
 def cmd_merge(args):
@@ -228,3 +243,89 @@ def cmd_merge(args):
         print("ℹ️ You may need to resolve conflicts manually")
     except Exception as e:
         print_svcs_error(f"Error during enhanced merge: {e}")
+
+
+def cmd_push(args):
+    """Enhanced git push that automatically syncs semantic notes."""
+    repo_path = Path(args.path or Path.cwd()).resolve()
+    
+    if not ensure_svcs_initialized(repo_path):
+        print_svcs_error("SVCS not initialized. Run 'svcs init' first.")
+        return
+    
+    try:
+        svcs = RepositoryLocalSVCS(repo_path)
+        
+        print("🔄 Enhanced git push with semantic notes sync...")
+        
+        # Step 1: Sync semantic notes to remote first
+        print("📤 Step 1: Syncing semantic notes to remote...")
+        sync_result = svcs.git_notes.sync_notes_to_remote()
+        if sync_result:
+            print("✅ Semantic notes synced to remote")
+        else:
+            print("⚠️  Failed to sync semantic notes (continuing with push)")
+        
+        # Step 2: Regular git push
+        print("📤 Step 2: Pushing code changes to remote...")
+        push_args = []
+        if hasattr(args, 'remote') and args.remote:
+            push_args.append(args.remote)
+        if hasattr(args, 'branch') and args.branch:
+            push_args.append(args.branch)
+            
+        result = subprocess.run(['git', 'push'] + push_args, cwd=repo_path, capture_output=True, text=True)
+        if result.returncode == 0:
+            print("✅ Git push completed successfully")
+            if result.stdout.strip():
+                print(f"ℹ️  {result.stdout.strip()}")
+        else:
+            print(f"❌ Git push failed: {result.stderr}")
+            return
+        
+        print("🎉 Enhanced push completed! Code and semantic notes are now on remote.")
+        
+    except Exception as e:
+        print_svcs_error(f"Enhanced push error: {e}")
+
+
+def cmd_config(args):
+    """Configure SVCS settings for automatic sync behavior."""
+    repo_path = Path(args.path or Path.cwd()).resolve()
+    
+    if not ensure_svcs_initialized(repo_path):
+        print_svcs_error("SVCS not initialized. Run 'svcs init' first.")
+        return
+    
+    try:
+        svcs = RepositoryLocalSVCS(repo_path)
+        
+        if args.config_action == 'set':
+            if args.setting == 'auto-sync' and args.value:
+                auto_sync = args.value.lower() in ['true', '1', 'yes', 'on']
+                svcs.set_config('auto_sync_notes', auto_sync)
+                status = "enabled" if auto_sync else "disabled"
+                print(f"✅ Automatic semantic notes sync {status}")
+                
+                if auto_sync:
+                    print("ℹ️  Git hooks will now automatically sync semantic notes during push/pull/merge operations")
+                else:
+                    print("ℹ️  Manual 'svcs notes sync/fetch' commands will be required")
+                    
+        elif args.config_action == 'get':
+            if args.setting == 'auto-sync':
+                auto_sync = svcs.get_config('auto_sync_notes', True)  # Default to True
+                status = "enabled" if auto_sync else "disabled"
+                print(f"Auto-sync semantic notes: {status}")
+            else:
+                print("Available settings:")
+                print("  auto-sync  - Automatically sync semantic notes during git operations")
+                
+        elif args.config_action == 'list':
+            config = svcs.get_all_config()
+            print("Current SVCS configuration:")
+            for key, value in config.items():
+                print(f"  {key}: {value}")
+                
+    except Exception as e:
+        print_svcs_error(f"Configuration error: {e}")

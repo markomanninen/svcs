@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.svcs')))
 
 # Import the script we want to test
-import svcs_discuss
+import legacy_scripts.svcs_discuss as svcs_discuss
 
 class TestSVCSDiscussEvolution(unittest.TestCase):
 

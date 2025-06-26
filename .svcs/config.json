@@ -1,0 +1,7 @@
+{
+  "svcs_version": "1.0.0",
+  "initialized": true,
+  "centralized": true,
+  "database_path": ".svcs/semantic.db",
+  "installation_type": "centralized"
+}

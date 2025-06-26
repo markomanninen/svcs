@@ -22,6 +22,36 @@ def cmd_discuss(args):
     print(f"🤖 Starting conversational interface for repository: {repo_path.name}")
     print("💬 Ask questions about your code's semantic evolution...")
     print("💡 Examples: 'show performance optimizations', 'what changed in main branch'")
+    
+    # Handle initial query if provided
+    if hasattr(args, 'query') and args.query:
+        print(f"📝 Processing initial query: '{args.query}'")
+        print()
+        
+        # First process the initial query
+        try:
+            original_dir = os.getcwd()
+            os.chdir(repo_path)
+            
+            sys.path.insert(0, str(repo_path.parent))
+            import svcs_repo_discuss
+            
+            # Process the initial query
+            result = svcs_repo_discuss.process_query(args.query)
+            print("🔍 Response:")
+            print(result)
+            print("\n" + "─" * 60 + "\n")
+            
+        except Exception as e:
+            print_svcs_error(f"Error processing initial query: {e}")
+        
+        # Ask if user wants to continue with interactive session
+        print("💬 Continue with interactive conversation? (y/n): ", end="")
+        response = input().strip().lower()
+        if response not in ['y', 'yes', '']:
+            os.chdir(original_dir)
+            return
+    
     print("⏹️ Type 'exit' or 'quit' to end the session")
     print()
     
@@ -30,10 +60,10 @@ def cmd_discuss(args):
         os.chdir(repo_path)
         
         sys.path.insert(0, str(repo_path.parent))
-        import svcs_discuss
+        import svcs_repo_discuss
         
         # Start interactive session
-        svcs_discuss.start_interactive_session()
+        svcs_repo_discuss.start_interactive_session()
         
         os.chdir(original_dir)
         
@@ -57,10 +87,10 @@ def cmd_query(args):
         os.chdir(repo_path)
         
         sys.path.insert(0, str(repo_path.parent))
-        import svcs_discuss
+        import svcs_repo_discuss
         
         # Process single query
-        result = svcs_discuss.process_query(args.query)
+        result = svcs_repo_discuss.process_query(args.query)
         print(result)
         
         os.chdir(original_dir)

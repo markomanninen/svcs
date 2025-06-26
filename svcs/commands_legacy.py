@@ -562,7 +562,12 @@ def cmd_ci(args):
         os.chdir(repo_path)
         
         sys.path.insert(0, str(repo_path.parent))
-        import svcs_ci
+        # Try to use new repository-local CI integration first
+        try:
+            import svcs_repo_ci as svcs_ci
+        except ImportError:
+            # Fallback to legacy CI integration
+            import svcs_ci
         
         if args.ci_command == 'pr-analysis':
             target_branch = args.target or 'main'
@@ -610,7 +615,7 @@ def cmd_discuss(args):
         os.chdir(repo_path)
         
         sys.path.insert(0, str(repo_path.parent))
-        import svcs_discuss
+        import legacy_scripts.svcs_discuss as svcs_discuss
         
         # Start interactive session
         svcs_discuss.start_interactive_session()
@@ -637,7 +642,7 @@ def cmd_query(args):
         os.chdir(repo_path)
         
         sys.path.insert(0, str(repo_path.parent))
-        import svcs_discuss
+        import legacy_scripts.svcs_discuss as svcs_discuss
         
         # Process single query
         result = svcs_discuss.process_query(args.query)

@@ -1,0 +1,3 @@
+# LLM inference logs contain sensitive data
+*.jsonl
+*.log

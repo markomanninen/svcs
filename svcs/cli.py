@@ -21,14 +21,19 @@ Complete command set:
   svcs cleanup      - Repository maintenance
 """
 
+import sys
+from pathlib import Path
+# Ensure package root is on sys.path for console_scripts entry points
+package_root = Path(__file__).parent.parent
+if str(package_root) not in sys.path:
+    sys.path.insert(0, str(package_root))
+
 import argparse
 import json
 import os
 import shutil
 import subprocess
-import sys
 from datetime import datetime
-from pathlib import Path
 from typing import Dict, List, Optional
 import threading
 import time
@@ -85,6 +90,7 @@ Complete command set:
   svcs web start                      # Start interactive web dashboard
   svcs ci pr-analysis                 # CI/CD integration
   svcs discuss                        # Conversational interface
+  svcs discuss --query "summary"      # Start with initial query
   svcs query "natural language"       # One-shot natural language queries
   svcs notes sync                     # Git notes team collaboration
   svcs compare main feature           # Compare branches
@@ -94,11 +100,35 @@ Examples:
   svcs init                           # Initialize current repository
   svcs events --limit 50              # Show 50 recent events
   svcs search --pattern-type performance --confidence 0.8
+  svcs search --event-type "signature_change" --author john
+  svcs search --since "1 week ago" --location "src/"
   svcs evolution "func:process_data"  # Track function evolution
   svcs analytics --output report.json --format json
   svcs quality --verbose              # Detailed quality analysis
   svcs web start --port 9000          # Start dashboard on port 9000
+  svcs discuss                        # Start interactive conversation
+  svcs discuss --query "summarize recent changes"  # Start with initial query
+  svcs query "show me performance optimizations"   # One-shot query
   svcs compare main develop           # Compare semantic patterns
+
+Search Pattern Types (--pattern-type):
+  performance          # Performance optimizations and bottlenecks
+  architecture         # Architectural patterns and design changes  
+  error_handling       # Exception handling and error patterns
+  refactoring          # Code refactoring patterns
+  
+Common Event Types (--event-type):
+  signature_change     # Function/method signature changes
+  behavior_change      # Behavioral modifications
+  performance_optimization  # Performance improvements
+  dependency_addition  # New dependencies added
+  error_handling_improvement  # Better error handling
+  
+Date Formats (--since):
+  "2024-01-01"        # Specific date (YYYY-MM-DD)
+  "1 week ago"        # Relative time
+  "2 months ago"      # Relative time
+  "yesterday"         # Relative time
         """
     )
     
@@ -208,6 +238,8 @@ Examples:
     
     # Discuss command
     discuss_parser = subparsers.add_parser('discuss', help='Conversational interface')
+    discuss_parser.add_argument('--query', '-q', type=str,
+                               help='Initial query to start conversation with')
     discuss_parser.set_defaults(func=cmd_discuss)
     
     # Query command
@@ -239,6 +271,24 @@ Examples:
                                help='Show database statistics')
     cleanup_parser.set_defaults(func=cmd_cleanup)
     
+    # Configuration command
+    config_parser = subparsers.add_parser('config', help='Configure SVCS settings')
+    config_subparsers = config_parser.add_subparsers(dest="config_action", required=True)
+    
+    # Config set
+    config_set_parser = config_subparsers.add_parser('set', help='Set configuration value')
+    config_set_parser.add_argument('setting', help='Setting name (e.g., auto-sync)')
+    config_set_parser.add_argument('value', help='Setting value')
+    
+    # Config get
+    config_get_parser = config_subparsers.add_parser('get', help='Get configuration value')
+    config_get_parser.add_argument('setting', nargs='?', help='Setting name (optional)')
+    
+    # Config list
+    config_list_parser = config_subparsers.add_parser('list', help='List all configuration')
+    
+    config_parser.set_defaults(func=cmd_config)
+    
     # Process-hook command (for git hooks)
     hook_parser = subparsers.add_parser('process-hook', help='Process git hook (internal use)')
     hook_parser.add_argument('hook_name', help='Git hook name (e.g., post-commit)')
@@ -255,6 +305,13 @@ Examples:
     pull_parser = subparsers.add_parser('pull', help='Enhanced git pull with semantic event sync')
     pull_parser.add_argument('--path', '-p', type=str, help='Repository path')
     pull_parser.set_defaults(func=cmd_pull)
+    
+    # Push command
+    push_parser = subparsers.add_parser('push', help='Enhanced git push with semantic notes sync')
+    push_parser.add_argument('--path', '-p', type=str, help='Repository path')
+    push_parser.add_argument('remote', nargs='?', help='Remote name (optional)')
+    push_parser.add_argument('branch', nargs='?', help='Branch name (optional)')
+    push_parser.set_defaults(func=cmd_push)
     
     # Merge command
     merge_parser = subparsers.add_parser('merge', help='Enhanced git merge with semantic event transfer')

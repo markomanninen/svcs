@@ -102,6 +102,32 @@ def init_svcs_centralized(repo_path: Path):
             branch = result.stdout.strip() or 'main'
         except:
             branch = 'main'
+        
+        # Automatically fetch semantic notes if this is a cloned repository
+        try:
+            # Check if we have remotes configured (indicating this is a clone)
+            remote_result = subprocess.run(['git', 'remote'], 
+                                         cwd=repo_path, capture_output=True, text=True, check=True)
+            if remote_result.stdout.strip():
+                print("🔄 Checking for existing semantic notes...")
+                fetch_result = subprocess.run(['git', 'fetch', 'origin', 'refs/notes/svcs-semantic:refs/notes/svcs-semantic'], 
+                                            cwd=repo_path, capture_output=True, text=True)
+                if fetch_result.returncode == 0:
+                    print("✅ Existing semantic notes fetched from origin")
+                    
+                    # Import the fetched semantic notes into local database
+                    try:
+                        imported_count = svcs.import_semantic_events_from_notes()
+                        if imported_count > 0:
+                            print(f"✅ Imported {imported_count} semantic events from notes")
+                        else:
+                            print("ℹ️  No semantic events to import")
+                    except Exception as e:
+                        print(f"⚠️  Failed to import semantic notes: {e}")
+                else:
+                    print("ℹ️  No existing semantic notes found on origin")
+        except:
+            pass  # Not a big deal if this fails
             
         return f"✅ SVCS initialized for repository at {repo_path} (branch: {branch})"
     except Exception as e:
@@ -126,21 +152,45 @@ def setup_centralized_git_hooks(repo_path: Path):
             # Use the proper modular CLI script
             svcs_cmd = f"{sys.executable} {cli_script}"
         
-        # Hook template that calls centralized SVCS
-        hook_template = f"""#!/bin/bash
-# SVCS Git Hook - Centralized Version
-# This hook calls the centralized SVCS installation
-
-{svcs_cmd} process-hook "$0" "$@"
+        # Enhanced hook templates with semantic note synchronization
+        hooks_config = {
+            'post-commit': f"""#!/bin/bash
+# SVCS Post-Commit Hook - Trigger semantic analysis
+echo "🔍 SVCS: Analyzing commit for semantic events..."
+if [ -d ".svcs" ]; then
+    {svcs_cmd} process-hook post-commit "$@" || echo "⚠️  SVCS: Post-commit analysis failed"
+fi
+""",
+            'post-merge': f"""#!/bin/bash
+# SVCS Post-Merge Hook - Sync semantic notes and analyze merge
+echo "🔄 SVCS: Processing merge and syncing semantic notes..."
+if [ -d ".svcs" ]; then
+    {svcs_cmd} process-hook post-merge "$@" || echo "⚠️  SVCS: Post-merge processing failed"
+fi
+""",
+            'post-checkout': f"""#!/bin/bash
+# SVCS Post-Checkout Hook - Fetch semantic notes after clone/checkout
+echo "📥 SVCS: Processing checkout and fetching semantic notes..."
+if [ -d ".svcs" ]; then
+    {svcs_cmd} process-hook post-checkout "$@" || echo "⚠️  SVCS: Post-checkout processing failed"
+fi
+""",
+            'post-receive': f"""#!/bin/bash
+# SVCS Post-Receive Hook - For bare repositories
+echo "� SVCS: Post-receive hook executed"
+""",
+            'update': f"""#!/bin/bash
+# SVCS Update Hook - For handling note updates in bare repos
+echo "🔄 SVCS: Update hook executed"
 """
+        }
         
-        # Install hooks
-        hooks_to_install = ['post-commit', 'post-merge', 'post-checkout', 'pre-push']
+        # Install enhanced hooks
         installed_hooks = []
         
-        for hook_name in hooks_to_install:
+        for hook_name, hook_content in hooks_config.items():
             hook_path = hooks_dir / hook_name
-            hook_path.write_text(hook_template)
+            hook_path.write_text(hook_content)
             hook_path.chmod(0o755)  # Make executable
             installed_hooks.append(hook_name)
         

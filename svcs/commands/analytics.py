@@ -23,34 +23,11 @@ def cmd_analytics(args):
     print(f"📊 Generating analytics for repository: {repo_path.name}")
     
     try:
-        # Try to use repository-local analytics if available
-        try:
-            from svcs_repo_analytics import generate_repository_analytics_report
-            report = generate_repository_analytics_report(str(repo_path))
-        except ImportError:
-            # Fallback to adapted legacy analytics
-            original_dir = os.getcwd()
-            os.chdir(repo_path)
-            
-            # Import and adapt legacy analytics
-            sys.path.insert(0, str(repo_path.parent))
-            import svcs_analytics
-            
-            # Create a mock global context for legacy module
-            class MockGlobalContext:
-                def __init__(self, repo_path):
-                    self.repo_path = repo_path
-                    
-                def get_projects(self):
-                    return [{'path': str(repo_path), 'name': repo_path.name}]
-                    
-                def get_database_path(self, project_path):
-                    return str(repo_path / '.svcs' / 'semantic.db')
-            
-            # Monkey patch for repository-local operation
-            svcs_analytics.global_context = MockGlobalContext(repo_path)
-            report = svcs_analytics.generate_analytics_report()
-            os.chdir(original_dir)
+        # Use centralized API
+        sys.path.insert(0, str(repo_path))
+        from svcs.api import generate_analytics
+        
+        report = generate_analytics()
         
         if args.output:
             output_path = Path(args.output)
@@ -84,22 +61,11 @@ def cmd_quality(args):
     print(f"🎯 Running quality analysis for repository: {repo_path.name}")
     
     try:
-        # Try repository-local quality analysis if available
-        try:
-            from svcs_repo_quality import RepositoryQualityAnalyzer
-            analyzer = RepositoryQualityAnalyzer(str(repo_path))
-            report = analyzer.generate_quality_report()
-        except ImportError:
-            # Fallback to adapted legacy quality analysis
-            original_dir = os.getcwd()
-            os.chdir(repo_path)
-            
-            sys.path.insert(0, str(repo_path.parent))
-            import svcs_quality
-            
-            # Adapt for repository-local operation
-            report = svcs_quality.analyze_repository_quality(str(repo_path))
-            os.chdir(original_dir)
+        # Use centralized API
+        sys.path.insert(0, str(repo_path))
+        from svcs.api import analyze_quality
+        
+        report = analyze_quality()
         
         print("✅ Quality Analysis Complete")
         

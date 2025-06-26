@@ -37,14 +37,21 @@ setup(
     
     # Install requirements
     install_requires=[
-        # No external dependencies - uses only Python standard library
+        # Core and AI dependencies
+        'rich>=12.0.0',
+        'google-generativeai>=0.3.0',
+        'tenacity>=8.0.0',
+        # Language parsers
+        'esprima>=4.0.1',
+        'phply>=1.2.6',
+        'tree-sitter>=0.20.0',
+        'tree-sitter-php>=0.20.0',
     ],
     
     # Console scripts - this makes 'svcs' command available globally
     entry_points={
         'console_scripts': [
-            'svcs=svcs.cli:main',
-            'svcs-local=svcs.cli:main',  # Alternative name
+            'svcs=svcs.__main__:main',
         ],
     },
     

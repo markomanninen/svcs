@@ -265,6 +265,15 @@ class GitNotesManager:
     def sync_notes_to_remote(self, remote: str = "origin") -> bool:
         """Push semantic git notes to remote repository."""
         try:
+            # First check if remote exists
+            check_remote = subprocess.run([
+                "git", "remote", "get-url", remote
+            ], cwd=self.repo_path, capture_output=True, text=True)
+            
+            if check_remote.returncode != 0:
+                logger.warning(f"Remote '{remote}' not configured in repository")
+                return False
+            
             result = subprocess.run([
                 "git", "push", remote, self.notes_ref
             ], cwd=self.repo_path, capture_output=True, text=True)
@@ -273,7 +282,7 @@ class GitNotesManager:
                 logger.info(f"Successfully pushed semantic git notes to {remote}")
                 return True
             else:
-                logger.error(f"Failed to push git notes: {result.stderr}")
+                logger.error(f"Failed to push git notes to '{remote}': {result.stderr}")
                 return False
         
         except Exception as e:
@@ -283,15 +292,38 @@ class GitNotesManager:
     def fetch_notes_from_remote(self, remote: str = "origin") -> bool:
         """Fetch semantic git notes from remote repository."""
         try:
+            # First check if remote exists
+            check_remote = subprocess.run([
+                "git", "remote", "get-url", remote
+            ], cwd=self.repo_path, capture_output=True, text=True)
+            
+            if check_remote.returncode != 0:
+                logger.warning(f"Remote '{remote}' not configured in repository")
+                return False
+            
+            # Check if notes reference exists on remote
+            check_notes = subprocess.run([
+                "git", "ls-remote", remote, f"refs/notes/svcs-semantic"
+            ], cwd=self.repo_path, capture_output=True, text=True)
+            
+            if check_notes.returncode != 0 or not check_notes.stdout.strip():
+                logger.info(f"No semantic git notes found on remote '{remote}'")
+                return False
+            
+            # Fetch the notes - success includes both updates and "already up to date"
             result = subprocess.run([
                 "git", "fetch", remote, f"{self.notes_ref}:{self.notes_ref}"
             ], cwd=self.repo_path, capture_output=True, text=True)
             
+            # Git fetch returns 0 for both successful updates and "already up to date"
             if result.returncode == 0:
-                logger.info(f"Successfully fetched semantic git notes from {remote}")
+                if result.stderr and "up to date" in result.stderr.lower():
+                    logger.info(f"Semantic git notes are already up to date with {remote}")
+                else:
+                    logger.info(f"Successfully fetched semantic git notes from {remote}")
                 return True
             else:
-                logger.warning(f"No semantic notes found on remote: {result.stderr}")
+                logger.warning(f"Failed to fetch git notes from '{remote}': {result.stderr}")
                 return False
         
         except Exception as e:
@@ -418,7 +450,7 @@ class RepositoryLocalSVCS:
             "branch1_events": branch1_events,
             "branch2_events": branch2_events
         }
-
+    
     def get_repository_status(self) -> Dict[str, Any]:
         """Get repository SVCS status."""
         current_branch = self.db.get_current_branch()
@@ -703,6 +735,42 @@ class RepositoryLocalSVCS:
             results.append("⚠️ Could not determine git state")
         
         return " | ".join(results) if results else "✅ No issues detected"
+
+    def get_config(self, key: str, default=None):
+        """Get a configuration value."""
+        with self.db.get_connection() as conn:
+            cursor = conn.execute("SELECT config FROM repository_info WHERE repo_path = ?", (str(self.repo_path),))
+            result = cursor.fetchone()
+            if result and result[0]:
+                config = json.loads(result[0])
+                return config.get(key, default)
+            return default
+    
+    def set_config(self, key: str, value):
+        """Set a configuration value."""
+        with self.db.get_connection() as conn:
+            cursor = conn.execute("SELECT config FROM repository_info WHERE repo_path = ?", (str(self.repo_path),))
+            result = cursor.fetchone()
+            
+            if result and result[0]:
+                config = json.loads(result[0])
+            else:
+                config = {}
+            
+            config[key] = value
+            
+            conn.execute("UPDATE repository_info SET config = ? WHERE repo_path = ?", 
+                        (json.dumps(config), str(self.repo_path)))
+            conn.commit()
+    
+    def get_all_config(self) -> Dict[str, Any]:
+        """Get all configuration values."""
+        with self.db.get_connection() as conn:
+            cursor = conn.execute("SELECT config FROM repository_info WHERE repo_path = ?", (str(self.repo_path),))
+            result = cursor.fetchone()
+            if result and result[0]:
+                return json.loads(result[0])
+            return {}
 
 # Migration tools for moving from global to repository-local architecture
 class SVCSMigrator:

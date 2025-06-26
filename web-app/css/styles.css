@@ -117,6 +117,14 @@ body {
     color: #2c3e50;
 }
 
+.form-hint {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #666;
+    font-style: italic;
+}
+
 .form-control, .form-select {
     width: 100%;
     padding: 10px 12px;

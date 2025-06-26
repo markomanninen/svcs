@@ -28,7 +28,7 @@ import json
 import argparse
 
 # Import from repository-local .svcs/api.py
-sys.path.insert(0, '.svcs')
+sys.path.insert(0, 'svcs')
 try:
     from api import get_full_log, get_valid_commit_hashes
 except ImportError:

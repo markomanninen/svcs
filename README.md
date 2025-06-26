@@ -327,7 +327,9 @@ python3 svcs_local_cli.py status
 
 # Via command line:
 svcs search --limit=20
-python3 svcs_discuss.py  # Requires GOOGLE_API_KEY
+svcs discuss --query "summarize my project"  # Enhanced CLI integration
+svcs query "show recent performance changes" # One-shot queries
+python3 svcs_discuss.py  # Direct script (legacy)
 ```
 
 ## 📖 **Usage Guide**
@@ -353,37 +355,42 @@ svcs cleanup --show-stats                    # Show database status
 svcs prune --all-projects                    # Clean orphaned data
 ```
 
-### **Repository-Local SVCS CLI (`svcs-local`)**
+### **Repository-Local SVCS CLI (`svcs`)**
 
 **New git-integrated team collaboration interface:**
 
 ```bash
 # Repository initialization and management
-svcs-local init                              # Initialize SVCS for current repository
-svcs-local status                            # Show repository SVCS status
-svcs-local remove                            # Remove SVCS from repository
+svcs init                              # Initialize SVCS for current repository
+svcs status                            # Show repository SVCS status
+svcs remove                            # Remove SVCS from repository
 
 # Semantic analysis and events
-svcs-local events --limit 10                 # List semantic events for current branch
-svcs-local events --branch feature/auth      # Events for specific branch
-svcs-local analyze --commit abc123           # Manually analyze a commit
+svcs events --limit 10                 # List semantic events for current branch
+svcs events --branch feature/auth      # Events for specific branch
+svcs analyze --commit abc123           # Manually analyze a commit
 
 # Git notes team collaboration
-svcs-local notes sync                        # Sync semantic notes to remote
-svcs-local notes fetch                       # Fetch semantic notes from remote
-svcs-local notes show --commit abc123        # View semantic note for commit
+svcs notes sync                        # Sync semantic notes to remote
+svcs notes fetch                       # Fetch semantic notes from remote
+svcs notes show --commit abc123        # View semantic note for commit
 
 # Migration from global architecture
-svcs-local migrate list                      # List projects for migration
-svcs-local migrate migrate                   # Migrate current project to local
+svcs migrate list                      # List projects for migration
+svcs migrate migrate                   # Migrate current project to local
 ```
 
-### **Conversational Interface (`svcs_discuss.py`)**
+### **Conversational Interface**
 
-Natural language queries about code evolution:
+Natural language queries about code evolution available through multiple interfaces:
 
 ```bash
-# Start interactive session (requires GOOGLE_API_KEY)
+# CLI Integration (New!)
+svcs discuss                            # Start interactive session
+svcs discuss --query "summarize recent changes"  # Start with initial query
+svcs query "show performance optimizations"      # One-shot query
+
+# Direct script (Legacy)
 export GOOGLE_API_KEY="your_key"
 python3 svcs_discuss.py
 
@@ -795,21 +802,21 @@ We're designing **git-native team collaboration** that integrates with existing 
 ✅ **Phase 1 - Core Architecture** (Completed):
 ```bash
 # Implemented repository-local CLI commands
-svcs-local init                         # Initialize SVCS for repository
-svcs-local status                       # Show repository status and branch info
-svcs-local events --branch main --limit 10  # Branch-specific semantic events
-svcs-local notes sync                   # Sync semantic data via git notes
-svcs-local notes fetch                  # Fetch team's semantic data
-svcs-local migrate list                 # List projects for migration from global DB
+svcs init                         # Initialize SVCS for repository
+svcs status                       # Show repository status and branch info
+svcs events --branch main --limit 10  # Branch-specific semantic events
+svcs notes sync                   # Sync semantic data via git notes
+svcs notes fetch                  # Fetch team's semantic data
+svcs migrate list                 # List projects for migration from global DB
 ```
 
 🚧 **Phase 2 - Integration** (In Progress):
 ```bash
 # Planned integration with existing SVCS components
-svcs-local search --event-type "security_improvement"  # Advanced semantic search
-svcs-local diff-branches main..feature    # Compare semantic evolution between branches
-svcs-local team-activity --since "1 week" # Team's semantic changes across branches
-svcs-local merge-preview feature/auth     # Preview semantic impact of branch merge
+svcs search --event-type "security_improvement"  # Advanced semantic search
+svcs diff-branches main..feature    # Compare semantic evolution between branches
+svcs team-activity --since "1 week" # Team's semantic changes across branches
+svcs merge-preview feature/auth     # Preview semantic impact of branch merge
 ```
 
 📋 **Phase 3 - Team Features** (Planned):

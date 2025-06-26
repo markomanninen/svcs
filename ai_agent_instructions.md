@@ -17,3 +17,5 @@
 - Working an hour with ai agent halts VSC, consoles get red, and UI unsresponsive Must reboot.
 - AttributeError: 'PythonParser' object has no attribute 'parse' -> parse_code !!!
   The parser uses parse_code method.
+- Claude 4 overuses icons in docs and app, which is extremely naive
+- 

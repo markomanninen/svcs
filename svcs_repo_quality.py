@@ -26,12 +26,12 @@ import argparse
 from collections import defaultdict, Counter
 from datetime import datetime, timedelta
 
-# Import from repository-local .svcs/api.py
-sys.path.insert(0, '.svcs')
+# Import from centralized API
+sys.path.insert(0, '.')
 try:
-    from api import get_full_log, get_node_evolution
+    from svcs.api import get_full_log, get_node_evolution
 except ImportError:
-    print("❌ Error: Could not import from .svcs/api.py")
+    print("❌ Error: Could not import from svcs.api")
     print("   Make sure you're running this from a repository with SVCS initialized")
     print("   Run 'svcs init' first if this is a new repository")
     sys.exit(1)

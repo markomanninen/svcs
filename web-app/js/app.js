@@ -69,8 +69,7 @@ class SVCSDashboard {
         // Repository Manager functions
         window.showAddRepositoryForm = () => this.components.repositoryManager?.showAddRepositoryForm();
         window.hideAddRepositoryForm = () => this.components.repositoryManager?.hideAddRepositoryForm();
-        window.registerRepository = () => this.components.repositoryManager?.registerRepository();
-        window.initializeRepository = () => this.components.repositoryManager?.initializeRepository();
+        window.addRepository = () => this.components.repositoryManager?.addRepository();
         
         // Semantic Search functions
         window.searchEventsBasic = () => this.components.semanticSearch?.performUnifiedSearch();

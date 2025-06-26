@@ -253,7 +253,7 @@ class DiscussAdapter(RepositoryLocalAdapter):
         original_dir = self.setup_legacy_module_context('svcs_discuss')
         
         try:
-            import svcs_discuss
+            import legacy_scripts.svcs_discuss as svcs_discuss
             
             # Set repository context
             svcs_discuss.REPOSITORY_PATH = str(self.repo_path)
@@ -276,7 +276,7 @@ class DiscussAdapter(RepositoryLocalAdapter):
         original_dir = self.setup_legacy_module_context('svcs_discuss')
         
         try:
-            import svcs_discuss
+            import legacy_scripts.svcs_discuss as svcs_discuss
             
             # Set repository context
             svcs_discuss.REPOSITORY_PATH = str(self.repo_path)

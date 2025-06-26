@@ -108,12 +108,24 @@ def cmd_process_hook(args):
             from svcs_repo_local import RepositoryLocalSVCS
             svcs = RepositoryLocalSVCS(str(repo_path))
             
-            # First, import semantic events from git notes (for commits merged from remote)
+            # Check if auto-sync is enabled (default: True)
+            auto_sync = svcs.get_config('auto_sync_notes', True)
+            
+            if auto_sync:
+                # Automatically fetch semantic notes from remote (in case they weren't fetched during git pull)
+                print("📥 SVCS: Auto-fetching semantic notes from remote...")
+                fetch_result = svcs.git_notes.fetch_notes_from_remote()
+                if fetch_result:
+                    print("✅ SVCS: Semantic notes fetched from remote")
+            else:
+                print("ℹ️ SVCS: Auto-sync disabled, use 'svcs notes fetch' manually if needed")
+            
+            # Import semantic events from git notes (for commits merged from remote)
             imported_count = svcs.import_semantic_events_from_notes()
             if imported_count > 0:
                 print(f"📥 SVCS: Imported {imported_count} semantic events from git notes")
             
-            # Then, automatically process merge and transfer semantic events between branches
+            # Finally, automatically process merge and transfer semantic events between branches
             result = svcs.process_merge()
             print(f"✅ SVCS: {result}")
             
@@ -121,14 +133,54 @@ def cmd_process_hook(args):
             print(f"❌ SVCS: Merge processing error: {e}")
         
     elif hook_name.endswith('post-checkout'):
-        # Post-checkout: handle branch switching
-        print("🔍 SVCS: Processing checkout...")
-        # Additional checkout processing can be added here
+        # Post-checkout: handle branch switching and fetch notes
+        try:
+            print("🔍 SVCS: Processing checkout...")
+            
+            # Initialize SVCS
+            from svcs_repo_local import RepositoryLocalSVCS
+            svcs = RepositoryLocalSVCS(str(repo_path))
+            
+            # Fetch semantic notes when switching branches (they might have new commits)
+            print("📥 SVCS: Fetching semantic notes after checkout...")
+            fetch_result = svcs.git_notes.fetch_notes_from_remote()
+            if fetch_result:
+                print("✅ SVCS: Semantic notes fetched from remote")
+            
+            # Import any new semantic events from notes
+            imported_count = svcs.import_semantic_events_from_notes()
+            if imported_count > 0:
+                print(f"📥 SVCS: Imported {imported_count} semantic events from git notes")
+                
+        except Exception as e:
+            print(f"❌ SVCS: Checkout processing error: {e}")
         
     elif hook_name.endswith('pre-push'):
-        # Pre-push: validation or sync
-        print("🔍 SVCS: Processing pre-push...")
-        # Additional pre-push processing can be added here
+        # Pre-push: automatically sync semantic notes to remote (if auto-sync enabled)
+        try:
+            print("🔍 SVCS: Processing pre-push...")
+            
+            # Initialize SVCS
+            from svcs_repo_local import RepositoryLocalSVCS
+            svcs = RepositoryLocalSVCS(str(repo_path))
+            
+            # Check if auto-sync is enabled (default: True)
+            auto_sync = svcs.get_config('auto_sync_notes', True)
+            
+            if auto_sync:
+                # Automatically sync semantic notes to remote before push
+                print("📤 SVCS: Auto-syncing semantic notes to remote...")
+                sync_result = svcs.git_notes.sync_notes_to_remote()
+                if sync_result:
+                    print("✅ SVCS: Semantic notes synced to remote")
+                else:
+                    print("⚠️ SVCS: Failed to sync semantic notes (continuing with push)")
+            else:
+                print("ℹ️ SVCS: Auto-sync disabled, use 'svcs notes sync' manually if needed")
+                
+        except Exception as e:
+            print(f"❌ SVCS: Pre-push processing error: {e}")
+            # Don't fail the push if semantic notes sync fails
         
     else:
         print(f"⚠️ SVCS: Unknown hook type: {hook_name}")

@@ -20,9 +20,9 @@ def cmd_search(args):
         return
     
     try:
-        # Import API functions
-        sys.path.insert(0, str(repo_path / '.svcs'))
-        from api import search_events_advanced, search_semantic_patterns
+        # Import API functions from centralized location
+        sys.path.insert(0, str(repo_path))
+        from svcs.api import search_events_advanced, search_semantic_patterns
         
         # Determine search type
         if args.pattern_type:
@@ -90,8 +90,8 @@ def cmd_evolution(args):
         return
     
     try:
-        sys.path.insert(0, str(repo_path / '.svcs'))
-        from api import get_filtered_evolution
+        sys.path.insert(0, str(repo_path))
+        from svcs.api import get_filtered_evolution
         
         results = get_filtered_evolution(
             node_id=args.node_id,

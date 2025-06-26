@@ -16,7 +16,7 @@ from .web import cmd_web, cmd_dashboard
 from .ci import cmd_ci
 from .discuss import cmd_discuss, cmd_query
 from .notes import cmd_notes
-from .sync import cmd_sync, cmd_merge_resolve, cmd_auto_fix, cmd_sync_all, cmd_pull, cmd_merge
+from .sync import cmd_sync, cmd_merge_resolve, cmd_auto_fix, cmd_sync_all, cmd_pull, cmd_push, cmd_merge, cmd_config, cmd_config
 from .utils import cmd_quick_help, cmd_workflow
 
 # Export all command functions
@@ -59,7 +59,9 @@ __all__ = [
     'cmd_auto_fix',
     'cmd_sync_all',
     'cmd_pull',
+    'cmd_push',
     'cmd_merge',
+    'cmd_config',
     
     # Utilities and help
     'cmd_quick_help',

@@ -129,6 +129,33 @@ class RepositoryManager {
         }
     }
 
+    async addRepository() {
+        const path = this.repoPathInput ? this.repoPathInput.value : '';
+        const name = this.repoNameInput ? this.repoNameInput.value : '';
+        
+        if (!path) {
+            this.utils.showError('Please enter a repository path');
+            return;
+        }
+        
+        try {
+            // Try to initialize first (this handles directory creation, git init, and svcs init)
+            const initResult = await this.api.initializeRepository({ path: path });
+            
+            // Then register the repository
+            await this.api.registerRepository({
+                path: path,
+                name: name || undefined
+            });
+            
+            this.utils.showSuccess('Repository added and registered successfully!');
+            this.hideAddRepositoryForm();
+            this.discoverRepositories();
+        } catch (error) {
+            this.utils.showError(`Failed to add repository: ${error.message}`);
+        }
+    }
+
     async registerRepository() {
         const path = this.repoPathInput ? this.repoPathInput.value : '';
         const name = this.repoNameInput ? this.repoNameInput.value : '';

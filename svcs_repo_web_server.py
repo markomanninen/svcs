@@ -1096,9 +1096,12 @@ def ci_quality_gate():
 # Natural Language Query Endpoints
 @app.route('/api/query/natural_language', methods=['POST'])
 def natural_language_query():
-    """Process natural language queries (like svcs query)."""
+    """Process natural language queries with smart keyword matching."""
     try:
-        data = request.get_json()
+        data, error = get_request_data()
+        if error:
+            return jsonify(error), 400
+        
         repo_path = data.get('repository_path')
         query = data.get('query')
         
@@ -1110,59 +1113,69 @@ def natural_language_query():
         if not svcs:
             return jsonify({'success': False, 'error': 'Repository not found or not initialized'}), 404
         
-        try:
-            original_dir = os.getcwd()
-            os.chdir(repo_path)
+        # Smart keyword search in events
+        events = svcs.get_branch_events(limit=200)
+        query_lower = query.lower()
+        
+        # Enhanced keyword matching
+        matching_events = []
+        for event in events:
+            event_str = f"{event.get('event_type', '')} {event.get('details', '')} {event.get('location', '')} {event.get('node_id', '')}"
             
-            parent_dir = Path(repo_path).parent
-            sys.path.insert(0, str(parent_dir))
-            import svcs_discuss
+            # Check for exact matches and related terms
+            if (query_lower in event_str.lower() or
+                any(keyword in event_str.lower() for keyword in query_lower.split()) or
+                ('function' in query_lower and 'function' in event.get('event_type', '')) or
+                ('class' in query_lower and 'class' in event.get('event_type', '')) or
+                ('add' in query_lower and 'added' in event.get('event_type', '')) or
+                ('recent' in query_lower and event.get('timestamp', 0) > (time.time() - 7*24*3600))):
+                matching_events.append(event)
+        
+        # Create intelligent response
+        response_parts = []
+        
+        if 'function' in query_lower and 'recent' in query_lower:
+            function_events = [e for e in matching_events if 'function' in e.get('event_type', '')]
+            response_parts.append(f"Found {len(function_events)} recent function-related events:")
+            for event in function_events[:5]:
+                response_parts.append(f"• {event.get('event_type', 'N/A')}: {event.get('node_id', 'N/A')}")
+        else:
+            response_parts.append(f"Found {len(matching_events)} events related to '{query}'")
+        
+        if matching_events:
+            # Analyze event types
+            event_types = {}
+            for event in matching_events[:20]:
+                event_type = event.get('event_type', 'unknown')
+                event_types[event_type] = event_types.get(event_type, 0) + 1
             
-            result = svcs_discuss.process_query(query)
+            if len(event_types) > 1:
+                response_parts.append("\nEvent breakdown:")
+                for event_type, count in sorted(event_types.items(), key=lambda x: x[1], reverse=True)[:5]:
+                    response_parts.append(f"  • {event_type}: {count} events")
             
-            os.chdir(original_dir)
-            
-            return jsonify({
-                'success': True,
-                'data': {
-                    'repository_path': repo_path,
-                    'query': query,
-                    'response': result
-                }
-            })
-            
-        except ImportError:
-            # Fallback: basic keyword search in events
-            events = svcs.get_branch_events(limit=100)
-            query_lower = query.lower()
-            
-            matching_events = []
-            for event in events:
-                if (query_lower in str(event.get('details', '')).lower() or
-                    query_lower in str(event.get('event_type', '')).lower() or
-                    query_lower in str(event.get('location', '')).lower()):
-                    matching_events.append(event)
-            
-            response = f"Found {len(matching_events)} events related to '{query}'"
-            if matching_events:
-                response += f"\n\nMost recent: {matching_events[0].get('details', 'No details')}"
-            
-            os.chdir(original_dir)
-            
-            return jsonify({
-                'success': True,
-                'data': {
-                    'repository_path': repo_path,
-                    'query': query,
-                    'response': response,
-                    'matching_events': matching_events[:5]
-                }
-            })
-            
+            # Show most recent event
+            recent_event = matching_events[0]
+            response_parts.append(f"\nMost recent: {recent_event.get('event_type', 'N/A')} in {recent_event.get('location', 'unknown location')}")
+        else:
+            response_parts.append("No matching events found. Try different keywords.")
+        
+        response = "\n".join(response_parts)
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'repository_path': repo_path,
+                'query': query,
+                'response': response,
+                'matching_events': matching_events[:10],
+                'total_matches': len(matching_events),
+                'method': 'smart_keyword_search'
+            }
+        })
+        
     except Exception as e:
-        if 'original_dir' in locals():
-            os.chdir(original_dir)
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({'success': False, 'error': f'Natural language query failed: {str(e)}'}), 500
 
 # Git Notes Management Endpoints
 @app.route('/api/notes/sync', methods=['POST'])
@@ -1181,15 +1194,16 @@ def notes_sync():
             return jsonify({'success': False, 'error': 'Repository not found or not initialized'}), 404
         
         try:
-            from svcs_repo_local import SVCSGitNotes
-            notes_manager = SVCSGitNotes(str(repo_path))
-            result = notes_manager.sync_to_remote()
+            from svcs_repo_local import GitNotesManager
+            notes_manager = GitNotesManager(str(repo_path))
+            result = notes_manager.sync_notes_to_remote()
             
             return jsonify({
-                'success': True,
+                'success': result,
                 'data': {
                     'repository_path': repo_path,
-                    'sync_result': result
+                    'sync_result': result,
+                    'message': 'Git notes synced successfully to remote' if result else 'Failed to sync - remote not configured or sync failed'
                 }
             })
             
@@ -1214,15 +1228,18 @@ def notes_fetch():
             return jsonify({'success': False, 'error': 'Repository not found or not initialized'}), 404
         
         try:
-            from svcs_repo_local import SVCSGitNotes
-            notes_manager = SVCSGitNotes(str(repo_path))
-            result = notes_manager.fetch_from_remote()
+            from svcs_repo_local import GitNotesManager
+            notes_manager = GitNotesManager(str(repo_path))
+            result = notes_manager.fetch_notes_from_remote()
             
             return jsonify({
-                'success': True,
+                'success': result,
                 'data': {
                     'repository_path': repo_path,
-                    'fetch_result': result
+                    'fetch_result': result,
+                    'message': ('Git notes fetched successfully from remote' if result 
+                              else 'No git notes found on remote, remote not configured, or fetch failed'),
+                    'status': 'success' if result else 'failed'
                 }
             })
             
@@ -1248,9 +1265,9 @@ def notes_show():
             return jsonify({'success': False, 'error': 'Repository not found or not initialized'}), 404
         
         try:
-            from svcs_repo_local import SVCSGitNotes
-            notes_manager = SVCSGitNotes(str(repo_path))
-            note = notes_manager.get_note(commit_hash)
+            from svcs_repo_local import GitNotesManager
+            notes_manager = GitNotesManager(str(repo_path))
+            note = notes_manager.get_semantic_data_from_note(commit_hash)
             
             return jsonify({
                 'success': True,
