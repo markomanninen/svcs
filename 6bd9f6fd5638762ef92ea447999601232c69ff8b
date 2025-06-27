@@ -1,0 +1,30 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-27T13:33:45.181429",
+  "semantic_events": [
+    {
+      "event_type": "file_modified",
+      "node_id": "file:svcs/cli.py",
+      "location": "svcs/cli.py",
+      "details": "File svcs/cli.py was modified",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File content changed",
+      "commit_hash": "6bd9f6fd5638762ef92ea447999601232c69ff8b",
+      "created_at": 1751020425
+    },
+    {
+      "event_type": "file_modified",
+      "node_id": "file:svcs/commands/tour_utils.py",
+      "location": "svcs/commands/tour_utils.py",
+      "details": "File svcs/commands/tour_utils.py was modified",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File content changed",
+      "commit_hash": "6bd9f6fd5638762ef92ea447999601232c69ff8b",
+      "created_at": 1751020425
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "6bd9f6fd5638762ef92ea447999601232c69ff8b"
+}
