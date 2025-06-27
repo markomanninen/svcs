@@ -5,6 +5,7 @@ Repository-Local Semantic Version Control System
 
 Complete command set:
   svcs init         - Initialize SVCS in current repository
+  svcs init-project - Interactive tour to setup a new SVCS project
   svcs status       - Show SVCS status  
   svcs events       - List recent semantic events
   svcs search       - Advanced semantic search
@@ -44,6 +45,7 @@ try:
     from svcs_repo_local import RepositoryLocalSVCS, SVCSMigrator
     from svcs_repo_hooks import SVCSRepositoryManager
     from .commands import *  # Import all commands from modular package
+    from .commands.init import cmd_init_project # Ensure cmd_init_project is imported
 except ImportError:
     # Fallback to parent directory (development mode)
     parent_dir = Path(__file__).parent.parent
@@ -81,6 +83,7 @@ def main():
         epilog="""
 Complete command set:
   svcs init                           # Initialize SVCS in current repository
+  svcs init-project [name] [--path .] [--non-interactive] # Interactive tour / setup for new project
   svcs status                         # Show repository status
   svcs events                         # List recent semantic events
   svcs search "query"                 # Advanced semantic search
@@ -383,6 +386,13 @@ Date Formats (--since):
     mcp_logs_parser.add_argument('--follow', '-f', action='store_true',
                                 help='Follow log output')
     mcp_logs_parser.set_defaults(func=cmd_mcp_logs)
+
+    # Init-project command
+    init_project_parser = subparsers.add_parser('init-project', help='Initialize a new SVCS project with an interactive tour or non-interactively.')
+    init_project_parser.add_argument('project_name', nargs='?', default=None, help='Name of the new project (optional, will be prompted if not provided in interactive mode, or uses a default in non-interactive mode if not set)')
+    init_project_parser.add_argument('--path', type=str, help='Directory to create the project in (default: current directory if interactive, or prompted)')
+    init_project_parser.add_argument('--non-interactive', action='store_true', help='Run in non-interactive mode, using defaults and skipping prompts.')
+    init_project_parser.set_defaults(func=cmd_init_project)
 
     # Parse arguments
     args = parser.parse_args()

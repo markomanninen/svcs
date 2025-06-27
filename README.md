@@ -288,6 +288,15 @@ cd your-project
 
 # Register with SVCS MCP server
 svcs init --name "My Project" .
+
+# OR take an interactive tour to initialize a new project
+svcs init-project
+# This will guide you through creating a project, e.g., 'svcs_demo_project'.
+# It sets up SVCS, creates sample files, and makes an initial commit.
+
+# For non-interactive setup (e.g., scripting):
+svcs init-project MyNewProject --path ./projects --non-interactive
+# This creates './projects/MyNewProject' with defaults, ready to use.
 ```
 
 ### **2. Make Changes and Commit** (Both Architectures)
