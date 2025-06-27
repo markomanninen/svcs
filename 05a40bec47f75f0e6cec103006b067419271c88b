@@ -1,0 +1,217 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-06-27T03:58:10.198724",
+  "semantic_events": [
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:install.py",
+      "location": "install.py",
+      "details": "File install.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    },
+    {
+      "event_type": "file_modified",
+      "node_id": "file:svcs/api.py",
+      "location": "svcs/api.py",
+      "details": "File svcs/api.py was modified",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File content changed",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    },
+    {
+      "event_type": "file_modified",
+      "node_id": "file:svcs/cli.py",
+      "location": "svcs/cli.py",
+      "details": "File svcs/cli.py was modified",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File content changed",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    },
+    {
+      "event_type": "file_modified",
+      "node_id": "file:svcs/commands/__init__.py",
+      "location": "svcs/commands/__init__.py",
+      "details": "File svcs/commands/__init__.py was modified",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File content changed",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    },
+    {
+      "event_type": "file_added",
+      "node_id": "file:svcs/commands/mcp_commands.py",
+      "location": "svcs/commands/mcp_commands.py",
+      "details": "New file svcs/commands/mcp_commands.py was added",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File is new (no previous content)",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    },
+    {
+      "event_type": "file_modified",
+      "node_id": "file:svcs/semantic_analyzer.py",
+      "location": "svcs/semantic_analyzer.py",
+      "details": "File svcs/semantic_analyzer.py was modified",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File content changed",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    },
+    {
+      "event_type": "file_modified",
+      "node_id": "file:svcs_mcp/mcp_server.py",
+      "location": "svcs_mcp/mcp_server.py",
+      "details": "File svcs_mcp/mcp_server.py was modified",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File content changed",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    },
+    {
+      "event_type": "file_added",
+      "node_id": "file:svcs_mcp/server.py",
+      "location": "svcs_mcp/server.py",
+      "details": "New file svcs_mcp/server.py was added",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File is new (no previous content)",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:svcs_mcp/svcs_mcp/__init__.py",
+      "location": "svcs_mcp/svcs_mcp/__init__.py",
+      "details": "File svcs_mcp/svcs_mcp/__init__.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:svcs_mcp/svcs_mcp/cli.py",
+      "location": "svcs_mcp/svcs_mcp/cli.py",
+      "details": "File svcs_mcp/svcs_mcp/cli.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:svcs_mcp/svcs_mcp/git_hooks.py",
+      "location": "svcs_mcp/svcs_mcp/git_hooks.py",
+      "details": "File svcs_mcp/svcs_mcp/git_hooks.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:svcs_mcp/svcs_mcp/integration.py",
+      "location": "svcs_mcp/svcs_mcp/integration.py",
+      "details": "File svcs_mcp/svcs_mcp/integration.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:svcs_mcp/svcs_mcp/semantic_analyzer.py",
+      "location": "svcs_mcp/svcs_mcp/semantic_analyzer.py",
+      "details": "File svcs_mcp/svcs_mcp/semantic_analyzer.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    },
+    {
+      "event_type": "file_deleted",
+      "node_id": "file:svcs_mcp/svcs_mcp/server.py",
+      "location": "svcs_mcp/svcs_mcp/server.py",
+      "details": "File svcs_mcp/svcs_mcp/server.py was deleted",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File no longer exists in repository",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    },
+    {
+      "event_type": "file_modified",
+      "node_id": "file:svcs_mcp/svcs_repo_local_core.py",
+      "location": "svcs_mcp/svcs_repo_local_core.py",
+      "details": "File svcs_mcp/svcs_repo_local_core.py was modified",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File content changed",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    },
+    {
+      "event_type": "file_modified",
+      "node_id": "file:tests/test_mcp_debug.py",
+      "location": "tests/test_mcp_debug.py",
+      "details": "File tests/test_mcp_debug.py was modified",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File content changed",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    },
+    {
+      "event_type": "file_added",
+      "node_id": "file:tests/test_mcp_initialization.py",
+      "location": "tests/test_mcp_initialization.py",
+      "details": "New file tests/test_mcp_initialization.py was added",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File is new (no previous content)",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    },
+    {
+      "event_type": "file_modified",
+      "node_id": "file:tests/test_mcp_query_tools.py",
+      "location": "tests/test_mcp_query_tools.py",
+      "details": "File tests/test_mcp_query_tools.py was modified",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File content changed",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    },
+    {
+      "event_type": "file_added",
+      "node_id": "file:tests/test_mcp_tools.py",
+      "location": "tests/test_mcp_tools.py",
+      "details": "New file tests/test_mcp_tools.py was added",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File is new (no previous content)",
+      "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b",
+      "created_at": 1750985890
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "05a40bec47f75f0e6cec103006b067419271c88b"
+}
