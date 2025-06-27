@@ -86,10 +86,12 @@ def print_error(message):
     console.print(f"[error]❌ {message}[/error]", style="red")
 
 def ask_prompt(prompt_message, default=None, choices=None):
-    return Prompt.ask(f"[prompt❓] {prompt_message}[/prompt]", default=default, choices=choices)
+    # Remove unsupported rich markup tags from the prompt string
+    return Prompt.ask(f"❓ {prompt_message}", default=default, choices=choices)
 
 def ask_confirm(prompt_message, default=True):
-    return Confirm.ask(f"[confirm❓] {prompt_message}[/confirm]", default=default)
+    # Remove unsupported rich markup tags from the confirm string
+    return Confirm.ask(f"❓ {prompt_message}", default=default)
 
 def print_file_content(file_path, header=None):
     if header is None:

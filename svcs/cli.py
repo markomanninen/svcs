@@ -56,6 +56,7 @@ except ImportError:
         # Import modular commands in development mode
         sys.path.insert(0, str(Path(__file__).parent))
         from commands import *
+        from commands.init import cmd_init_project
     except ImportError:
         print("❌ Error: SVCS modules not found. Please ensure SVCS is properly installed.")
         print(f"   Searched in: {Path(__file__).parent} and {parent_dir}")
