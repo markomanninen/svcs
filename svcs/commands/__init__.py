@@ -18,6 +18,7 @@ from .discuss import cmd_discuss, cmd_query
 from .notes import cmd_notes
 from .sync import cmd_sync, cmd_merge_resolve, cmd_auto_fix, cmd_sync_all, cmd_pull, cmd_push, cmd_merge, cmd_config, cmd_config
 from .utils import cmd_quick_help, cmd_workflow
+from .mcp_commands import cmd_mcp_start, cmd_mcp_stop, cmd_mcp_status, cmd_mcp_restart, cmd_mcp_logs
 
 # Export all command functions
 __all__ = [
@@ -65,5 +66,12 @@ __all__ = [
     
     # Utilities and help
     'cmd_quick_help',
-    'cmd_workflow'
+    'cmd_workflow',
+    
+    # MCP server management
+    'cmd_mcp_start',
+    'cmd_mcp_stop',
+    'cmd_mcp_status',
+    'cmd_mcp_restart',
+    'cmd_mcp_logs'
 ]

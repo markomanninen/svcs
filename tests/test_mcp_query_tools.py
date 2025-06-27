@@ -1,71 +1,64 @@
 #!/usr/bin/env python3
 """
-Test MCP query tools with specific project ID
+Test MCP query tools via the new SVCS API
 """
 
 import sys
 import os
 from pathlib import Path
 
-# Add the MCP directory to Python path
+# Add the SVCS directory to Python path
 script_dir = Path(__file__).parent
-sys.path.insert(0, str(script_dir))
+svcs_root = script_dir.parent
+sys.path.insert(0, str(svcs_root))
 
-# Import MCP tools
-from svcs_core import GlobalSVCSDatabase
+# Import new SVCS API
+from svcs.api import search_events_advanced, get_recent_activity
 
 def test_mcp_query_tools():
-    """Test MCP query tools exactly as the user would use them."""
+    """Test MCP query tools exactly as the user would use them via the new API."""
     
-    print("🔧 Testing MCP Query Tools")
+    print("🔧 Testing MCP Query Tools via New API")
     print("=" * 40)
     
-    # Initialize database
-    db = GlobalSVCSDatabase()
-    
-    # Test with user's project ID format
-    project_id = "041b54b5"  # User's partial project ID
-    limit = 10
-    
-    print(f"📋 Query parameters:")
-    print(f"   project_id: {project_id}")
-    print(f"   limit: {limit}")
-    
-    # Find full project ID (since user provided partial)
-    with db.get_connection() as conn:
-        cursor = conn.execute(
-            "SELECT project_id, name FROM projects WHERE project_id LIKE ?",
-            (f"{project_id}%",)
-        )
-        project = cursor.fetchone()
-    
-    if not project:
-        print(f"❌ No project found with ID starting with: {project_id}")
+    # Test recent activity (works with current directory)
+    print(f"\n📊 Recent Activity (last 7 days):")
+    try:
+        recent_events = get_recent_activity(days=7, limit=10)
+        
+        print(f"Found {len(recent_events)} recent events")
+        
+        for i, event in enumerate(recent_events[:5], 1):  # Show first 5
+            print(f"\n{i}. {event['event_type']}")
+            print(f"   Location: {event['location']}")
+            print(f"   Author: {event['author']}")
+            print(f"   Date: {event['timestamp']}")
+            if 'details' in event:
+                print(f"   Details: {event['details']}")
+                
+    except Exception as e:
+        print(f"❌ Error getting recent activity: {e}")
         return
     
-    full_project_id = project[0]
-    project_name = project[1]
-    print(f"✅ Found project: {project_name} (Full ID: {full_project_id})")
-    
-    # Query semantic events
+    # Test advanced search
+    print(f"\n🔍 Advanced Event Search:")
     try:
-        events = db.query_semantic_events(project_id=full_project_id, limit=limit)
+        search_results = search_events_advanced(limit=5)
         
-        print(f"\n📊 Query Results: {len(events)} events found")
+        print(f"Found {len(search_results)} events via advanced search")
         
-        for i, event in enumerate(events[:5], 1):  # Show first 5
+        for i, event in enumerate(search_results[:3], 1):  # Show first 3
             print(f"\n{i}. {event['event_type']}")
-            print(f"   Node: {event['node_id']}")
             print(f"   Location: {event['location']}")
-            print(f"   Details: {event['details']}")
-            print(f"   Author: {event['author']}")
-            print(f"   Commit: {event['commit_hash'][:8]}...")
-            print(f"   Layer: {event['layer']}")
-            
-        print(f"\n✅ MCP query tools working correctly!")
-        
+            print(f"   Layer: {event.get('layer', 'N/A')}")
+            if 'node_id' in event:
+                print(f"   Node: {event['node_id']}")
+                
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"❌ Error in advanced search: {e}")
+        return
+        
+    print(f"\n✅ MCP query tools working correctly via new API!")
 
 if __name__ == "__main__":
     test_mcp_query_tools()

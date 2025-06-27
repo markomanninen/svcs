@@ -1,3 +1,0 @@
-[console_scripts]
-svcs = svcs_mcp.cli:main
-svcs-mcp-server = svcs_mcp.server:server_main

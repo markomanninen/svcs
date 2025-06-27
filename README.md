@@ -399,11 +399,6 @@ python3 svcs_discuss.py
 "Show me all dependency changes by Alice"
 "How has the DataProcessor class evolved?"
 "Which commits had the most significant semantic changes?"
-
-# New git integration queries:
-"What files were changed in commit abc123?"
-"Show me the actual diff for that commit"
-"What were the exact code changes that led to the authentication refactoring?"
 "Show me only the changes to auth.py in commit abc123"
 ```
 
@@ -602,58 +597,103 @@ In VS Code, Cursor, or other MCP-compatible editors:
 > summarize commit abc123
 ```
 
-## 🗂️ **Project Management & Cleanup**
+### **MCP Server Integration (AI Chat Interfaces)**
 
-SVCS provides comprehensive project lifecycle management with intelligent cleanup capabilities to prevent database bloat from test projects and abandoned repositories.
+SVCS provides a fully integrated **Model Context Protocol (MCP) server** for AI chat interfaces like Claude and VS Code Chat. The MCP server enables semantic code analysis through natural conversation.
 
-### **Project Management CLI**
-
-SVCS provides comprehensive project lifecycle management with both **soft delete** (recoverable) and **hard delete** (permanent) options:
+#### **🚀 MCP Server Management**
 
 ```bash
-# Project registration and setup
-svcs init --name "My Project" /path/to/project     # Register and setup git hooks
-svcs list                                          # List all active projects
-svcs status /path/to/project                       # Check project status and hooks
+# Start MCP server for IDE integration
+svcs mcp start                         # Start in foreground (see output)
+svcs mcp start --background            # Start in background
 
-# Project removal options
-svcs remove /path/to/project                       # Soft delete: mark inactive, preserve data
-svcs remove --purge /path/to/project               # Hard delete: permanently remove all data
+# Server management
+svcs mcp stop                          # Stop the MCP server
+svcs mcp status                        # Check if server is running
+svcs mcp restart                       # Restart the server
+svcs mcp restart --background          # Restart in background
 
-# Database cleanup and maintenance
-svcs cleanup --show-stats                          # Show database statistics
-svcs cleanup --show-inactive                       # List inactive projects
-svcs prune --project /path/to/project              # Clean orphaned data for specific project
-svcs prune --all-projects                          # Clean orphaned data for all projects
+# Monitoring and debugging
+svcs mcp logs                          # View recent server logs
+svcs mcp logs --lines 100              # View more log lines
+svcs mcp logs --follow                 # Follow logs in real-time
 ```
 
-#### **Project Lifecycle Management**
+#### **🛠️ MCP Server Usage**
 
-**Basic Operations**:
+**For Development/Testing:**
 ```bash
-svcs init --name "My Project" /path/to/project     # Register project
-svcs list                                          # List projects
-svcs remove /path/to/project                       # Soft delete (recoverable)
-svcs remove --purge /path/to/project               # Hard delete (permanent)
+svcs mcp start                         # Start in foreground to see output
+# Use the tools in Claude/VS Code
+svcs mcp stop                          # Stop when done
 ```
 
-**Database Maintenance**:
+**For Production/IDE Integration:**
 ```bash
-svcs cleanup --show-stats                          # Database statistics
-svcs cleanup --show-inactive                       # List inactive projects
-svcs prune --all-projects                          # Clean orphaned data
+svcs mcp start --background            # Start and detach
+svcs mcp status                        # Check if running
+svcs mcp logs                          # Check for any issues
 ```
 
-# Clean orphaned data from git operations
+**After Code Changes:**
 ```bash
-svcs prune
-```
-# Verify cleanup results
-```bash
-svcs cleanup --show-stats
+svcs mcp restart --background          # Restart to apply changes
 ```
 
-## 🔧 **Development Setup**
+#### **🔧 Available MCP Tools (11 Total)**
+
+When the MCP server is running, these tools are available in Claude/VS Code:
+
+**📊 Project Overview & Statistics**
+- **list_projects** - List all registered SVCS repositories
+- **get_project_statistics** - Get semantic statistics for a project
+
+**🔍 Semantic Event Queries**
+- **query_semantic_events** - Query semantic events from database
+- **search_events_advanced** - Advanced search with comprehensive filtering
+- **get_recent_activity** - Get recent project activity with filtering
+- **search_semantic_patterns** - Search for AI-detected semantic patterns
+
+**📈 Code Evolution Tracking**
+- **get_filtered_evolution** - Get evolution history for specific functions/classes
+
+**🤖 Conversational Interface**
+- **conversational_query** - Natural language interface for semantic analysis
+
+**📝 Commit Analysis**
+- **get_commit_summary** - Comprehensive commit analysis including semantic events
+- **get_commit_changed_files** - List files changed in specific commits
+
+**🔧 Debug & Diagnostics**
+- **debug_query_tools** - Diagnostic information for troubleshooting
+
+#### **💬 Example MCP Queries**
+
+Once the MCP server is running, you can ask natural language questions in Claude or VS Code:
+
+> *"Show me all registered projects"*
+
+> *"What semantic patterns were detected in the last week?"*
+
+> *"Get a summary of commit abc123 including all semantic events"*
+
+> *"How has the authenticate function evolved over time?"*
+
+> *"Show me recent performance optimization patterns with high confidence"*
+
+> *"What files were changed in the last commit and what semantic events occurred?"*
+
+#### **🔗 Integration with Claude/VS Code**
+
+The MCP server automatically integrates with:
+- **Claude Desktop** - Add SVCS server to your MCP configuration
+- **VS Code with MCP Extension** - Connect to local SVCS server
+- **Any MCP-compatible AI interface** - Standard Model Context Protocol support
+
+**Log Location:** `~/Library/Logs/Claude/mcp-server-svcs.log` (macOS)
+
+## 🧑‍💻 **Development Setup**
 
 ```bash
 # Clone and setup development environment

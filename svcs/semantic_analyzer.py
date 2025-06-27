@@ -28,12 +28,29 @@ class SVCSModularAnalyzer:
     
     def __init__(self, repo_path: str = None):
         """Initialize the analyzer for a specific repository."""
+        # Use current working directory if no repo_path provided
         self.repo_path = repo_path or os.getcwd()
+        
+        # Ensure we don't try to create .svcs in root directory
+        if self.repo_path == '/' or not os.access(self.repo_path, os.W_OK):
+            # Fallback to user's home directory if root or non-writable
+            fallback_path = os.path.expanduser('~/.local/share/svcs')
+            print(f"Warning: Cannot write to {self.repo_path}, using fallback: {fallback_path}", file=sys.stderr)
+            self.repo_path = fallback_path
+        
         self.svcs_dir = os.path.join(self.repo_path, '.svcs')
         self.db_path = os.path.join(self.svcs_dir, 'semantic.db')
         
-        # Ensure .svcs directory exists
-        os.makedirs(self.svcs_dir, exist_ok=True)
+        # Ensure .svcs directory exists with error handling
+        try:
+            os.makedirs(self.svcs_dir, exist_ok=True)
+        except (OSError, PermissionError) as e:
+            # If we can't create the directory, use a temp directory
+            import tempfile
+            temp_dir = tempfile.mkdtemp(prefix='svcs_')
+            print(f"Warning: Cannot create {self.svcs_dir}, using temporary directory: {temp_dir}", file=sys.stderr)
+            self.svcs_dir = temp_dir
+            self.db_path = os.path.join(self.svcs_dir, 'semantic.db')
         
         # Initialize database
         initialize_database(self.db_path)

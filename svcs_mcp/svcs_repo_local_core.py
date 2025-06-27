@@ -2,11 +2,12 @@
 """
 SVCS Repository-Local MCP Server Core
 
-Updated MCP server that works with the new repository-local architecture:
+Updated MCP server that works with the new centralized architecture:
 - Uses repository-local databases (.svcs/semantic.db)
 - Integrates with git notes for team collaboration
 - Supports multiple repositories simultaneously
 - Compatible with the new multi-language analyzer
+- Uses centralized initialization and registry system
 """
 
 import asyncio
@@ -23,8 +24,21 @@ import subprocess
 # Import the new repository-local modules
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from svcs_repo_local import RepositoryLocalSVCS, RepositoryLocalDatabase, GitNotesManager
-from svcs_repo_analyzer import RepositoryLocalSemanticAnalyzer
+
+# Import new centralized architecture modules
+try:
+    from svcs.centralized_utils import smart_init_svcs
+    from svcs_repo_local import RepositoryLocalSVCS, RepositoryLocalDatabase, GitNotesManager
+    from svcs_repo_analyzer import RepositoryLocalSemanticAnalyzer
+    from svcs_repo_hooks import SVCSRepositoryManager
+    from svcs_web_repository_manager import web_repository_manager
+    NEW_ARCH_AVAILABLE = True
+except ImportError as e:
+    logging.warning(f"New architecture modules not available: {e}")
+    # Fallback to legacy imports
+    from svcs_repo_local import RepositoryLocalSVCS, RepositoryLocalDatabase, GitNotesManager
+    from svcs_repo_analyzer import RepositoryLocalSemanticAnalyzer
+    NEW_ARCH_AVAILABLE = False
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -39,7 +53,7 @@ class RepositoryManager:
         self.analyzers: Dict[str, RepositoryLocalSemanticAnalyzer] = {}
     
     def register_repository(self, repo_path: str, name: str = None) -> Dict[str, Any]:
-        """Register a repository for SVCS tracking."""
+        """Register a repository for SVCS tracking using new centralized architecture."""
         repo_path = Path(repo_path).resolve()
         
         if not repo_path.exists():
@@ -52,34 +66,76 @@ class RepositoryManager:
         if name is None:
             name = repo_path.name
         
-        # Initialize repository-local SVCS
         try:
-            svcs = RepositoryLocalSVCS(repo_path)
-            result = svcs.initialize_repository()
-            
-            if "❌" in result:
-                return {"success": False, "error": result}
-            
-            # Initialize semantic analyzer
-            analyzer = RepositoryLocalSemanticAnalyzer(repo_path)
-            
-            # Store references
-            self.repositories[repo_id] = svcs
-            self.analyzers[repo_id] = analyzer
-            
-            return {
-                "success": True,
-                "repo_id": repo_id,
-                "name": name,
-                "path": str(repo_path),
-                "message": result
-            }
-            
+            if NEW_ARCH_AVAILABLE:
+                # Use new centralized initialization
+                result = smart_init_svcs(repo_path)
+                
+                if "❌" in result:
+                    return {"success": False, "error": result}
+                
+                # Register in central registry
+                try:
+                    registry_result = web_repository_manager.register_repository(str(repo_path), name)
+                    if not registry_result.get('success'):
+                        logger.warning(f"Registry registration failed: {registry_result.get('error')}")
+                except Exception as e:
+                    logger.warning(f"Registry registration failed: {e}")
+                
+                # Initialize SVCS instance for MCP operations
+                svcs = RepositoryLocalSVCS(repo_path)
+                analyzer = RepositoryLocalSemanticAnalyzer(repo_path)
+                
+                # Store references
+                self.repositories[repo_id] = svcs
+                self.analyzers[repo_id] = analyzer
+                
+                return {
+                    "success": True,
+                    "repo_id": repo_id,
+                    "name": name,
+                    "path": str(repo_path),
+                    "message": result
+                }
+            else:
+                # Fallback to legacy initialization
+                svcs = RepositoryLocalSVCS(repo_path)
+                result = svcs.initialize_repository()
+                
+                if "❌" in result:
+                    return {"success": False, "error": result}
+                
+                # Initialize semantic analyzer
+                analyzer = RepositoryLocalSemanticAnalyzer(repo_path)
+                
+                # Store references
+                self.repositories[repo_id] = svcs
+                self.analyzers[repo_id] = analyzer
+                
+                return {
+                    "success": True,
+                    "repo_id": repo_id,
+                    "name": name,
+                    "path": str(repo_path),
+                    "message": result
+                }
+                
         except Exception as e:
-            return {"success": False, "error": f"Failed to initialize repository: {e}"}
+            return {"success": False, "error": f"Failed to register repository: {str(e)}"}
     
     def list_repositories(self) -> List[Dict[str, Any]]:
-        """List all registered repositories."""
+        """List all registered repositories using new architecture."""
+        if NEW_ARCH_AVAILABLE:
+            try:
+                # Use new registry system
+                repos = web_repository_manager.discover_repositories()
+                return repos
+            except Exception as e:
+                logger.warning(f"Failed to list from registry: {e}")
+                # Fallback to MCP-tracked repositories
+                pass
+        
+        # Fallback to MCP-tracked repositories
         repos = []
         for repo_id, svcs in self.repositories.items():
             try:
@@ -87,15 +143,18 @@ class RepositoryManager:
                 repos.append({
                     "repo_id": repo_id,
                     "path": status.get("repository_path", repo_id),
+                    "name": Path(repo_id).name,
                     "current_branch": status.get("current_branch", "unknown"),
                     "events_count": status.get("semantic_events_count", 0),
                     "commits_analyzed": status.get("commits_analyzed", 0),
-                    "initialized": status.get("initialized", False)
+                    "initialized": status.get("initialized", False),
+                    "type": "repository-local"
                 })
             except Exception as e:
                 repos.append({
                     "repo_id": repo_id,
                     "path": repo_id,
+                    "name": Path(repo_id).name,
                     "error": str(e)
                 })
         return repos

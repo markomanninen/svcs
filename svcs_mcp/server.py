@@ -10,11 +10,13 @@ from pathlib import Path
 # Add the parent directory to Python path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from mcp_server import main
+from svcs_mcp.mcp_server import main
 
 
 def server_main():
     """Entry point for svcs-mcp-server command."""
+    print("🚀 Starting SVCS MCP Server...")
+    print("📡 Server ready for IDE connections")
     asyncio.run(main())
 
 

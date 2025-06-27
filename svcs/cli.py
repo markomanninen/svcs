@@ -19,6 +19,7 @@ Complete command set:
   svcs notes        - Git notes management
   svcs compare      - Compare branches
   svcs cleanup      - Repository maintenance
+  svcs mcp          - MCP server management
 """
 
 import sys
@@ -95,6 +96,7 @@ Complete command set:
   svcs notes sync                     # Git notes team collaboration
   svcs compare main feature           # Compare branches
   svcs cleanup                        # Repository maintenance
+  svcs mcp start                     # Start MCP server
 
 Examples:
   svcs init                           # Initialize current repository
@@ -348,6 +350,40 @@ Date Formats (--since):
                                 default='basic', help='Type of workflow guide')
     workflow_parser.set_defaults(func=cmd_workflow)
     
+    # MCP Server commands
+    mcp_parser = subparsers.add_parser('mcp', help='MCP server management')
+    mcp_subparsers = mcp_parser.add_subparsers(dest='mcp_command', help='MCP server operations')
+    
+    # MCP start command
+    mcp_start_parser = mcp_subparsers.add_parser('start', help='Start MCP server for IDE integration')
+    mcp_start_parser.add_argument('--background', '-b', action='store_true', 
+                                 help='Run server in background')
+    mcp_start_parser.add_argument('--log-file', type=str, 
+                                 help='Log file path (default: ~/Library/Logs/Claude/mcp-server-svcs.log)')
+    mcp_start_parser.set_defaults(func=cmd_mcp_start)
+    
+    # MCP stop command
+    mcp_stop_parser = mcp_subparsers.add_parser('stop', help='Stop MCP server')
+    mcp_stop_parser.set_defaults(func=cmd_mcp_stop)
+    
+    # MCP status command
+    mcp_status_parser = mcp_subparsers.add_parser('status', help='Check MCP server status')
+    mcp_status_parser.set_defaults(func=cmd_mcp_status)
+    
+    # MCP restart command
+    mcp_restart_parser = mcp_subparsers.add_parser('restart', help='Restart MCP server')
+    mcp_restart_parser.add_argument('--background', '-b', action='store_true', 
+                                   help='Run server in background')
+    mcp_restart_parser.set_defaults(func=cmd_mcp_restart)
+    
+    # MCP logs command
+    mcp_logs_parser = mcp_subparsers.add_parser('logs', help='Show MCP server logs')
+    mcp_logs_parser.add_argument('--lines', '-n', type=int, default=50,
+                                help='Number of log lines to show')
+    mcp_logs_parser.add_argument('--follow', '-f', action='store_true',
+                                help='Follow log output')
+    mcp_logs_parser.set_defaults(func=cmd_mcp_logs)
+
     # Parse arguments
     args = parser.parse_args()
     

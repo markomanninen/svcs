@@ -13,17 +13,23 @@ from datetime import datetime, timedelta
 
 # --- Configuration ---
 SVCS_DIR = ".svcs"
-# Support both old and new database names for compatibility
+# Use the new repository-local database path
 DB_PATH = os.path.join(SVCS_DIR, "semantic.db")
-if not os.path.exists(DB_PATH):
-    DB_PATH = os.path.join(SVCS_DIR, "history.db")
 
 def _get_db_connection():
     """Establishes a connection to the SQLite database."""
-    if not os.path.exists(DB_PATH):
-        raise FileNotFoundError(f"SVCS database not found at '{DB_PATH}'.")
+    # Try the new database first, then fall back to legacy
+    new_db_path = os.path.join(SVCS_DIR, "semantic.db")
+    legacy_db_path = os.path.join(SVCS_DIR, "history.db")
     
-    conn = sqlite3.connect(DB_PATH)
+    if os.path.exists(new_db_path):
+        db_path = new_db_path
+    elif os.path.exists(legacy_db_path):
+        db_path = legacy_db_path
+    else:
+        raise FileNotFoundError(f"SVCS database not found. Looked for '{new_db_path}' or '{legacy_db_path}'.")
+    
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
 
