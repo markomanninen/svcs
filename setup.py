@@ -16,7 +16,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="svcs",
-    version="2.0.0",
+    version="0.1",
     description="Semantic Version Control System - Repository-local git-integrated semantic analysis",
     long_description=long_description,
     long_description_content_type="text/markdown",

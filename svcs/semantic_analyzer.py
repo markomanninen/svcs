@@ -102,6 +102,10 @@ class SVCSModularAnalyzer:
         
         return all_events
     
+    def analyze_commit_changes(self, commit_hash: str = None) -> List[Dict[str, Any]]:
+        """Analyze semantic changes in a commit (alias for analyze_commit)."""
+        return self.analyze_commit(commit_hash)
+    
     def get_recent_events(self, limit: int = 20) -> List[Dict[str, Any]]:
         """Get recent semantic events from the database."""
         return get_recent_events(self.db_path, limit)

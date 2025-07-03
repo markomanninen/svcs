@@ -63,7 +63,8 @@ class TrueAIAnalyzer:
                     })
         
         except Exception as e:
-            print(f"Warning: LLM analysis failed: {e}")
+            # Silently skip LLM analysis if not available
+            pass
         
         return events
     
@@ -87,7 +88,8 @@ class TrueAIAnalyzer:
             changes.extend(parsed_changes)
             
         except Exception as e:
-            print(f"Warning: LLM query failed: {e}")
+            # Silently skip LLM query if not available
+            pass
         
         return changes
     
@@ -226,7 +228,7 @@ Only include changes with confidence >= 0.7. If no significant semantic changes 
                 response = self._model.generate_content(prompt)
                 return response.text
             except Exception as e:
-                print(f"Gemini query failed: {e}")
+                print("⚠️ AI analysis unavailable (API key not configured)")
         
         # Try OpenAI (fallback)
         if hasattr(self._model, 'chat'):

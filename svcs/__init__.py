@@ -9,7 +9,7 @@ from .semantic_analyzer import SVCSModularAnalyzer
 # Modular parsers available in parsers/ directory
 from .storage import initialize_database, store_commit_events, get_recent_events, get_event_statistics
 
-__version__ = "2.0.0"
+__version__ = "0.1"
 __author__ = "SVCS Team"
 __license__ = "MIT"
 

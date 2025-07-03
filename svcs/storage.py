@@ -29,6 +29,7 @@ def initialize_database(db_path):
                 confidence REAL,
                 reasoning TEXT,
                 impact TEXT,
+                created_at INTEGER NOT NULL,
                 FOREIGN KEY (commit_hash) REFERENCES commits (commit_hash)
             )
         """)
@@ -36,6 +37,10 @@ def initialize_database(db_path):
 
 def store_commit_events(db_path, commit_hash, commit_metadata, events):
     """Stores the analysis results for a single commit in the database."""
+    import time
+    
+    current_time = int(time.time())
+    
     with sqlite3.connect(db_path) as conn:
         cursor = conn.cursor()
         
@@ -58,13 +63,14 @@ def store_commit_events(db_path, commit_hash, commit_metadata, events):
                 event.get("confidence"),
                 event.get("reasoning"),
                 event.get("impact"),
+                current_time,  # created_at
             )
             for event in events
         ]
         
         cursor.executemany("""
-            INSERT INTO semantic_events (commit_hash, event_type, node_id, location, details, layer, layer_description, confidence, reasoning, impact)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO semantic_events (commit_hash, event_type, node_id, location, details, layer, layer_description, confidence, reasoning, impact, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, events_to_store)
         
         conn.commit()

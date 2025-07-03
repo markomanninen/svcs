@@ -78,7 +78,7 @@ def health_check():
     return jsonify({
         'status': 'healthy',
         'service': 'SVCS Web Server (New Architecture)',
-        'version': '2.0.0',
+        'version': '0.1',
         'architecture': 'repository-local',
         'repo_local_available': REPO_LOCAL_AVAILABLE
     })

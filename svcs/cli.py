@@ -140,6 +140,9 @@ Date Formats (--since):
         """
     )
     
+    # Add version flag
+    parser.add_argument('--version', '-v', action='version', version='SVCS 0.1')
+    
     parser.add_argument('--path', '-p', type=str,
                        help='Repository path (default: current directory)')
     

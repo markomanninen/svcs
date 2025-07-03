@@ -109,7 +109,7 @@ def test_web_server_import():
         health_data = {
             'status': 'healthy',
             'service': 'SVCS Web Server (New Architecture)',
-            'version': '2.0.0',
+            'version': '0.1',
             'architecture': 'repository-local'
         }
         print(f"   💓 Health check: {health_data['status']}")
