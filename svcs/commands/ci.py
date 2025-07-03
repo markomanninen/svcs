@@ -25,25 +25,20 @@ def cmd_ci(args):
         original_dir = os.getcwd()
         os.chdir(repo_path)
         
-        # Try to use new repository-local CI integration first
-        try:
-            sys.path.insert(0, str(repo_path.parent))
-            import svcs_repo_ci as svcs_ci
-        except ImportError:
-            # Fallback to legacy CI integration
-            sys.path.insert(0, str(repo_path.parent))
-            import svcs_ci
+        # Use repository-local CI integration
+        sys.path.insert(0, str(repo_path.parent))
+        import svcs_repo_ci
         
         if args.ci_command == 'pr-analysis':
             target_branch = args.target or 'main'
-            result = svcs_ci.analyze_pr_semantic_impact(target_branch)
+            result = svcs_repo_ci.analyze_pr_semantic_impact(target_branch)
             print("✅ PR Analysis Complete")
             if isinstance(result, dict):
                 print(f"📊 Semantic changes: {result.get('change_count', 'N/A')}")
                 print(f"🎯 Risk level: {result.get('risk_level', 'N/A')}")
                 
         elif args.ci_command == 'quality-gate':
-            result = svcs_ci.run_quality_gate(strict=args.strict)
+            result = svcs_repo_ci.run_quality_gate(strict=args.strict)
             print("✅ Quality Gate Complete")
             if isinstance(result, dict):
                 passed = result.get('passed', False)
@@ -51,7 +46,7 @@ def cmd_ci(args):
                 
         elif args.ci_command == 'report':
             format_type = args.format or 'text'
-            result = svcs_ci.generate_ci_report(format_type)
+            result = svcs_repo_ci.generate_ci_report(format_type)
             print(f"✅ CI Report generated in {format_type} format")
             
         os.chdir(original_dir)

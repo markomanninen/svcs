@@ -68,8 +68,7 @@ def init_svcs_centralized(repo_path: Path):
         "svcs_version": "1.0.0",
         "initialized": True,
         "centralized": True,
-        "database_path": ".svcs/semantic.db",
-        "installation_type": "centralized"
+        "database_path": ".svcs/semantic.db"
     }
     
     config_path = svcs_dir / 'config.json'
@@ -202,82 +201,4 @@ echo "🔄 SVCS: Update hook executed"
         return False
 
 
-def migrate_legacy_installation(repo_path: Path):
-    """Migrate from legacy file-copy installation to centralized architecture."""
-    svcs_dir = repo_path / '.svcs'
-    
-    if not svcs_dir.exists():
-        return False
-    
-    # Check if this is a legacy installation (has copied Python files)
-    legacy_files = ['svcs_repo_local.py', 'svcs_repo_analyzer.py', 'svcs_multilang.py']
-    has_legacy_files = any((svcs_dir / f).exists() for f in legacy_files)
-    
-    if not has_legacy_files:
-        return False
-    
-    print("🔄 Legacy SVCS installation detected.")
-    response = input("Migrate to centralized version? This will remove local copies but preserve your data. (y/n): ").lower().strip()
-    
-    if response not in ['y', 'yes']:
-        return False
-    
-    # Backup semantic database
-    db_path = svcs_dir / 'semantic.db'
-    if db_path.exists():
-        backup_path = svcs_dir / 'semantic.db.backup'
-        import shutil
-        shutil.copy2(db_path, backup_path)
-        print("📦 Backed up semantic database")
-    
-    # Remove legacy files
-    for file in legacy_files + ['analyzer.py', 'api.py']:
-        file_path = svcs_dir / file
-        if file_path.exists():
-            file_path.unlink()
-            print(f"🗑️ Removed {file}")
-    
-    # Initialize centralized version
-    result = init_svcs_centralized(repo_path)
-    print("✅ Migration completed successfully")
-    return True
-
-
-def detect_svcs_state(repo_path: Path):
-    """Detect current SVCS installation state."""
-    svcs_dir = repo_path / '.svcs'
-    
-    if not svcs_dir.exists():
-        return "not_initialized"
-    
-    config_path = svcs_dir / 'config.json'
-    if config_path.exists():
-        try:
-            with open(config_path) as f:
-                config = json.load(f)
-            if config.get("centralized"):
-                return "centralized"
-        except:
-            pass
-    
-    # Check for legacy files
-    legacy_files = ['svcs_repo_local.py', 'svcs_repo_analyzer.py']
-    if any((svcs_dir / f).exists() for f in legacy_files):
-        return "legacy"
-    
-    return "unknown"
-
-
-# Maintain backward compatibility
-def setup_repository_files(repo_path: Path):
-    """Backward compatibility wrapper."""
-    state = detect_svcs_state(repo_path)
-    
-    if state == "legacy":
-        migrate_legacy_installation(repo_path)
-        return True
-    elif state == "centralized":
-        print("✅ Already using centralized architecture")
-        return True
-    else:
-        return init_svcs_centralized(repo_path).startswith("✅")
+# Note: Only centralized architecture is supported. All transitional logic has been removed.

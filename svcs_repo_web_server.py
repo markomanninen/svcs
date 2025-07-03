@@ -971,17 +971,13 @@ def ci_pr_analysis():
             original_dir = os.getcwd()
             os.chdir(repo_path)
             
-            # Import CI integration class
-            parent_dir = Path(repo_path).parent
-            sys.path.insert(0, str(parent_dir))
-            try:
-                from svcs_repo_ci import RepositoryLocalCIIntegration
-                ci_integration = RepositoryLocalCIIntegration(repo_path)
-                result = ci_integration.run_pr_analysis(target_branch)
-            except ImportError:
-                # Fallback to legacy CI
-                import svcs_ci
-                result = svcs_ci.analyze_pr_semantic_impact(target_branch, repo_path)
+            # Import CI integration at function level to avoid import issues
+            import svcs_repo_ci
+            
+            # Use the standalone function directly (simpler approach)
+            result = svcs_repo_ci.analyze_pr_semantic_impact(target_branch, repo_path)
+            
+            os.chdir(original_dir)
             
             os.chdir(original_dir)
             
@@ -1042,17 +1038,11 @@ def ci_quality_gate():
             original_dir = os.getcwd()
             os.chdir(repo_path)
             
-            # Import CI integration class
-            parent_dir = Path(repo_path).parent
-            sys.path.insert(0, str(parent_dir))
-            try:
-                from svcs_repo_ci import RepositoryLocalCIIntegration
-                ci_integration = RepositoryLocalCIIntegration(repo_path)
-                result = ci_integration.run_quality_gate(strict=strict, target_branch=target_branch)
-            except ImportError:
-                # Fallback to legacy CI
-                import svcs_ci
-                result = svcs_ci.run_quality_gate(strict=strict, repo_path=repo_path)
+            # Import CI integration at function level to avoid import issues
+            import svcs_repo_ci
+            
+            # Use the standalone function directly (simpler approach)
+            result = svcs_repo_ci.run_quality_gate(strict=strict, repo_path=repo_path)
             
             os.chdir(original_dir)
             

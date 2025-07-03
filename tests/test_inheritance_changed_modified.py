@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-sys.path.append('/Users/markomanninen/Documents/GitHub/svcs')
+sys.path.append('os.path.dirname(os.path.dirname(os.path.abspath(__file__)))')
 
 from svcs.semantic_analyzer import SVCSModularAnalyzer
 

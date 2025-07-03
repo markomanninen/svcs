@@ -13,10 +13,9 @@ import sys
 
 # Add the root and .svcs directories to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.svcs')))
 
 # Import the script we want to test
-import legacy_scripts.svcs_discuss as svcs_discuss
+import svcs_repo_discuss as svcs_discuss
 
 class TestSVCSDiscussEvolution(unittest.TestCase):
 

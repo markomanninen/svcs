@@ -27,8 +27,8 @@ def run_command(cmd, cwd=None, capture_output=True, check=True):
         cmd = cmd.split()
     
     env = os.environ.copy()
-    env['PYTHONPATH'] = f"/Users/markomanninen/Documents/GitHub/svcs:/Users/markomanninen/Documents/GitHub/svcs/svcs"
-    env['SVCS_INSTALL_DIR'] = "/Users/markomanninen/Documents/GitHub/svcs"
+    env['PYTHONPATH'] = f"os.path.dirname(os.path.dirname(os.path.abspath(__file__))):os.path.dirname(os.path.dirname(os.path.abspath(__file__)))/svcs"
+    env['SVCS_INSTALL_DIR'] = "os.path.dirname(os.path.dirname(os.path.abspath(__file__)))"
     
     result = subprocess.run(
         cmd, 

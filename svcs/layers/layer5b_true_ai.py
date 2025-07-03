@@ -93,7 +93,7 @@ class TrueAIAnalyzer:
     
     def _check_llm_availability(self) -> bool:
         """Check if LLM services are available."""
-        # Check for Google Gemini API key (primary LLM as in legacy system)
+        # Check for Google Gemini API key (primary LLM service)
         if os.getenv('GOOGLE_API_KEY'):
             try:
                 import google.generativeai as genai
@@ -131,7 +131,7 @@ class TrueAIAnalyzer:
         if not self._llm_available:
             return None
         
-        # Try Google Gemini first (as in legacy system)
+        # Try Google Gemini first (primary LLM service)
         if os.getenv('GOOGLE_API_KEY'):
             try:
                 import google.generativeai as genai
@@ -220,7 +220,7 @@ Only include changes with confidence >= 0.7. If no significant semantic changes 
         if not self._model:
             return "[]"
         
-        # Try Google Gemini Flash (primary as in legacy system)
+        # Try Google Gemini Flash (primary LLM service)
         if hasattr(self._model, 'generate_content'):
             try:
                 response = self._model.generate_content(prompt)

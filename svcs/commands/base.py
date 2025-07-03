@@ -18,7 +18,7 @@ from typing import Dict, List, Optional
 
 # Import core SVCS modules
 try:
-    from svcs_repo_local import RepositoryLocalSVCS, SVCSMigrator
+    from svcs_repo_local import RepositoryLocalSVCS
     from svcs_repo_hooks import SVCSRepositoryManager
     try:
         from . import utils
@@ -29,7 +29,7 @@ except ImportError:
     current_dir = Path(__file__).parent.parent.parent
     sys.path.insert(0, str(current_dir))
     try:
-        from svcs_repo_local import RepositoryLocalSVCS, SVCSMigrator
+        from svcs_repo_local import RepositoryLocalSVCS
         from svcs_repo_hooks import SVCSRepositoryManager
         import sys
         sys.path.insert(0, str(Path(__file__).parent.parent))

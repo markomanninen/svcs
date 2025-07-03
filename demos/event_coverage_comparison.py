@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Event Coverage Comparison - Legacy vs New System
-=================================================
+Event Coverage Comparison - System Performance Analysis
+=======================================================
 
-Direct comparison using the same test data from comprehensive_language_test.py
-to see how the new modular system performs on the legacy test cases.
+Direct comparison using test data from comprehensive_language_test.py
+to see how the modular system performs on various test cases.
 """
 
 import sys
@@ -17,8 +17,8 @@ import shutil
 sys.path.insert(0, str(Path(__file__).parent))
 
 # Import both systems
-from svcs_multilang import MultiLanguageAnalyzer  # Legacy system
-from svcs.semantic_analyzer import SVCSModularAnalyzer  # New modular system
+from svcs_multilang import MultiLanguageAnalyzer  # Baseline implementation
+from svcs.semantic_analyzer import SVCSModularAnalyzer  # Current modular system
 
 def get_test_files():
     """Get the test files from comprehensive_language_test.py"""
@@ -542,7 +542,7 @@ class AdvancedDataProcessor:
     
     def process_sync(self, item: Any) -> int:
         """
-        Legacy synchronous processing method for backwards compatibility.
+        Baseline synchronous processing method for backwards compatibility.
         
         Args:
             item: Item to process
@@ -577,7 +577,7 @@ def create_processor(config: ProcessingConfig = None) -> AdvancedDataProcessor:
     """Create a new AdvancedDataProcessor instance."""
     return AdvancedDataProcessor(config)
 
-# Legacy compatibility
+# Baseline compatibility
 DataProcessor = AdvancedDataProcessor
 fetch_data = fetch_data_async
 '''
@@ -588,9 +588,9 @@ fetch_data = fetch_data_async
         'python': {'before': python_before, 'after': python_after}
     }
 
-def test_legacy_system(test_files):
-    """Test the legacy system with the same files."""
-    print("🏛️ LEGACY SYSTEM TEST")
+def test_baseline_system(test_files):
+    """Test the baseline system with the same files."""
+    print("🏛️ BASELINE SYSTEM TEST")
     print("=" * 40)
     
     analyzer = MultiLanguageAnalyzer()
@@ -602,7 +602,7 @@ def test_legacy_system(test_files):
         print(f"\n🔍 Testing {lang.upper()}")
         print("-" * 20)
         
-        # Analyze with legacy system (filename, before_content, after_content)
+        # Analyze with baseline system (filename, before_content, after_content)
         filename = f"test.{lang}"
         events = analyzer.analyze_file_changes(filename, files['before'], files['after'])
         
@@ -625,7 +625,7 @@ def test_legacy_system(test_files):
                 count = sum(1 for e in events if e.event_type == event_type)
             print(f"   • {event_type}: {count}")
                 
-    print(f"\n📊 LEGACY TOTAL: {total_events} events, {len(all_event_types)} types")
+    print(f"\n📊 BASELINE TOTAL: {total_events} events, {len(all_event_types)} types")
     return results, total_events, len(all_event_types)
 
 def test_new_system(test_files):
@@ -704,7 +704,7 @@ def main():
     test_files = get_test_files()
     
     # Test both systems
-    legacy_results, legacy_total, legacy_types = test_legacy_system(test_files)
+    baseline_results, baseline_total, baseline_types = test_baseline_system(test_files)
     new_results, new_total, new_types = test_new_system(test_files)
     
     # Comparison
@@ -712,56 +712,56 @@ def main():
     print("=" * 30)
     
     for lang in ['php', 'javascript', 'python']:
-        legacy_events = legacy_results[lang]['events'] 
+        baseline_events = baseline_results[lang]['events'] 
         new_events = new_results[lang]['events']
         
-        legacy_types_count = legacy_results[lang]['types']
+        baseline_types_count = baseline_results[lang]['types']
         new_types_count = new_results[lang]['types']
         
         print(f"\n{lang.upper()}:")
-        print(f"  Legacy:  {legacy_events} events, {legacy_types_count} types")
-        print(f"  New:     {new_events} events, {new_types_count} types")
-        print(f"  Diff:    {new_events - legacy_events:+d} events, {new_types_count - legacy_types_count:+d} types")
+        print(f"  Baseline: {baseline_events} events, {baseline_types_count} types")
+        print(f"  Current:  {new_events} events, {new_types_count} types")
+        print(f"  Diff:     {new_events - baseline_events:+d} events, {new_types_count - baseline_types_count:+d} types")
     
     print(f"\nOVERALL:")
-    print(f"  Legacy:  {legacy_total} events, {legacy_types} types")
-    print(f"  New:     {new_total} events, {new_types} types")
-    print(f"  Diff:    {new_total - legacy_total:+d} events, {new_types - legacy_types:+d} types")
+    print(f"  Baseline: {baseline_total} events, {baseline_types} types")
+    print(f"  Current:  {new_total} events, {new_types} types")
+    print(f"  Diff:     {new_total - baseline_total:+d} events, {new_types - baseline_types:+d} types")
     
     # Analysis
     print(f"\n🎯 ANALYSIS:")
-    if new_total >= legacy_total:
-        print("✅ New system matches or exceeds legacy event detection")
+    if new_total >= baseline_total:
+        print("✅ Current system matches or exceeds baseline event detection")
     else:
-        print("⚠️  New system detects fewer total events")
-        print(f"   Difference: {legacy_total - new_total} fewer events")
+        print("⚠️  Current system detects fewer total events")
+        print(f"   Difference: {baseline_total - new_total} fewer events")
     
-    if new_types >= legacy_types:
-        print("✅ New system has equal or better event type diversity")
+    if new_types >= baseline_types:
+        print("✅ Current system has equal or better event type diversity")
     else:
-        print("⚠️  New system has fewer event types")
+        print("⚠️  Current system has fewer event types")
         
     # Show unique types in each system
-    legacy_all_types = set()
+    baseline_all_types = set()
     new_all_types = set()
     
-    for lang_data in legacy_results.values():
-        legacy_all_types.update(lang_data['type_list'])
+    for lang_data in baseline_results.values():
+        baseline_all_types.update(lang_data['type_list'])
         
     for lang_data in new_results.values():
         new_all_types.update(lang_data['type_list'])
     
-    legacy_only = legacy_all_types - new_all_types
-    new_only = new_all_types - legacy_all_types
+    baseline_only = baseline_all_types - new_all_types
+    current_only = new_all_types - baseline_all_types
     
-    if legacy_only:
-        print(f"\n📝 Event types ONLY in legacy system ({len(legacy_only)}):")
-        for event_type in sorted(legacy_only):
+    if baseline_only:
+        print(f"\n📝 Event types ONLY in baseline system ({len(baseline_only)}):")
+        for event_type in sorted(baseline_only):
             print(f"   • {event_type}")
     
-    if new_only:
-        print(f"\n📝 Event types ONLY in new system ({len(new_only)}):")
-        for event_type in sorted(new_only):
+    if current_only:
+        print(f"\n📝 Event types ONLY in current system ({len(current_only)}):")
+        for event_type in sorted(current_only):
             print(f"   • {event_type}")
 
 if __name__ == "__main__":

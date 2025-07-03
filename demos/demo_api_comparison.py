@@ -18,7 +18,7 @@ def demonstrate_web_api():
     print("=" * 50)
     
     base_url = "http://localhost:8080"
-    repo_path = "/Users/markomanninen/Documents/GitHub/svcs"
+    repo_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     
     try:
         # Health check

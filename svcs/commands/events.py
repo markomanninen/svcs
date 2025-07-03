@@ -76,14 +76,14 @@ def cmd_process_hook(args):
             
             # Initialize SVCS and analyzer
             from svcs_repo_local import RepositoryLocalSVCS
-            from svcs_repo_analyzer import RepositoryLocalSemanticAnalyzer
+            from svcs.semantic_analyzer import SVCSModularAnalyzer
             
             print("🔍 SVCS: Analyzing semantic changes...")
             svcs = RepositoryLocalSVCS(str(repo_path))
-            analyzer = RepositoryLocalSemanticAnalyzer(str(repo_path))
+            analyzer = SVCSModularAnalyzer(str(repo_path))
             
-            # Analyze the commit
-            semantic_events = analyzer.analyze_commit(commit_hash)
+            # Analyze the commit using modern analyzer
+            semantic_events = analyzer.analyze_commit_changes(commit_hash)
             if semantic_events:
                 stored_count, notes_success = svcs.analyze_and_store_commit(commit_hash, semantic_events)
                 print(f'✅ SVCS: Stored {stored_count} semantic events')

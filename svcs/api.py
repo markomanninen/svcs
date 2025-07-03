@@ -18,16 +18,10 @@ DB_PATH = os.path.join(SVCS_DIR, "semantic.db")
 
 def _get_db_connection():
     """Establishes a connection to the SQLite database."""
-    # Try the new database first, then fall back to legacy
-    new_db_path = os.path.join(SVCS_DIR, "semantic.db")
-    legacy_db_path = os.path.join(SVCS_DIR, "history.db")
+    db_path = os.path.join(SVCS_DIR, "semantic.db")
     
-    if os.path.exists(new_db_path):
-        db_path = new_db_path
-    elif os.path.exists(legacy_db_path):
-        db_path = legacy_db_path
-    else:
-        raise FileNotFoundError(f"SVCS database not found. Looked for '{new_db_path}' or '{legacy_db_path}'.")
+    if not os.path.exists(db_path):
+        raise FileNotFoundError(f"SVCS database not found at '{db_path}'. Run 'svcs init' to initialize the repository.")
     
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row

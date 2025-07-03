@@ -146,5 +146,5 @@ if __name__ == "__main__":
             sys.exit(1)
     except requests.exceptions.RequestException:
         print("❌ SVCS Web Server is not running. Please start it first with:")
-        print("cd /Users/markomanninen/Documents/GitHub/svcs && python svcs_web_server.py")
+        print("cd os.path.dirname(os.path.dirname(os.path.abspath(__file__))) && python svcs_web_server.py")
         sys.exit(1)

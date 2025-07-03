@@ -2,15 +2,15 @@
 """
 SVCS Repository Quality Insights - Git-integrated code quality evolution analysis
 
-This is the repository-local version of svcs_quality.py, designed to work with
-the new .svcs/semantic.db architecture while providing enhanced git integration.
+This module provides repository-local code quality analysis with git integration,
+reading from the .svcs/semantic.db database and providing branch-aware analysis.
 
-Key Changes from Legacy Version:
-- Reads from local .svcs/semantic.db instead of global database
-- Enhanced with git blame integration for author-quality correlation
-- Added branch-aware quality analysis
+Key Features:
+- Repository-local database support (.svcs/semantic.db)
+- Git blame integration for author-quality correlation
+- Branch-aware quality analysis and comparison
 - Git history quality trend tracking
-- Preserved all existing quality analysis logic
+- Quality metrics and improvement suggestions
 
 Usage:
     python3 svcs_repo_quality.py

@@ -74,7 +74,7 @@ def test_repository_manager():
 def test_registry_integration():
     """Test the registry integration script."""
     try:
-        from legacy_scripts.svcs_registry_integration import list_repositories
+        from svcs_repo_registry_integration import list_repositories
         
         print("🧪 Testing Registry Integration")
         print("=" * 50)

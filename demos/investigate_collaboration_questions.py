@@ -16,7 +16,7 @@ import time
 import json
 
 # Add the parent directory to Python path to import SVCS modules
-sys.path.insert(0, '/Users/markomanninen/Documents/GitHub/svcs')
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def run_command(command, cwd=None):
     """Run a shell command and return (success, output)"""
@@ -141,7 +141,7 @@ def test_third_developer_scenario():
         print(f"👤 Creating third developer workspace: {third_dev_repo}")
         
         # Clone the current SVCS repository (which has semantic notes)
-        current_repo = "/Users/markomanninen/Documents/GitHub/svcs"
+        current_repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         success, output = run_command(f"git clone {current_repo} {third_dev_repo}")
         if not success:
             print(f"❌ Failed to clone for third developer: {output}")
@@ -205,7 +205,7 @@ def investigate_original_notes():
     print("=" * 40)
     
     # Check the current SVCS repository for its semantic notes
-    current_repo = "/Users/markomanninen/Documents/GitHub/svcs"
+    current_repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     print(f"🏛️  Analyzing semantic notes in current SVCS repository...")
     
     notes = analyze_notes_in_repo(current_repo, "Current SVCS Repository")

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-sys.path.append('/Users/markomanninen/Documents/GitHub/svcs')
+sys.path.append('os.path.dirname(os.path.dirname(os.path.abspath(__file__)))')
 
 from svcs.semantic_analyzer import SVCSModularAnalyzer
 
@@ -9,10 +9,10 @@ def test_specific_assignment_pattern():
     print("🔍 Testing specific assignment pattern case...")
     
     # Read the actual test case files
-    with open('/Users/markomanninen/Documents/GitHub/svcs/test_cases/javascript/assignment_pattern/before.js', 'r') as f:
+    with open('os.path.dirname(os.path.dirname(os.path.abspath(__file__)))/test_cases/javascript/assignment_pattern/before.js', 'r') as f:
         before_code = f.read()
     
-    with open('/Users/markomanninen/Documents/GitHub/svcs/test_cases/javascript/assignment_pattern/after.js', 'r') as f:
+    with open('os.path.dirname(os.path.dirname(os.path.abspath(__file__)))/test_cases/javascript/assignment_pattern/after.js', 'r') as f:
         after_code = f.read()
     
     print("📋 BEFORE CODE:")

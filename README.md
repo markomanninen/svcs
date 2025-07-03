@@ -150,7 +150,7 @@ SVCS employs a multi-layer analysis system:
 | Language | Extensions | Support Level | Parser Technology | Features |
 |----------|------------|---------------|-------------------|----------|
 | **Python** | `.py`, `.pyw`, `.pyi` | **Complete** | Native AST | Full AST analysis, 31+ semantic event types, decorators, async/await, generators, comprehensions, type annotations |
-| **PHP** | `.php`, `.phtml`, `.php3`, `.php4`, `.php5`, `.phps` | **Modern** | Tree-sitter (primary) + phply (fallback) | Modern PHP 7.4+/8.x features (enums, attributes, typed properties), legacy PHP 5.x-7.3 support, classes, interfaces, traits, methods, properties, namespaces, inheritance tracking |
+| **PHP** | `.php`, `.phtml`, `.php3`, `.php4`, `.php5`, `.phps` | **Modern** | Tree-sitter (primary) + phply (fallback) | Modern PHP 7.4+/8.x features (enums, attributes, typed properties), PHP 5.x-7.3 support, classes, interfaces, traits, methods, properties, namespaces, inheritance tracking |
 | **JavaScript** | `.js` | **AST-based** | esprima AST parser + regex fallback | ES6+ classes, arrow functions, async/await, inheritance changes, method signatures, constructor parameters, import/export tracking |
 | **TypeScript** | `.ts` | **AST-based** | esprima AST parser + regex fallback | Same as JavaScript with TypeScript syntax support |
 
@@ -162,7 +162,7 @@ SVCS uses a **multi-tier fallback system** for maximum reliability:
 1. **Primary**: Tree-sitter PHP parser (supports PHP 7.4+ and 8.x)
    - Modern features: enums, attributes, typed properties, union types
    - Accurate AST-based parsing with full semantic understanding
-2. **Fallback**: phply parser (PHP 5.x-7.3 legacy support)
+2. **Fallback**: phply parser (PHP 5.x-7.3 support)
    - Maintains compatibility with older codebases
 3. **Final Fallback**: Regex parsing for basic structural detection
 
@@ -278,7 +278,7 @@ python3 svcs_local_cli.py notes sync
 git push origin main  # Semantic notes automatically included
 ```
 
-### **Option B: Global SVCS** (Legacy/Existing Projects)
+### **Option B: Global SVCS**
 
 **Traditional global database approach:**
 
@@ -338,7 +338,6 @@ python3 svcs_local_cli.py status
 svcs search --limit=20
 svcs discuss --query "summarize my project"  # Enhanced CLI integration
 svcs query "show recent performance changes" # One-shot queries
-python3 svcs_discuss.py  # Direct script (legacy)
 ```
 
 ## 📖 **Usage Guide**
@@ -383,10 +382,6 @@ svcs analyze --commit abc123           # Manually analyze a commit
 svcs notes sync                        # Sync semantic notes to remote
 svcs notes fetch                       # Fetch semantic notes from remote
 svcs notes show --commit abc123        # View semantic note for commit
-
-# Migration from global architecture
-svcs migrate list                      # List projects for migration
-svcs migrate migrate                   # Migrate current project to local
 ```
 
 ### **Conversational Interface**
@@ -398,10 +393,6 @@ Natural language queries about code evolution available through multiple interfa
 svcs discuss                            # Start interactive session
 svcs discuss --query "summarize recent changes"  # Start with initial query
 svcs query "show performance optimizations"      # One-shot query
-
-# Direct script (Legacy)
-export GOOGLE_API_KEY="your_key"
-python3 svcs_discuss.py
 
 # Example queries:
 "What performance optimizations were made last week?"
@@ -476,7 +467,7 @@ python3 svcs_analytics.py
 python3 svcs_quality.py
 
 # CI/CD integration
-python3 svcs_ci.py --pr-analysis --target=main
+python3 svcs_repo_ci.py --pr-analysis --target=main
 ```
 
 ## 📊 **Database Maintenance**
@@ -536,7 +527,7 @@ For comprehensive maintenance documentation, see [`docs/DATABASE_MAINTENANCE_GUI
 
 ### **CI/CD Integration**
 
-#### **`svcs_ci.py` - Continuous Integration Support**
+#### **`svcs_repo_ci.py` - Continuous Integration Support**
 - **PR Analysis**: Semantic impact assessment of pull requests
 - **Quality Gates**: Automated quality checks based on semantic patterns
 - **Trend Monitoring**: Continuous quality trend analysis
@@ -802,38 +793,29 @@ This project originated from the "Time Crystal VCS" concept - a science fiction-
 
 ### **Current Limitations**
 
-SVCS is currently designed as a **single-user system**:
-- Local database (`~/.svcs/global.db`) stores data only on your machine
-- No built-in sharing or synchronization capabilities
-- Projects are managed locally per user
-- No team collaboration features yet implemented
+## Team Collaboration
 
-### **Current Limitations**
+SVCS provides repository-local, git-integrated team collaboration:
 
-SVCS is currently in transition between architectures:
-- **Global Architecture** (current): Local database (`~/.svcs/global.db`) for single-user operation
-- **Repository-Local Architecture** (new): Git-integrated team collaboration with repository-local storage
+### **Repository-Local Architecture**
 
-The new repository-local architecture has been implemented and is ready for testing:
+Each repository maintains its own semantic database with team sharing through git:
 - Repository-local semantic database (`.svcs/semantic.db`)
 - Git notes integration for team sharing
 - Branch-aware semantic analysis
-- Repository-specific git hooks
-
-### **Migration to Git-Integrated Team Features**
-
-✅ **Implemented**: Repository-local architecture with git notes integration
-- Repository-local database storage in `.svcs/semantic.db`
-- Semantic data stored as git notes attached to commits
-- Branch-aware semantic analysis and tracking
 - Repository-specific git hooks for automatic analysis
 - Team collaboration through git push/pull workflow
-- Migration tools from global to repository-local storage
 
-🚧 **In Progress**: Integration with existing SVCS components
-- Connecting to existing semantic analyzer modules
-- Updating MCP server for repository-local mode
-- Web dashboard integration for local repositories
+### **Current Features**
+
+✅ **Implemented**: Full repository-local architecture with git integration
+- Repository-local database storage and analysis
+- Semantic data shared as git notes attached to commits
+- Branch-aware semantic tracking and comparison
+- Automatic analysis through git hooks
+- Team collaboration via standard git workflows
+- MCP server integration for AI-powered analysis
+- Web dashboard for visualization and exploration
 
 ### **Planned Git-Integrated Team Features**
 
@@ -856,7 +838,6 @@ svcs status                       # Show repository status and branch info
 svcs events --branch main --limit 10  # Branch-specific semantic events
 svcs notes sync                   # Sync semantic data via git notes
 svcs notes fetch                  # Fetch team's semantic data
-svcs migrate list                 # List projects for migration from global DB
 ```
 
 🚧 **Phase 2 - Integration** (In Progress):

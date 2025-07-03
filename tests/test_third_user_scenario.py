@@ -17,7 +17,7 @@ import time
 import json
 
 # Add the parent directory to Python path to import SVCS modules
-sys.path.insert(0, '/Users/markomanninen/Documents/GitHub/svcs')
+sys.path.insert(0, 'os.path.dirname(os.path.dirname(os.path.abspath(__file__)))')
 
 class ExtendedCollaborativeTest:
     def __init__(self):

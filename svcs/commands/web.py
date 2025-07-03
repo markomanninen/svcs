@@ -28,23 +28,9 @@ def cmd_dashboard(args):
     print(f"🎨 Generating dashboard for repository: {repo_path.name}")
     
     try:
-        # Try repository-local dashboard generation
-        try:
-            from svcs_repo_web import generate_repository_dashboard
-            dashboard_path = generate_repository_dashboard(str(repo_path), args.output)
-        except ImportError:
-            # Fallback to adapted legacy dashboard
-            import os
-            original_dir = os.getcwd()
-            os.chdir(repo_path)
-            
-            sys.path.insert(0, str(repo_path.parent))
-            import svcs_web
-            
-            # Generate dashboard for repository
-            dashboard_path = args.output or f"{repo_path.name}_dashboard.html"
-            svcs_web.generate_dashboard(dashboard_path)
-            os.chdir(original_dir)
+        # Generate repository-local dashboard
+        from svcs_repo_web import generate_repository_dashboard
+        dashboard_path = generate_repository_dashboard(str(repo_path), args.output)
         
         print(f"✅ Dashboard generated: {dashboard_path}")
         print(f"🌐 Open in browser: file://{Path(dashboard_path).resolve()}")

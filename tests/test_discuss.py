@@ -13,13 +13,12 @@ from unittest.mock import patch, MagicMock, call
 import os
 import sys
 
-# We need to add the root directory and the .svcs directory to the path
+# We need to add the root directory to the path
 # so that our test file can import the modules we want to test.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.svcs')))
 
 # Now we can import the modules
-import legacy_scripts.svcs_discuss as svcs_discuss
+import svcs_repo_discuss as svcs_discuss
 
 class TestSVCSDiscuss(unittest.TestCase):
 

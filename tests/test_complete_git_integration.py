@@ -28,7 +28,7 @@ try:
         input=test_input,
         text=True,
         capture_output=True,
-        cwd="/Users/markomanninen/Documents/GitHub/svcs"
+        cwd="os.path.dirname(os.path.dirname(os.path.abspath(__file__)))"
     )
     
     print("OUTPUT:")

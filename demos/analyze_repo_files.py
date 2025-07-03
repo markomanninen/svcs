@@ -109,13 +109,13 @@ def get_file_size_and_date(file_path):
 
 def main():
     """Main analysis function."""
-    base_dir = "/Users/markomanninen/Documents/GitHub/svcs"
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     
-    # Find all svcs_repo_* files (excluding legacy)
+    # Find all svcs_repo_* files (excluding mcp directory)
     repo_files = []
     for root, dirs, files in os.walk(base_dir):
-        # Skip legacy and mcp directories for main analysis
-        if 'legacy' in root or 'svcs_mcp' in root:
+        # Skip mcp directory for main analysis
+        if 'svcs_mcp' in root:
             continue
         for file in files:
             if file.startswith('svcs_repo_') and file.endswith('.py'):

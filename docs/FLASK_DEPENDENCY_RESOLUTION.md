@@ -40,7 +40,7 @@ All `svcs_repo_*` files are now fully functional:
 
 1. ✅ **`svcs_repo_discuss.py`** - Conversational interface
 2. ✅ **`svcs_repo_local.py`** - Core database backend  
-3. ✅ **`svcs_repo_analyzer.py`** - Semantic analysis engine
+3. ✅ **`svcs.semantic_analyzer.SVCSModularAnalyzer`** - Semantic analysis engine
 4. ✅ **`svcs_repo_hooks.py`** - Git hooks management
 5. ✅ **`svcs_repo_quality.py`** - Quality analysis with CLI
 6. ✅ **`svcs_repo_analytics.py`** - Repository analytics with CLI

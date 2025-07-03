@@ -4,6 +4,7 @@ Populate semantic.db with comprehensive test data for API testing.
 Creates realistic commits and semantic events to test all API functions.
 """
 
+import os
 import sqlite3
 import time
 import random
@@ -11,7 +12,9 @@ import json
 from datetime import datetime, timedelta
 
 # Database path
-DB_PATH = "/Users/markomanninen/Documents/GitHub/svcs/.svcs/semantic.db"
+# Use relative path to current repo
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(REPO_ROOT, ".svcs", "semantic.db")
 
 def get_random_commit_hash():
     """Generate a realistic git commit hash."""
@@ -79,7 +82,7 @@ def create_test_data():
             INSERT INTO repository_info (repo_path, created_at, last_analyzed, current_branch, config)
             VALUES (?, ?, ?, ?, ?)
         """, (
-            "/Users/markomanninen/Documents/GitHub/svcs",
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             get_timestamp(30),
             get_timestamp(0),
             "main",

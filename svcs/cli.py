@@ -42,7 +42,7 @@ import time
 
 # Try to import from installed package, fallback to parent directory
 try:
-    from svcs_repo_local import RepositoryLocalSVCS, SVCSMigrator
+    from svcs_repo_local import RepositoryLocalSVCS
     from svcs_repo_hooks import SVCSRepositoryManager
     from .commands import *  # Import all commands from modular package
     from .commands.init import cmd_init_project # Ensure cmd_init_project is imported
@@ -52,7 +52,7 @@ except ImportError:
     parent_dir = Path(__file__).parent.parent
     sys.path.insert(0, str(parent_dir))
     try:
-        from svcs_repo_local import RepositoryLocalSVCS, SVCSMigrator
+        from svcs_repo_local import RepositoryLocalSVCS
         from svcs_repo_hooks import SVCSRepositoryManager
         # Import modular commands in development mode
         sys.path.insert(0, str(Path(__file__).parent))

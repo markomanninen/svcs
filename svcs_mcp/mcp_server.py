@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-SVCS MCP Server - Cleaned Version
+SVCS MCP Server
 
-This MCP server uses the new SVCS API directly, removing all legacy components.
-Provides repository-local semantic analysis with simplified architecture.
+Provides repository-local semantic analysis through the Model Context Protocol,
+enabling AI integration with git-aware semantic code analysis.
 """
 
 import asyncio
@@ -36,7 +36,7 @@ except ImportError as e:
     print(f"Warning: Could not import new architecture components: {e}")
     NEW_ARCH_AVAILABLE = False
 
-# Import SVCS API functions (replaces legacy CLIDatabase)
+# Import SVCS API functions
 try:
     from svcs.api import (
         search_events_advanced, get_recent_activity, search_semantic_patterns,

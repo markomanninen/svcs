@@ -19,7 +19,7 @@ from typing import List, Dict, Any
 
 def find_svcs_files():
     """Find SVCS installation files."""
-    svcs_files = ['svcs_repo_local.py', 'svcs_repo_analyzer.py', 'svcs_multilang.py']
+    svcs_files = ['svcs_repo_local.py', 'svcs_multilang.py']
     
     # Check environment variable first (set by global installation)
     install_dir = os.environ.get('SVCS_INSTALL_DIR')
@@ -67,7 +67,7 @@ def setup_repository_files(repo_path: Path):
     # Copy essential SVCS files to .svcs directory
     essential_files = [
         'svcs_repo_local.py',
-        'svcs_repo_analyzer.py', 
+        
         'svcs_multilang.py'
     ]
     
@@ -330,45 +330,7 @@ def setup_centralized_git_hooks(repo_path: Path):
         return False
 
 
-def migrate_legacy_installation(repo_path: Path):
-    """Migrate from legacy file-copy installation to centralized architecture."""
-    svcs_dir = repo_path / '.svcs'
-    
-    if not svcs_dir.exists():
-        return False
-    
-    # Check if this is a legacy installation (has copied Python files)
-    legacy_files = ['svcs_repo_local.py', 'svcs_repo_analyzer.py', 'svcs_multilang.py']
-    has_legacy_files = any((svcs_dir / f).exists() for f in legacy_files)
-    
-    if not has_legacy_files:
-        return False
-    
-    print("🔄 Legacy SVCS installation detected.")
-    response = input("Migrate to centralized version? This will remove local copies but preserve your data. (y/n): ").lower().strip()
-    
-    if response not in ['y', 'yes']:
-        return False
-    
-    # Backup semantic database
-    db_path = svcs_dir / 'semantic.db'
-    if db_path.exists():
-        backup_path = svcs_dir / 'semantic.db.backup'
-        import shutil
-        shutil.copy2(db_path, backup_path)
-        print("📦 Backed up semantic database")
-    
-    # Remove legacy files
-    for file in legacy_files + ['analyzer.py', 'api.py']:
-        file_path = svcs_dir / file
-        if file_path.exists():
-            file_path.unlink()
-            print(f"🗑️ Removed {file}")
-    
-    # Initialize centralized version
-    result = init_svcs_centralized(repo_path)
-    print("✅ Migration completed successfully")
-    return True
+
 
 
 def init_database():
@@ -531,7 +493,7 @@ def get_event_statistics() -> Dict[str, Any]:
 
 def find_svcs_files():
     """Find SVCS installation files."""
-    svcs_files = ['svcs_repo_local.py', 'svcs_repo_analyzer.py', 'svcs_multilang.py']
+    svcs_files = ['svcs_repo_local.py', 'svcs_multilang.py']
     
     # Check environment variable first (set by global installation)
     install_dir = os.environ.get('SVCS_INSTALL_DIR')
@@ -579,7 +541,7 @@ def setup_repository_files(repo_path: Path):
     # Copy essential SVCS files to .svcs directory
     essential_files = [
         'svcs_repo_local.py',
-        'svcs_repo_analyzer.py', 
+        
         'svcs_multilang.py'
     ]
     
