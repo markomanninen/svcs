@@ -1,0 +1,158 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-07-03T16:48:07.703220",
+  "semantic_events": [
+    {
+      "node_id": "func:main",
+      "location": "svcs/cli.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "added 3 new literals",
+      "commit_hash": "f399268fda1a564ebbe48806cba1e9ccb731d662"
+    },
+    {
+      "node_id": "func:analyze",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "internal_call_removed",
+      "details": "No longer calls: print",
+      "commit_hash": "f399268fda1a564ebbe48806cba1e9ccb731d662"
+    },
+    {
+      "node_id": "func:analyze_abstract_changes",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "internal_call_removed",
+      "details": "No longer calls: print",
+      "commit_hash": "f399268fda1a564ebbe48806cba1e9ccb731d662"
+    },
+    {
+      "node_id": "func:analyze",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "removed 1 literals",
+      "commit_hash": "f399268fda1a564ebbe48806cba1e9ccb731d662"
+    },
+    {
+      "node_id": "func:_query_llm",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "added 1 new literals; removed 1 literals",
+      "commit_hash": "f399268fda1a564ebbe48806cba1e9ccb731d662"
+    },
+    {
+      "node_id": "func:analyze_abstract_changes",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "removed 1 literals",
+      "commit_hash": "f399268fda1a564ebbe48806cba1e9ccb731d662"
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:analyze_commit_changes",
+      "location": "svcs/semantic_analyzer.py",
+      "details": "New func added",
+      "layer": "1",
+      "layer_description": "File and module structure analysis",
+      "commit_hash": "f399268fda1a564ebbe48806cba1e9ccb731d662"
+    },
+    {
+      "node_id": "class:SVCSModularAnalyzer",
+      "location": "svcs/semantic_analyzer.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "class_methods_changed",
+      "details": "added methods: analyze_commit_changes",
+      "commit_hash": "f399268fda1a564ebbe48806cba1e9ccb731d662"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:analyze_commit_changes",
+      "location": "svcs/semantic_analyzer.py",
+      "details": "Possible method extraction: analyze_commit_changes",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "f399268fda1a564ebbe48806cba1e9ccb731d662"
+    },
+    {
+      "event_type": "dependency_added",
+      "node_id": "module:svcs/storage.py",
+      "location": "svcs/storage.py",
+      "details": "Added dependencies: time",
+      "layer": "1",
+      "layer_description": "File and module structure analysis",
+      "commit_hash": "f399268fda1a564ebbe48806cba1e9ccb731d662"
+    },
+    {
+      "node_id": "func:store_commit_events",
+      "location": "svcs/storage.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "internal_call_added",
+      "details": "Now calls: int, time.time",
+      "commit_hash": "f399268fda1a564ebbe48806cba1e9ccb731d662"
+    },
+    {
+      "node_id": "func:store_commit_events",
+      "location": "svcs/storage.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "attribute_access_changed",
+      "details": "Attribute access patterns changed",
+      "commit_hash": "f399268fda1a564ebbe48806cba1e9ccb731d662"
+    },
+    {
+      "node_id": "func:store_commit_events",
+      "location": "svcs/storage.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "assignment_pattern_changed",
+      "details": "Assignment patterns changed",
+      "commit_hash": "f399268fda1a564ebbe48806cba1e9ccb731d662"
+    },
+    {
+      "node_id": "func:health_check",
+      "location": "svcs_repo_web_server.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "added 1 new literals; removed 1 literals",
+      "commit_hash": "f399268fda1a564ebbe48806cba1e9ccb731d662"
+    },
+    {
+      "event_type": "optimization_data_structure",
+      "node_id": "optimization:svcs_repo_web_server.py",
+      "location": "svcs_repo_web_server.py",
+      "details": "List membership check replaced with set/dict",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.9,
+      "reasoning": "List membership replaced with O(1) lookup",
+      "impact": "Significant performance improvement",
+      "commit_hash": "f399268fda1a564ebbe48806cba1e9ccb731d662"
+    },
+    {
+      "node_id": "func:test_web_server_import",
+      "location": "tests/test_new_architecture.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "added 1 new literals; removed 1 literals",
+      "commit_hash": "f399268fda1a564ebbe48806cba1e9ccb731d662"
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "f399268fda1a564ebbe48806cba1e9ccb731d662"
+}
