@@ -1,0 +1,30 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-07-03T10:22:17.132332",
+  "semantic_events": [
+    {
+      "event_type": "file_modified",
+      "node_id": "file:svcs/cli.py",
+      "location": "svcs/cli.py",
+      "details": "File svcs/cli.py was modified",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File content changed",
+      "commit_hash": "a1b9b6d46454b2a25399e59d5f977f0473265bce",
+      "created_at": 1751527337
+    },
+    {
+      "event_type": "file_added",
+      "node_id": "file:svcs/commands/delete.py",
+      "location": "svcs/commands/delete.py",
+      "details": "New file svcs/commands/delete.py was added",
+      "layer": "core",
+      "confidence": 1.0,
+      "reasoning": "File is new (no previous content)",
+      "commit_hash": "a1b9b6d46454b2a25399e59d5f977f0473265bce",
+      "created_at": 1751527337
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "a1b9b6d46454b2a25399e59d5f977f0473265bce"
+}
