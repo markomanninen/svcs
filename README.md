@@ -221,15 +221,40 @@ pip install tree-sitter tree-sitter-php esprima
 # Install core SVCS dependencies
 pip install -r ../requirements.txt
 
-# Set up Google API key for Layer 5b AI features (optional)
-export GOOGLE_API_KEY="your_gemini_api_key_here"
+# Install AI analysis dependencies (optional)
+pip install -r requirements_ai.txt
 
 # Verify installation
 cd ..
 svcs --help
 ```
 
-### **2. Configure MCP Server in VS Code**
+### **2. Configuration Setup**
+
+SVCS uses environment variables for configuration. Set up your environment:
+
+```bash
+# Copy the example environment file
+cp .env.example .env
+
+# Edit .env with your API keys and preferences
+nano .env  # or use your preferred editor
+```
+
+**Required for AI Analysis (Layer 5b)**:
+- `GOOGLE_API_KEY` - Google Gemini API key (primary)
+- `OPENAI_API_KEY` - OpenAI API key (fallback)  
+- `ANTHROPIC_API_KEY` - Anthropic Claude API key (fallback)
+- `OLLAMA_MODEL` - Local Ollama model (fallback, default: deepseek-r1:8b)
+
+**Optional Configuration**:
+- `AI_COMPLEXITY_THRESHOLD` - Minimum complexity for AI analysis (default: 2)
+- `AI_TIMEOUT` - AI analysis timeout in seconds (default: 30)
+- `SVCS_DEBUG` - Enable debug output (default: false)
+
+See `.env.example` for complete configuration options.
+
+### **3. Configure MCP Server in VS Code**
 
 Add to your VS Code `settings.json`:
 

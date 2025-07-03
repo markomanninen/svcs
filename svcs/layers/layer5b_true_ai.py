@@ -6,6 +6,26 @@ from dataclasses import dataclass
 import json
 import os
 import re
+from pathlib import Path
+
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    
+    # Look for .env file in current directory or SVCS project root
+    env_paths = [
+        Path(".env"),
+        Path.cwd() / ".env", 
+        Path(__file__).parent.parent.parent / ".env"
+    ]
+    
+    for env_path in env_paths:
+        if env_path.exists():
+            load_dotenv(env_path)
+            break
+except ImportError:
+    # dotenv not available, use environment variables directly
+    pass
 
 @dataclass
 class LLMChange:
@@ -23,6 +43,28 @@ class TrueAIAnalyzer:
     def __init__(self):
         self.layer_name = "Layer 5b: True AI"
         self.layer_description = "Large Language Model semantic analysis"
+        
+        # Load configuration from environment
+        self.config = {
+            # API Keys
+            'google_api_key': os.getenv('GOOGLE_API_KEY'),
+            'openai_api_key': os.getenv('OPENAI_API_KEY'),
+            'anthropic_api_key': os.getenv('ANTHROPIC_API_KEY'),
+            
+            # Model Selection
+            'google_model': os.getenv('GOOGLE_MODEL', 'gemini-2.5-flash'),
+            'openai_model': os.getenv('OPENAI_MODEL', 'gpt-4o-mini'),
+            'anthropic_model': os.getenv('ANTHROPIC_MODEL', 'claude-3-5-haiku-20241022'),
+            'ollama_model': os.getenv('OLLAMA_MODEL', 'deepseek-r1:8b'),
+            
+            # Service Configuration
+            'ollama_base_url': os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434'),
+            'ai_timeout': int(os.getenv('AI_TIMEOUT', '30')),
+            'complexity_threshold': int(os.getenv('AI_COMPLEXITY_THRESHOLD', '2')),
+            'max_retries': int(os.getenv('AI_MAX_RETRIES', '3')),
+            'debug': os.getenv('SVCS_DEBUG', 'false').lower() == 'true'
+        }
+        
         self._llm_available = self._check_llm_availability()
         self._model = self._initialize_model()
     
@@ -31,9 +73,6 @@ class TrueAIAnalyzer:
         """Analyze semantic changes using LLM-powered analysis."""
         events = []
         
-        if not self._llm_available or not self._model:
-            return events
-        
         # Skip identical content
         if before_content == after_content:
             return events
@@ -41,6 +80,15 @@ class TrueAIAnalyzer:
         # 🚀 INTELLIGENT FILTERING: Only call LLM for non-trivial changes
         if not self._is_change_worth_llm_analysis(before_content, after_content, filepath):
             # Skip LLM analysis for trivial changes to save API costs
+            return events
+
+        # Try to initialize any available model if not already done
+        if not self._model:
+            self._llm_available = self._check_llm_availability()
+            self._model = self._initialize_model()
+            
+        if not self._llm_available and not self._model:
+            # No LLM available at all
             return events
 
         try:
@@ -81,7 +129,7 @@ class TrueAIAnalyzer:
         
         try:
             # Get LLM response
-            response = self._query_llm(prompt)
+            response = self._query_llm(prompt, filepath)
             
             # Parse LLM response into structured changes
             parsed_changes = self._parse_llm_response(response, filepath)
@@ -94,7 +142,8 @@ class TrueAIAnalyzer:
         return changes
     
     def _check_llm_availability(self) -> bool:
-        """Check if LLM services are available."""
+        """Check if any LLM services are available."""
+        
         # Check for Google Gemini API key (primary LLM service)
         if os.getenv('GOOGLE_API_KEY'):
             try:
@@ -103,7 +152,7 @@ class TrueAIAnalyzer:
             except ImportError:
                 pass
         
-        # Check for OpenAI API key (fallback)
+        # Check for OpenAI API key (fallback) - GPT-4o-mini
         if os.getenv('OPENAI_API_KEY'):
             try:
                 import openai
@@ -119,7 +168,7 @@ class TrueAIAnalyzer:
             except ImportError:
                 pass
         
-        # Check for local LLM options (fallback)
+        # Check for local Ollama (no API key needed)
         try:
             import ollama
             return True
@@ -129,24 +178,23 @@ class TrueAIAnalyzer:
         return False
     
     def _initialize_model(self) -> Optional[Any]:
-        """Initialize the LLM model."""
-        if not self._llm_available:
-            return None
+        """Initialize any available LLM model, trying all options."""
         
         # Try Google Gemini first (primary LLM service)
         if os.getenv('GOOGLE_API_KEY'):
             try:
                 import google.generativeai as genai
                 genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
-                return genai.GenerativeModel('gemini-1.5-flash')
+                return genai.GenerativeModel(self.config['google_model'])
             except ImportError:
                 pass
         
-        # Try OpenAI as fallback
+        # Try OpenAI GPT-4o-mini as fallback
         if os.getenv('OPENAI_API_KEY'):
             try:
                 import openai
-                return openai
+                client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+                return client
             except ImportError:
                 pass
         
@@ -158,54 +206,58 @@ class TrueAIAnalyzer:
             except ImportError:
                 pass
         
-        # Try local Ollama as fallback
+        # ALWAYS try local Ollama as fallback (no API key needed)
         try:
             import ollama
-            return ollama
+            # Test if ollama is running and has models
+            try:
+                models = ollama.list()
+                print(f"🔍 Found Ollama with {len(models.get('models', []))} models")
+                return ollama
+            except Exception as e:
+                print(f"🔍 Ollama not accessible: {e}")
         except ImportError:
-            pass
+            print("🔍 Ollama library not installed")
         
         return None
     
     def _create_analysis_prompt(self, before_content: str, after_content: str, filepath: str) -> str:
-        """Create a prompt for LLM semantic analysis."""
+        """Create a prompt for LLM semantic analysis optimized for GPT-4o-mini and Deepseek-R1."""
         prompt = f"""You are an expert code analyzer. Analyze the semantic changes between these two versions of a {filepath} file.
 
 BEFORE:
 ```
-{before_content[:2000]}  # Truncate for token limits
+{before_content[:1500]}  # Truncate for token limits
 ```
 
 AFTER:
 ```
-{after_content[:2000]}  # Truncate for token limits
+{after_content[:1500]}  # Truncate for token limits
 ```
 
-Please identify high-level semantic changes, focusing on:
-1. Intent and purpose changes
-2. Algorithm or approach changes  
-3. Architectural modifications
-4. Business logic alterations
-5. Design pattern implementations/removals
-6. Performance implications
-7. Security implications
-8. Maintainability impacts
+Identify high-level semantic changes focusing on:
+1. Algorithm or approach changes
+2. Business logic alterations
+3. Design pattern implementations/removals
+4. Performance implications
+5. Security implications
+6. Error handling improvements
 
-For each change, provide:
-- change_type: A descriptive type (e.g., "algorithm_optimization", "business_logic_change")
+For each significant change, provide a JSON object with:
+- change_type: Descriptive type (e.g., "algorithm_optimization", "business_logic_change", "error_handling_improvement")
 - description: What changed in natural language
 - confidence: 0.0-1.0 confidence score
 - reasoning: Why you identified this change
 - impact: The implications of this change
 - node_id: The affected function/class (if identifiable)
 
-Respond in JSON format with an array of changes:
+Return ONLY a JSON array of changes with confidence >= 0.7:
 ```json
 [
   {{
     "change_type": "...",
     "description": "...", 
-    "confidence": 0.0,
+    "confidence": 0.8,
     "reasoning": "...",
     "impact": "...",
     "node_id": "..."
@@ -213,64 +265,114 @@ Respond in JSON format with an array of changes:
 ]
 ```
 
-Only include changes with confidence >= 0.7. If no significant semantic changes are detected, return an empty array.
+If no significant semantic changes are detected, return: []
 """
         return prompt
     
-    def _query_llm(self, prompt: str) -> str:
-        """Query the LLM with the given prompt."""
-        if not self._model:
-            return "[]"
+    def _query_llm(self, prompt: str, filepath: str = "") -> str:
+        """Query LLM with fallback to multiple models."""
+        
+        # Display which file is being analyzed
+        file_display = f" for {filepath}" if filepath else ""
+        print(f"🔍 Analyzing{file_display}...")
+        
+        if self.config['debug']:
+            print(f"🐛 Debug: Prompt length: {len(prompt)} characters")
+            print(f"🐛 Debug: Available providers: {self._get_available_providers()}")
         
         # Try Google Gemini Flash (primary LLM service)
-        if hasattr(self._model, 'generate_content'):
+        if os.getenv('GOOGLE_API_KEY'):
             try:
-                response = self._model.generate_content(prompt)
+                import google.generativeai as genai
+                genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
+                model = genai.GenerativeModel(self.config['google_model'])
+                response = model.generate_content(prompt)
+                print(f"✅ Gemini analysis successful{file_display}")
                 return response.text
             except Exception as e:
-                print("⚠️ AI analysis unavailable (API key not configured)")
+                print(f"⚠️ Gemini analysis failed{file_display}, trying fallbacks...")
         
         # Try OpenAI (fallback)
-        if hasattr(self._model, 'chat'):
+        if os.getenv('OPENAI_API_KEY'):
             try:
-                response = self._model.chat.completions.create(
-                    model="gpt-3.5-turbo",
+                print(f"🔄 Trying OpenAI {self.config['openai_model']}{file_display}...")
+                import openai
+                client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+                response = client.chat.completions.create(
+                    model=self.config['openai_model'],
                     messages=[
                         {"role": "system", "content": "You are an expert code analyzer."},
                         {"role": "user", "content": prompt}
                     ],
                     max_tokens=1000,
-                    temperature=0.1
+                    temperature=0.1,
+                    timeout=self.config['ai_timeout']
                 )
+                print(f"✅ OpenAI analysis successful{file_display}")
                 return response.choices[0].message.content
             except Exception as e:
-                print(f"OpenAI query failed: {e}")
+                print(f"⚠️ OpenAI analysis failed{file_display}, trying more fallbacks...")
         
-        # Try Anthropic (fallback)
-        if hasattr(self._model, 'messages'):
+        # Try Anthropic Claude (fallback)
+        if os.getenv('ANTHROPIC_API_KEY'):
             try:
-                response = self._model.messages.create(
-                    model="claude-3-haiku-20240307",
+                print(f"🔄 Trying Anthropic {self.config['anthropic_model']}{file_display}...")
+                import anthropic
+                client = anthropic.Anthropic()
+                response = client.messages.create(
+                    model=self.config['anthropic_model'],
                     max_tokens=1000,
+                    timeout=self.config['ai_timeout'],
                     messages=[
                         {"role": "user", "content": prompt}
                     ]
                 )
+                print(f"✅ Anthropic analysis successful{file_display}")
                 return response.content[0].text
             except Exception as e:
-                print(f"Anthropic query failed: {e}")
+                print(f"⚠️ Anthropic analysis failed{file_display}, trying local models...")
         
-        # Try Ollama (fallback)
-        if hasattr(self._model, 'generate'):
+        # Try Ollama local models (fallback - no API key needed)
+        try:
+            print(f"🔄 Trying Ollama {self.config['ollama_model']}{file_display}...")
+            import ollama
+            
+            # Configure Ollama client if custom URL is provided
+            if self.config['ollama_base_url'] != 'http://localhost:11434':
+                ollama_client = ollama.Client(host=self.config['ollama_base_url'])
+            else:
+                ollama_client = ollama
+            
+            # First try the generate method
             try:
-                response = self._model.generate(
-                    model="llama2",
+                response = ollama_client.generate(
+                    model=self.config['ollama_model'],
                     prompt=prompt
                 )
+                print(f"✅ Ollama analysis successful{file_display}")
                 return response['response']
             except Exception as e:
-                print(f"Ollama query failed: {e}")
+                print(f"⚠️ Ollama generate failed{file_display}: {e}")
+                
+                # Try alternative Ollama chat format
+                try:
+                    response = ollama_client.chat(
+                        model=self.config['ollama_model'],
+                        messages=[
+                            {"role": "user", "content": prompt}
+                        ]
+                    )
+                    print(f"✅ Ollama chat analysis successful{file_display}")
+                    return response['message']['content']
+                except Exception as e2:
+                    print(f"⚠️ Ollama chat also failed{file_display}: {e2}")
+                    
+        except ImportError:
+            print(f"⚠️ Ollama library not available{file_display}")
+        except Exception as e:
+            print(f"⚠️ Ollama failed{file_display}: {e}")
         
+        print(f"⚠️ All AI analysis methods failed{file_display}")
         return "[]"
     
     def _parse_llm_response(self, response: str, filepath: str) -> List[LLMChange]:
@@ -438,4 +540,20 @@ Only include changes with confidence >= 0.7. If no significant semantic changes 
             algorithmic_change = True
         
         # Require minimum complexity score for LLM analysis
-        return complexity_score >= 2 or algorithmic_change
+        return complexity_score >= self.config['complexity_threshold'] or algorithmic_change
+    
+    def _get_available_providers(self) -> list:
+        """Get list of available AI providers for debug output."""
+        providers = []
+        if os.getenv('GOOGLE_API_KEY'):
+            providers.append('Google Gemini')
+        if os.getenv('OPENAI_API_KEY'):
+            providers.append('OpenAI')
+        if os.getenv('ANTHROPIC_API_KEY'):
+            providers.append('Anthropic')
+        try:
+            import ollama
+            providers.append('Ollama')
+        except ImportError:
+            pass
+        return providers
