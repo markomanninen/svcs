@@ -46,6 +46,7 @@ try:
     from svcs_repo_hooks import SVCSRepositoryManager
     from .commands import *  # Import all commands from modular package
     from .commands.init import cmd_init_project # Ensure cmd_init_project is imported
+    from .commands.delete import cmd_delete_project
 except ImportError:
     # Fallback to parent directory (development mode)
     parent_dir = Path(__file__).parent.parent
@@ -57,6 +58,7 @@ except ImportError:
         sys.path.insert(0, str(Path(__file__).parent))
         from commands import *
         from commands.init import cmd_init_project
+        from commands.delete import cmd_delete_project
     except ImportError:
         print("❌ Error: SVCS modules not found. Please ensure SVCS is properly installed.")
         print(f"   Searched in: {Path(__file__).parent} and {parent_dir}")
@@ -394,6 +396,11 @@ Date Formats (--since):
     init_project_parser.add_argument('--path', type=str, help='Directory to create the project in (default: current directory if interactive, or prompted)')
     init_project_parser.add_argument('--non-interactive', action='store_true', help='Run in non-interactive mode, using defaults and skipping prompts.')
     init_project_parser.set_defaults(func=cmd_init_project)
+
+    # Delete-project command
+    delete_project_parser = subparsers.add_parser('delete-project', help='Unregister project from SVCS registry and delete its directory')
+    delete_project_parser.add_argument('--path', '-p', type=str, help='Project path (default: current directory)')
+    delete_project_parser.set_defaults(func=cmd_delete_project)
 
     # Parse arguments
     args = parser.parse_args()
