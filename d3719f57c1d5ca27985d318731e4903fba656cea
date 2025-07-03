@@ -1,0 +1,386 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-07-04T01:14:00.741687",
+  "semantic_events": [
+    {
+      "event_type": "dependency_added",
+      "node_id": "module:svcs/layers/layer5b_true_ai.py",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "details": "Added dependencies: dotenv, pathlib",
+      "layer": "1",
+      "layer_description": "File and module structure analysis",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:_get_available_providers",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "details": "New func added",
+      "layer": "1",
+      "layer_description": "File and module structure analysis",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_query_llm",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "2",
+      "layer_description": "Syntax and signature analysis",
+      "event_type": "signature_changed",
+      "details": "Signature changed from (self, prompt) to (self, prompt, filepath)",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_query_llm",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "2",
+      "layer_description": "Syntax and signature analysis",
+      "event_type": "default_parameters_added",
+      "details": "Function now has default parameter values",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_query_llm",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "exception_handling_changed",
+      "details": "Exception handling changed, added: ImportError",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_query_llm",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "internal_call_added",
+      "details": "Now calls: anthropic.Anthropic, genai.GenerativeModel, genai.configure, len, model.generate_content, ollama.Client, ollama_client.chat, ollama_client.generate, openai.OpenAI, os.getenv, self._get_available_providers",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_query_llm",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "internal_call_removed",
+      "details": "No longer calls: hasattr",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:__init__",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "internal_call_added",
+      "details": "Now calls: int, os.getenv",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_initialize_model",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "control_flow_changed",
+      "details": "if count changed from 4 to 3",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_initialize_model",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "return_pattern_changed",
+      "details": "Return statements changed from 6 to 5",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_initialize_model",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "exception_handling_changed",
+      "details": "Exception handling changed, added: Exception",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_initialize_model",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "internal_call_added",
+      "details": "Now calls: len, models.get, ollama.list, openai.OpenAI, print",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:analyze",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "control_flow_changed",
+      "details": "if count changed from 4 to 5",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:analyze",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "internal_call_added",
+      "details": "Now calls: self._check_llm_availability, self._initialize_model",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_query_llm",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "function_complexity_changed",
+      "details": "Function complexity increased from 12 to 13",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_query_llm",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "attribute_access_changed",
+      "details": "Attribute access patterns changed",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_query_llm",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "assignment_pattern_changed",
+      "details": "Assignment patterns changed",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_query_llm",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "unary_operator_usage_changed",
+      "details": "removed Not",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_query_llm",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "comparison_operator_usage_changed",
+      "details": "added NotEq",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_query_llm",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "added 40 new literals; removed 12 literals",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_meets_complexity_threshold",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "attribute_access_changed",
+      "details": "Attribute access patterns changed",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_meets_complexity_threshold",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "added 1 new literals",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_meets_complexity_threshold",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "numeric_literal_usage_changed",
+      "details": "removed 1 literals",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_check_llm_availability",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "added 1 new literals; removed 1 literals",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_create_analysis_prompt",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "added 2 new literals; removed 2 literals",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_create_analysis_prompt",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "numeric_literal_usage_changed",
+      "details": "added 1 new literals; removed 1 literals",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:__init__",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "attribute_access_changed",
+      "details": "Attribute access patterns changed",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:__init__",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "comparison_operator_usage_changed",
+      "details": "added Eq",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:__init__",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "added 34 new literals",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_initialize_model",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "function_complexity_changed",
+      "details": "Function complexity decreased from 11 to 10",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_initialize_model",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "attribute_access_changed",
+      "details": "Attribute access patterns changed",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_initialize_model",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "assignment_pattern_changed",
+      "details": "Assignment patterns changed",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_initialize_model",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "unary_operator_usage_changed",
+      "details": "removed Not",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:_initialize_model",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "added 7 new literals; removed 2 literals",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "class:TrueAIAnalyzer",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "class_methods_changed",
+      "details": "added methods: _get_available_providers",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:analyze",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "function_complexity_changed",
+      "details": "Function complexity increased from 10 to 11",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:analyze",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "attribute_access_changed",
+      "details": "Attribute access patterns changed",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "node_id": "func:analyze",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "logical_operator_usage_changed",
+      "details": "added And; removed Or",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:_get_available_providers",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "details": "Possible method extraction: _get_available_providers",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "event_type": "api_breaking_change",
+      "node_id": "func:_query_llm",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "details": "Function _query_llm parameter count changed",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.9,
+      "reasoning": "Parameter count mismatch detected",
+      "impact": "Potential breaking change for callers",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    },
+    {
+      "event_type": "code_complication",
+      "node_id": "complexity:svcs/layers/layer5b_true_ai.py",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "details": "Code complexity significantly increased",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.8,
+      "reasoning": "Complexity increased from 120 to 147",
+      "impact": "Potential maintainability concern",
+      "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "d3719f57c1d5ca27985d318731e4903fba656cea"
+}
