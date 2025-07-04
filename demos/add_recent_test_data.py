@@ -3,12 +3,15 @@
 Add recent test data and fix API testing issues.
 """
 
+import os
 import sqlite3
 import time
 import random
 from datetime import datetime, timedelta
 
-DB_PATH = "/Users/markomanninen/Documents/GitHub/svcs/.svcs/semantic.db"
+# Use relative path to current repo
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(REPO_ROOT, ".svcs", "semantic.db")
 
 def add_recent_data():
     """Add some recent events for testing recent activity API."""

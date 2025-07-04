@@ -5,6 +5,7 @@ Repository-Local Semantic Version Control System
 
 Complete command set:
   svcs init         - Initialize SVCS in current repository
+  svcs init-project - Interactive tour to setup a new SVCS project
   svcs status       - Show SVCS status  
   svcs events       - List recent semantic events
   svcs search       - Advanced semantic search
@@ -41,19 +42,23 @@ import time
 
 # Try to import from installed package, fallback to parent directory
 try:
-    from svcs_repo_local import RepositoryLocalSVCS, SVCSMigrator
+    from svcs_repo_local import RepositoryLocalSVCS
     from svcs_repo_hooks import SVCSRepositoryManager
     from .commands import *  # Import all commands from modular package
+    from .commands.init import cmd_init_project # Ensure cmd_init_project is imported
+    from .commands.delete import cmd_delete_project
 except ImportError:
     # Fallback to parent directory (development mode)
     parent_dir = Path(__file__).parent.parent
     sys.path.insert(0, str(parent_dir))
     try:
-        from svcs_repo_local import RepositoryLocalSVCS, SVCSMigrator
+        from svcs_repo_local import RepositoryLocalSVCS
         from svcs_repo_hooks import SVCSRepositoryManager
         # Import modular commands in development mode
         sys.path.insert(0, str(Path(__file__).parent))
         from commands import *
+        from commands.init import cmd_init_project
+        from commands.delete import cmd_delete_project
     except ImportError:
         print("❌ Error: SVCS modules not found. Please ensure SVCS is properly installed.")
         print(f"   Searched in: {Path(__file__).parent} and {parent_dir}")
@@ -81,6 +86,7 @@ def main():
         epilog="""
 Complete command set:
   svcs init                           # Initialize SVCS in current repository
+  svcs init-project [name] [--path .] [--non-interactive] # Interactive tour / setup for new project
   svcs status                         # Show repository status
   svcs events                         # List recent semantic events
   svcs search "query"                 # Advanced semantic search
@@ -133,6 +139,9 @@ Date Formats (--since):
   "yesterday"         # Relative time
         """
     )
+    
+    # Add version flag
+    parser.add_argument('--version', '-v', action='version', version='SVCS 0.1')
     
     parser.add_argument('--path', '-p', type=str,
                        help='Repository path (default: current directory)')
@@ -383,6 +392,18 @@ Date Formats (--since):
     mcp_logs_parser.add_argument('--follow', '-f', action='store_true',
                                 help='Follow log output')
     mcp_logs_parser.set_defaults(func=cmd_mcp_logs)
+
+    # Init-project command
+    init_project_parser = subparsers.add_parser('init-project', help='Initialize a new SVCS project with an interactive tour or non-interactively.')
+    init_project_parser.add_argument('project_name', nargs='?', default=None, help='Name of the new project (optional, will be prompted if not provided in interactive mode, or uses a default in non-interactive mode if not set)')
+    init_project_parser.add_argument('--path', type=str, help='Directory to create the project in (default: current directory if interactive, or prompted)')
+    init_project_parser.add_argument('--non-interactive', action='store_true', help='Run in non-interactive mode, using defaults and skipping prompts.')
+    init_project_parser.set_defaults(func=cmd_init_project)
+
+    # Delete-project command
+    delete_project_parser = subparsers.add_parser('delete-project', help='Unregister project from SVCS registry and delete its directory')
+    delete_project_parser.add_argument('--path', '-p', type=str, help='Project path (default: current directory)')
+    delete_project_parser.set_defaults(func=cmd_delete_project)
 
     # Parse arguments
     args = parser.parse_args()

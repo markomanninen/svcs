@@ -17,7 +17,7 @@ def test_single_query():
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            cwd="/Users/markomanninen/Documents/GitHub/svcs"
+            cwd="os.path.dirname(os.path.dirname(os.path.abspath(__file__)))"
         )
         
         stdout, stderr = process.communicate(input=query, timeout=30)

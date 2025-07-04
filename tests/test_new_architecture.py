@@ -74,7 +74,7 @@ def test_repository_manager():
 def test_registry_integration():
     """Test the registry integration script."""
     try:
-        from legacy_scripts.svcs_registry_integration import list_repositories
+        from svcs_repo_registry_integration import list_repositories
         
         print("🧪 Testing Registry Integration")
         print("=" * 50)
@@ -109,7 +109,7 @@ def test_web_server_import():
         health_data = {
             'status': 'healthy',
             'service': 'SVCS Web Server (New Architecture)',
-            'version': '2.0.0',
+            'version': '0.1',
             'architecture': 'repository-local'
         }
         print(f"   💓 Health check: {health_data['status']}")

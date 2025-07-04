@@ -772,109 +772,83 @@ class RepositoryLocalSVCS:
                 return json.loads(result[0])
             return {}
 
-# Migration tools for moving from global to repository-local architecture
-class SVCSMigrator:
-    """Tools for migrating from global to repository-local SVCS architecture."""
-    
-    def __init__(self, global_db_path: str = None):
-        if global_db_path is None:
-            global_db_path = Path.home() / ".svcs" / "global.db"
-        self.global_db_path = Path(global_db_path)
-    
-    def migrate_project_to_local(self, project_path: str) -> str:
-        """Migrate a project from global database to repository-local storage."""
-        project_path = Path(project_path).resolve()
-        
-        if not self.global_db_path.exists():
-            return f"❌ Global database not found: {self.global_db_path}"
-        
-        # Initialize repository-local SVCS
-        local_svcs = RepositoryLocalSVCS(project_path)
-        result = local_svcs.initialize_repository()
-        
-        if "❌" in result:
-            return result
-        
-        # Extract data from global database
+    def analyze_current_commit(self) -> bool:
+        """Analyze the current/latest commit for semantic events."""
         try:
-            with sqlite3.connect(self.global_db_path) as global_conn:
-                # Get project_id
-                cursor = global_conn.execute(
-                    "SELECT project_id FROM projects WHERE path = ?", (str(project_path),)
-                )
-                project_result = cursor.fetchone()
-                
-                if not project_result:
-                    return f"⚠️ Project not found in global database: {project_path}"
-                
-                project_id = project_result[0]
-                
-                # Get semantic events
-                cursor = global_conn.execute("""
-                    SELECT commit_hash, event_type, node_id, location, details, 
-                           layer, layer_description, confidence, reasoning, impact, created_at
-                    FROM semantic_events 
-                    WHERE project_id = ?
-                    ORDER BY created_at
-                """, (project_id,))
-                
-                events = cursor.fetchall()
-                migrated_count = 0
-                
-                # Group events by commit
-                commit_events = {}
-                for event in events:
-                    commit_hash = event[0]
-                    if commit_hash not in commit_events:
-                        commit_events[commit_hash] = []
+            # Get the latest commit hash
+            result = subprocess.run(['git', 'rev-parse', 'HEAD'], 
+                                  cwd=self.repo_path, capture_output=True, text=True, check=True)
+            commit_hash = result.stdout.strip()
+            
+            # Use the PROVEN working modular analyzer system
+            from svcs.semantic_analyzer import SVCSModularAnalyzer
+            analyzer = SVCSModularAnalyzer(str(self.repo_path))
+            
+            # Get changed files in this commit
+            try:
+                cmd = ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", commit_hash]
+                result = subprocess.run(cmd, cwd=self.repo_path, capture_output=True, text=True, check=True)
+                changed_files = [f.strip() for f in result.stdout.strip().split('\n') if f.strip()]
+            except subprocess.CalledProcessError:
+                # Try initial commit approach
+                cmd = ["git", "ls-tree", "--name-only", "-r", commit_hash]
+                result = subprocess.run(cmd, cwd=self.repo_path, capture_output=True, text=True, check=True)
+                changed_files = [f.strip() for f in result.stdout.strip().split('\n') if f.strip()]
+            
+            if not changed_files:
+                print("🔍 SVCS: No files changed in this commit")
+                return False
+            
+            # Analyze each changed file
+            all_events = []
+            for filepath in changed_files:
+                # Only analyze supported file types
+                if not filepath.endswith(('.py', '.js', '.ts', '.php', '.phtml')):
+                    continue
                     
-                    event_data = {
-                        "event_type": event[1],
-                        "node_id": event[2],
-                        "location": event[3],
-                        "details": event[4],
-                        "layer": event[5],
-                        "layer_description": event[6],
-                        "confidence": event[7],
-                        "reasoning": event[8],
-                        "impact": event[9],
-                        "created_at": event[10]
-                    }
-                    commit_events[commit_hash].append(event_data)
+                try:
+                    # Get file content before and after
+                    try:
+                        before_result = subprocess.run(['git', 'show', f'{commit_hash}~1:{filepath}'], 
+                                                     cwd=self.repo_path, capture_output=True, text=True, check=True)
+                        before_content = before_result.stdout
+                    except subprocess.CalledProcessError:
+                        before_content = ""  # New file or initial commit
+                    
+                    after_result = subprocess.run(['git', 'show', f'{commit_hash}:{filepath}'], 
+                                                cwd=self.repo_path, capture_output=True, text=True, check=True)
+                    after_content = after_result.stdout
+                    
+                    # Use the working analyzer
+                    file_events = analyzer.analyze_changes(filepath, before_content, after_content)
+                    
+                    # Add commit context to each event
+                    for event in file_events:
+                        event['commit_hash'] = commit_hash
+                        event['file_path'] = filepath
+                        
+                    all_events.extend(file_events)
+                    
+                except Exception as e:
+                    print(f"⚠️ Error analyzing {filepath}: {e}")
+                    continue
+            
+            if all_events:
+                # Store the events using our existing method
+                stored_count, notes_success = self.analyze_and_store_commit(commit_hash, all_events)
+                print(f"✅ SVCS: Stored {stored_count} semantic events")
+                if notes_success:
+                    print("📝 SVCS: Semantic data saved as git notes")
+                return True
+            else:
+                print("🔍 SVCS: Analyzing semantic changes...")
+                print("ℹ️ SVCS: No semantic events detected in this commit")
+                return False
                 
-                # Migrate each commit's events
-                for commit_hash, semantic_events in commit_events.items():
-                    stored_count, notes_success = local_svcs.analyze_and_store_commit(
-                        commit_hash, semantic_events
-                    )
-                    migrated_count += stored_count
-                
-                return f"✅ Migrated {migrated_count} semantic events to repository-local storage"
-        
         except Exception as e:
-            return f"❌ Migration failed: {e}"
-    
-    def list_migratable_projects(self) -> List[Dict[str, Any]]:
-        """List projects that can be migrated from global database."""
-        if not self.global_db_path.exists():
-            return []
-        
-        try:
-            with sqlite3.connect(self.global_db_path) as conn:
-                cursor = conn.execute("""
-                    SELECT name, path, created_at, status, 
-                           (SELECT COUNT(*) FROM semantic_events WHERE project_id = projects.project_id) as event_count
-                    FROM projects 
-                    WHERE status = 'active'
-                    ORDER BY created_at DESC
-                """)
-                
-                columns = [desc[0] for desc in cursor.description]
-                return [dict(zip(columns, row)) for row in cursor.fetchall()]
-        
-        except Exception as e:
-            logger.error(f"Error listing projects: {e}")
-            return []
+            print(f"❌ SVCS: Semantic analysis failed: {e}")
+            logger.error(f"Error in analyze_current_commit: {e}")
+            return False
 
 
 def demo_repository_local_svcs():

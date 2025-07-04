@@ -106,7 +106,7 @@ class SVCSFreshRepoTest:
             "svcs_repo_local.py",
             "svcs_local_cli.py", 
             "svcs_repo_hooks.py",
-            "svcs_repo_analyzer.py",
+            "svcs_repo_local.py",
             "svcs_multilang.py"
         ]
         

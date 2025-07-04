@@ -134,14 +134,14 @@ if repo_svcs_dir not in sys.path:
 
 try:
     from svcs_repo_local import RepositoryLocalSVCS
-    from svcs_repo_analyzer import RepositoryLocalSemanticAnalyzer
+    from svcs.semantic_analyzer import SVCSModularAnalyzer
 
     # Initialize repository-local SVCS and analyzer
     svcs = RepositoryLocalSVCS('$REPO_ROOT')
-    analyzer = RepositoryLocalSemanticAnalyzer('$REPO_ROOT')
+    analyzer = SVCSModularAnalyzer('$REPO_ROOT')
 
-    # Analyze the commit
-    semantic_events = analyzer.analyze_commit('$COMMIT_HASH')
+    # Analyze the commit using modern analyzer
+    semantic_events = analyzer.analyze_commit_changes('$COMMIT_HASH')
     if semantic_events:
         stored_count, notes_success = svcs.analyze_and_store_commit('$COMMIT_HASH', semantic_events)
         print('✅ SVCS: Stored ' + str(stored_count) + ' semantic events')

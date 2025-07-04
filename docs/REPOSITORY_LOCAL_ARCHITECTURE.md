@@ -1,24 +1,28 @@
-# Repository-Local SVCS Architecture Implementation
+# SVCS Repository-Local Architecture
 
 ## Overview
 
-This document describes the implementation of the new repository-local, git-integrated team collaboration architecture for SVCS. This replaces the previous global database approach with a distributed, git-native system.
+SVCS provides a repository-local, git-integrated semantic code analysis system. Each repository maintains its own semantic database and shares insights through git notes for team collaboration.
 
-## Architecture Changes
+## Core Architecture
 
-### From Global to Repository-Local
+### Repository-Local Database
 
-**Previous Architecture (Global)**:
-- Single global database: `~/.svcs/global.db`
-- Projects registered by path in global database
-- No team collaboration or synchronization
-- Global git hooks routing to MCP server
+Each repository stores semantic analysis data in `.svcs/semantic.db` within the repository directory.
 
-**New Architecture (Repository-Local)**:
-- Repository-local database: `.svcs/semantic.db` per repository
-- Semantic data stored as git notes for team sharing
-- Branch-aware semantic analysis and storage
-- Repository-specific git hooks with automatic sync
+**Key Features**:
+- Branch-aware semantic event storage  
+- Git commit correlation for all semantic events
+- Local performance optimization
+- Git notes synchronization for team collaboration
+
+### Git Integration
+
+SVCS integrates deeply with git workflows:
+- Automatic analysis on commits via git hooks
+- Branch-aware semantic tracking
+- Git notes for sharing semantic insights with team members
+- Commit-correlated semantic events
 
 ## Core Components
 
@@ -28,283 +32,266 @@ Repository-local semantic database stored in `.svcs/semantic.db` within each git
 
 **Key Features**:
 - Branch-aware semantic event storage
-- Repository information and configuration
-- Commit tracking with git notes sync status
-- Branch evolution tracking
+- Git commit correlation
+- Team collaboration via git notes
+- Local caching for performance
 
 **Database Schema**:
 ```sql
--- Repository metadata
-repository_info (id, repo_path, created_at, last_analyzed, current_branch, config)
+-- Core semantic events table
+CREATE TABLE semantic_events (
+    id INTEGER PRIMARY KEY,
+    commit_hash TEXT,
+    event_type TEXT,
+    node_id TEXT,
+    location TEXT,
+    details TEXT,
+    layer INTEGER,
+    layer_description TEXT,
+    confidence REAL,
+    reasoning TEXT,
+    impact TEXT,
+    created_at TIMESTAMP,
+    branch TEXT,
+    author TEXT
+);
 
--- Commits with branch context
-commits (commit_hash, branch, author, timestamp, message, created_at, git_notes_synced)
-
--- Semantic events with branch tracking
-semantic_events (event_id, commit_hash, branch, event_type, node_id, location, 
-                 details, layer, confidence, reasoning, impact, created_at, git_notes_synced)
-
--- Branch evolution tracking
-branches (branch_name, created_at, last_analyzed, parent_branch, semantic_events_count)
+-- Git notes metadata table  
+CREATE TABLE git_notes (
+    commit_hash TEXT PRIMARY KEY,
+    notes_ref TEXT,
+    last_sync TIMESTAMP,
+    sync_status TEXT
+);
 ```
 
-### 2. GitNotesManager (`svcs_repo_local.py`)
+### 2. Git Hooks Manager (`svcs_repo_hooks.py`)
 
-Manages semantic data storage and synchronization via git notes.
+Manages git hooks for automatic semantic analysis and team synchronization.
 
-**Key Features**:
-- Store semantic analysis as git notes attached to commits
-- Automatic sync with git push/pull operations
-- Team collaboration through git workflow
-- JSON-formatted semantic data with versioning
+**Supported Hooks**:
+- `post-commit`: Analyze new commits automatically
+- `post-merge`: Handle merge semantic analysis  
+- `pre-push`: Sync semantic insights to team via git notes
+- `post-receive`: Update local analysis from team notes
 
-**Git Notes Structure**:
-```json
-{
-  "version": "1.0",
-  "timestamp": "2025-06-23T17:32:46.303381",
-  "semantic_events": [
-    {
-      "event_type": "function_added",
-      "node_id": "func:calculate_score",
-      "location": "utils.py:15",
-      "details": "Added weighted calculation function",
-      "layer": "core",
-      "confidence": 1.0,
-      "reasoning": "AST analysis detected new function definition"
-    }
-  ],
-  "analyzer": "svcs",
-  "commit_hash": "abc123..."
-}
-```
+### 3. Semantic Analysis Engine (`svcs.semantic_analyzer.SVCSModularAnalyzer`)
 
-### 3. Repository-Local Git Hooks (`svcs_repo_hooks.py`)
+Multi-language semantic analysis engine for repository-local analysis.
 
-Git hooks that work repository-locally and integrate with the git workflow.
+**Supported Languages**:
+- Python: AST-based analysis with scope tracking
+- JavaScript/TypeScript: Babel parser integration
+- Java: Tree-sitter based analysis
+- C/C++: Clang AST integration
+- Go: Go AST parser
+- Rust: Tree-sitter Rust grammar
+- PHP: PHP-Parser integration
 
-**Installed Hooks**:
-- **post-commit**: Analyze semantic changes, store locally and as git notes
-- **post-merge**: Integrate semantic data from merged commits
-- **post-checkout**: Update branch tracking for semantic analysis
-- **pre-push**: Sync semantic git notes to remote repository
+### 4. CLI Interface (`svcs/cli.py`)
 
-**Hook Architecture**:
-- Repository-specific Python scripts (not global symlinks)
-- Embedded Python code for semantic analysis
-- Automatic git notes synchronization
-- Branch-aware operation
-
-### 4. Repository Management (`svcs_repo_hooks.py`)
-
-High-level management for SVCS repository operations.
-
-**Key Operations**:
-- `setup_repository()`: Initialize SVCS and install git hooks
-- `teardown_repository()`: Remove SVCS with backup preservation
-- Status checking and configuration management
-
-### 5. New CLI Tool (`svcs_local_cli.py`)
-
-Command-line interface for repository-local SVCS operations.
+Repository-focused command line interface.
 
 **Core Commands**:
 ```bash
-svcs-local init                    # Initialize SVCS for repository
-svcs-local status                  # Show repository SVCS status
-svcs-local events --limit 10       # List semantic events for current branch
-svcs-local notes sync              # Sync semantic notes to remote
-svcs-local notes fetch             # Fetch semantic notes from remote
-svcs-local notes show --commit abc # Show semantic note for commit
-svcs-local migrate list            # List projects for migration
-svcs-local migrate migrate         # Migrate project from global DB
-svcs-local analyze --commit abc    # Manually analyze a commit
-svcs-local remove                  # Remove SVCS from repository
+# Repository Management
+svcs init                          # Initialize SVCS for current repository
+svcs status                        # Repository status with git integration
+svcs cleanup                       # Repository maintenance
+
+# Semantic Analysis
+svcs events                        # List semantic events with git context
+svcs search <query>                # Search semantic events
+svcs evolution <node>              # Track evolution of functions/classes
+svcs compare <branch1> <branch2>   # Compare semantic patterns
+
+# Team Collaboration  
+svcs sync                          # Sync semantic insights with team
+svcs notes                         # Manage git notes for semantic data
 ```
 
-## Team Collaboration Workflow
+## Team Collaboration
 
-### Git-Native Semantic Sync
+### Git Notes Integration
 
-1. **Developer commits** → semantic analysis stored as git notes
-2. **Push branch** → git notes automatically included in push
-3. **Teammates pull** → semantic analysis available automatically
-4. **Branch merges** → semantic data merges with code
-5. **Team collaboration** → shared semantic evolution history
+SVCS uses git notes to share semantic insights across team members:
 
-### Branch-Aware Analysis
+**Notes Organization**:
+- `refs/notes/svcs-semantic`: Semantic analysis results
+- `refs/notes/svcs-quality`: Code quality insights  
+- `refs/notes/svcs-patterns`: AI-detected patterns
 
-- Semantic events tracked per git branch
-- Branch switching updates semantic context
-- Merge operations integrate semantic data
-- Cross-branch semantic evolution queries
+**Team Workflow**:
+1. Developer commits code with automatic semantic analysis
+2. SVCS stores analysis in local database
+3. On push, semantic insights are shared via git notes
+4. Team members pull notes to get semantic context
+5. Semantic insights enhance code review and collaboration
 
-### Example Team Workflow
+### Synchronization
+
+**Push Workflow**:
+```bash
+git push                           # Pushes code + semantic notes
+# SVCS automatically:
+# 1. Analyzes new commits  
+# 2. Updates git notes with semantic insights
+# 3. Pushes notes to remote repository
+```
+
+**Pull Workflow**:
+```bash
+git pull                           # Pulls code + semantic notes  
+# SVCS automatically:
+# 1. Fetches semantic notes from team
+# 2. Updates local semantic database
+# 3. Provides enhanced context for development
+```
+
+## Performance Optimizations
+
+### Local Database Benefits
+- **Faster Queries**: No network latency for local analysis
+- **Branch Awareness**: Efficient branch-specific filtering
+- **Git Integration**: Native git command integration
+- **Incremental Analysis**: Only analyze changed files
+
+### Caching Strategy
+- **AST Caching**: Cache parsed ASTs for unchanged files
+- **Git Object Caching**: Cache git metadata for performance
+- **Analysis Caching**: Cache semantic analysis results
+- **Notes Caching**: Local cache of team semantic insights
+
+## API Integration
+
+### Repository-Local APIs
+
+The repository-local system provides APIs for integration:
+
+```python
+from svcs_repo_local import RepositoryLocalSVCS
+
+# Initialize repository-local SVCS
+repo = RepositoryLocalSVCS('/path/to/repository')
+repo.initialize_repository()
+
+# Get semantic events
+events = repo.get_semantic_events(branch='main', limit=100)
+
+# Search semantic patterns
+results = repo.search_events_advanced(
+    query="function complexity",
+    event_types=['complexity_increase'],
+    since_date='7 days ago'
+)
+
+# Get git-integrated analytics
+analytics = repo.get_repository_analytics()
+quality = repo.get_quality_metrics()
+```
+
+### MCP Server Integration
+
+The Model Context Protocol (MCP) server provides AI integration:
+
+**Features**:
+- Natural language semantic queries
+- AI-powered pattern detection
+- Intelligent code analysis
+- Team collaboration insights
+
+## Development Workflow
+
+### Repository Setup
+
+1. **Initialize Repository**:
+   ```bash
+   cd your-repository
+   svcs init
+   ```
+
+2. **Automatic Analysis**:
+   - SVCS automatically analyzes commits via git hooks
+   - Semantic events stored in local database
+   - Git notes shared with team
+
+3. **Team Collaboration**:
+   - Team members get semantic context automatically
+   - Enhanced code review with semantic insights
+   - Shared understanding of code evolution
+
+### Quality Integration
+
+**Branch-Aware Quality Gates**:
+```bash
+# Quality analysis for current branch
+svcs quality --branch main
+
+# Compare quality between branches  
+svcs quality --compare feature/new-ui main
+
+# Set quality thresholds for CI/CD
+svcs quality --gate --max-complexity 10
+```
+
+## Configuration
+
+### Repository Configuration
+
+SVCS configuration stored in `.svcs/config.yaml`:
+
+```yaml
+# Repository-local SVCS configuration
+repository:
+  name: "my-project"
+  initialized: "2024-01-15"
+  
+analysis:
+  languages: ["python", "javascript", "typescript"]
+  quality_thresholds:
+    max_complexity_increases: 3
+    min_error_handling_ratio: 0.7
+    
+collaboration:
+  git_notes_enabled: true
+  auto_sync: true
+  team_sharing: true
+  
+performance:
+  cache_enabled: true
+  incremental_analysis: true
+```
+
+### Git Hooks Configuration
+
+SVCS automatically configures git hooks during initialization:
 
 ```bash
-# Developer A: Create feature branch
-git checkout -b feature/auth-system
-svcs-local status                    # Shows branch: feature/auth-system
-
-# Make changes and commit
-git commit -m "Add authentication service"
-# ✅ SVCS: Stored 3 semantic events
-# 📝 SVCS: Semantic data saved as git notes
-
-# Push branch with semantic data
-git push origin feature/auth-system  
-# ⬆️ SVCS: Syncing semantic notes to origin
-# ✅ SVCS: Semantic notes synced to remote
-
-# Developer B: Review PR
-git fetch origin
-git checkout feature/auth-system
-svcs-local events --limit 5          # See semantic changes in branch
-svcs-local notes show                # View detailed semantic analysis
-
-# After merge to main
-git checkout main
-git pull origin main
-svcs-local events --branch main      # Includes merged semantic data
+# Hooks installed in .git/hooks/
+post-commit          # Automatic semantic analysis
+post-merge           # Merge semantic analysis
+pre-push             # Sync semantic notes  
+post-receive         # Update from team notes
 ```
 
-## Migration from Global Architecture
+## Benefits
 
-### Migration Process
+### Developer Experience
+- **Automatic Analysis**: No manual intervention required
+- **Git-Native**: Integrates seamlessly with existing git workflow  
+- **Team Collaboration**: Shared semantic insights enhance teamwork
+- **Performance**: Fast local queries and analysis
 
-The `SVCSMigrator` class provides tools for moving from global to repository-local storage:
+### Code Quality
+- **Continuous Monitoring**: Track code quality over time
+- **Branch Awareness**: Quality analysis per branch
+- **Pattern Detection**: AI-powered detection of code patterns
+- **Team Insights**: Learn from team coding patterns
 
-```bash
-# List projects that can be migrated
-svcs-local migrate list
+### Team Collaboration  
+- **Shared Context**: Team semantic insights via git notes
+- **Enhanced Reviews**: Semantic context for code reviews
+- **Knowledge Sharing**: Understand team coding evolution
+- **Onboarding**: New team members get semantic context
 
-# Migrate specific project
-svcs-local migrate migrate --project-path /path/to/project
-
-# Or migrate current repository
-cd /path/to/project
-svcs-local migrate migrate
-```
-
-### Migration Steps
-
-1. **Initialize repository-local SVCS** in target repository
-2. **Extract semantic events** from global database by project_id
-3. **Group events by commit** for git notes storage
-4. **Store locally** in repository database
-5. **Create git notes** for team sharing
-6. **Preserve all metadata** (timestamps, confidence, reasoning)
-
-## Implementation Status
-
-### ✅ Completed Components
-
-- [x] Repository-local database architecture
-- [x] Git notes management and storage
-- [x] Repository-local git hooks installation
-- [x] New CLI tool with full command set
-- [x] Migration tools from global architecture
-- [x] Branch-aware semantic analysis
-- [x] Team collaboration workflow design
-- [x] Basic testing and validation
-
-### 🚧 Integration Needed
-
-- [ ] Connect to existing semantic analyzer modules
-- [ ] Update MCP server to support repository-local mode
-- [ ] Web dashboard integration
-- [ ] CI/CD pipeline updates
-- [ ] Comprehensive testing across different scenarios
-- [ ] Documentation updates for existing tools
-
-### 📋 Next Steps
-
-1. **Integrate Semantic Analyzer**: Connect repository-local hooks to existing AST and AI analysis
-2. **Update MCP Server**: Add repository-local project management
-3. **Migration Tool**: Provide smooth transition from global to local
-4. **Testing**: Comprehensive validation across team workflows
-5. **Documentation**: Update all guides for new architecture
-
-## Testing Results
-
-Successfully tested the new architecture:
-
-```bash
-# Initialize SVCS in repository
-✅ SVCS initialized for repository at /Users/markomanninen/Documents/GitHub/svcs (branch: main)
-
-# Install git hooks
-✅ Installed git hooks: post-commit, post-merge, post-checkout, pre-push
-
-# Test commit with hooks
-git commit -m "Test commit for repository-local SVCS architecture"
-🔍 SVCS: Analyzing semantic changes...
-ℹ️ SVCS: No semantic changes detected
-
-# Manual analysis
-svcs-local analyze
-🔍 Analyzing commit d7e3e7b4...
-✅ Stored 1 semantic events
-📝 Semantic data saved as git notes
-
-# View events
-svcs-local events
-📊 Semantic Events (1 found)
-🔍 manual_analysis
-   📝 d7e3e7b4 | main | 2025-06-23 17:32:46
-   🎯 placeholder @ manual
-   💬 Manual analysis of commit d7e3e7b4
-
-# View git notes
-svcs-local notes show
-📝 Semantic git note for commit d7e3e7b4:
-{
-  "version": "1.0",
-  "timestamp": "2025-06-23T17:32:46.303381",
-  "semantic_events": [...],
-  "analyzer": "svcs",
-  "commit_hash": "d7e3e7b4..."
-}
-```
-
-## Architecture Benefits
-
-### For Individual Developers
-- **Repository-scoped**: Semantic data stays with the repository
-- **Git-integrated**: Works with existing git workflows
-- **No global state**: Each repository is independent
-- **Automatic sync**: Git notes travel with commits
-
-### For Teams
-- **Natural collaboration**: Semantic data follows git workflow
-- **Branch awareness**: Semantic evolution per branch
-- **Zero infrastructure**: No separate servers needed
-- **Universal compatibility**: Works with any git hosting platform
-
-### For Organizations
-- **Scalable**: Each repository manages its own semantic data
-- **Secure**: Semantic data follows same security model as source code
-- **Traceable**: Complete audit trail through git history
-- **Maintainable**: No central database to manage
-
-## File Structure
-
-```
-svcs/
-├── svcs_repo_local.py       # Repository-local database and git notes
-├── svcs_repo_hooks.py       # Repository-local git hooks manager
-├── svcs_local_cli.py        # New CLI for repository-local operations
-├── .svcs/                   # Repository-local SVCS data (gitignored)
-│   ├── semantic.db          # Local semantic database
-│   └── logs/               # Analysis logs
-└── .git/
-    ├── hooks/
-    │   ├── post-commit      # Repository-local SVCS hook
-    │   ├── post-merge       # Repository-local SVCS hook
-    │   ├── post-checkout    # Repository-local SVCS hook
-    │   └── pre-push         # Repository-local SVCS hook
-    └── notes/
-        └── svcs-semantic    # Git notes containing semantic data
-```
-
-This new architecture successfully transforms SVCS from a single-user, global system into a true team collaboration tool that leverages git's native distributed model.
+This repository-local architecture provides a modern, git-integrated approach to semantic code analysis with powerful team collaboration features while maintaining excellent performance through local optimization.

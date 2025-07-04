@@ -516,7 +516,7 @@ curl http://127.0.0.1:8080/health
    
 2. **Pre-review analysis**
    ```bash
-   python3 svcs_ci.py --pr-analysis --target=main
+   python3 svcs_repo_ci.py --pr-analysis --target=main
    ```
 
 3. **Show semantic impact assessment**

@@ -29,15 +29,15 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 try:
     from svcs.centralized_utils import smart_init_svcs
     from svcs_repo_local import RepositoryLocalSVCS, RepositoryLocalDatabase, GitNotesManager
-    from svcs_repo_analyzer import RepositoryLocalSemanticAnalyzer
+    from svcs.semantic_analyzer import SVCSModularAnalyzer
     from svcs_repo_hooks import SVCSRepositoryManager
     from svcs_web_repository_manager import web_repository_manager
     NEW_ARCH_AVAILABLE = True
 except ImportError as e:
-    logging.warning(f"New architecture modules not available: {e}")
-    # Fallback to legacy imports
+    logging.warning(f"Architecture modules not available: {e}")
+    # Import from current architecture
     from svcs_repo_local import RepositoryLocalSVCS, RepositoryLocalDatabase, GitNotesManager
-    from svcs_repo_analyzer import RepositoryLocalSemanticAnalyzer
+    from svcs.semantic_analyzer import SVCSModularAnalyzer
     NEW_ARCH_AVAILABLE = False
 
 # Configure logging
@@ -50,7 +50,7 @@ class RepositoryManager:
     
     def __init__(self):
         self.repositories: Dict[str, RepositoryLocalSVCS] = {}
-        self.analyzers: Dict[str, RepositoryLocalSemanticAnalyzer] = {}
+        self.analyzers: Dict[str, SVCSModularAnalyzer] = {}
     
     def register_repository(self, repo_path: str, name: str = None) -> Dict[str, Any]:
         """Register a repository for SVCS tracking using new centralized architecture."""
@@ -84,7 +84,7 @@ class RepositoryManager:
                 
                 # Initialize SVCS instance for MCP operations
                 svcs = RepositoryLocalSVCS(repo_path)
-                analyzer = RepositoryLocalSemanticAnalyzer(repo_path)
+                analyzer = SVCSModularAnalyzer(repo_path)
                 
                 # Store references
                 self.repositories[repo_id] = svcs
@@ -98,7 +98,7 @@ class RepositoryManager:
                     "message": result
                 }
             else:
-                # Fallback to legacy initialization
+                # Use current architecture for initialization
                 svcs = RepositoryLocalSVCS(repo_path)
                 result = svcs.initialize_repository()
                 
@@ -106,7 +106,7 @@ class RepositoryManager:
                     return {"success": False, "error": result}
                 
                 # Initialize semantic analyzer
-                analyzer = RepositoryLocalSemanticAnalyzer(repo_path)
+                analyzer = SVCSModularAnalyzer(repo_path)
                 
                 # Store references
                 self.repositories[repo_id] = svcs
@@ -129,10 +129,50 @@ class RepositoryManager:
             try:
                 # Use new registry system
                 repos = web_repository_manager.discover_repositories()
-                return repos
+                
+                # Also get MCP-tracked repositories
+                mcp_repos = []
+                for repo_id, svcs in self.repositories.items():
+                    try:
+                        status = svcs.get_repository_status()
+                        mcp_repos.append({
+                            "repo_id": repo_id,
+                            "path": status.get("repository_path", repo_id),
+                            "name": Path(repo_id).name,
+                            "current_branch": status.get("current_branch", "unknown"),
+                            "events_count": status.get("semantic_events_count", 0),
+                            "commits_analyzed": status.get("commits_analyzed", 0),
+                            "initialized": status.get("initialized", False),
+                            "type": "repository-local"
+                        })
+                    except Exception as e:
+                        mcp_repos.append({
+                            "repo_id": repo_id,
+                            "path": repo_id,
+                            "name": Path(repo_id).name,
+                            "error": str(e)
+                        })
+                
+                # Combine and deduplicate by normalized path
+                all_repos = repos + mcp_repos
+                seen_paths = set()
+                deduplicated_repos = []
+                
+                for repo in all_repos:
+                    # Normalize path by resolving symlinks and making absolute
+                    normalized_path = str(Path(repo['path']).resolve())
+                    
+                    if normalized_path not in seen_paths:
+                        seen_paths.add(normalized_path)
+                        # Update the repo path to the normalized version
+                        repo['path'] = normalized_path
+                        deduplicated_repos.append(repo)
+                
+                return deduplicated_repos
+                
             except Exception as e:
                 logger.warning(f"Failed to list from registry: {e}")
-                # Fallback to MCP-tracked repositories
+                # Fallback to MCP-tracked repositories only
                 pass
         
         # Fallback to MCP-tracked repositories
@@ -142,7 +182,7 @@ class RepositoryManager:
                 status = svcs.get_repository_status()
                 repos.append({
                     "repo_id": repo_id,
-                    "path": status.get("repository_path", repo_id),
+                    "path": str(Path(repo_id).resolve()),  # Normalize path here too
                     "name": Path(repo_id).name,
                     "current_branch": status.get("current_branch", "unknown"),
                     "events_count": status.get("semantic_events_count", 0),
@@ -153,7 +193,7 @@ class RepositoryManager:
             except Exception as e:
                 repos.append({
                     "repo_id": repo_id,
-                    "path": repo_id,
+                    "path": str(Path(repo_id).resolve()),  # Normalize path here too
                     "name": Path(repo_id).name,
                     "error": str(e)
                 })
@@ -164,7 +204,7 @@ class RepositoryManager:
         repo_path = str(Path(repo_path).resolve())
         return self.repositories.get(repo_path)
     
-    def get_analyzer(self, repo_path: str) -> Optional[RepositoryLocalSemanticAnalyzer]:
+    def get_analyzer(self, repo_path: str) -> Optional[SVCSModularAnalyzer]:
         """Get a repository analyzer instance."""
         repo_path = str(Path(repo_path).resolve())
         return self.analyzers.get(repo_path)
@@ -344,7 +384,7 @@ class RepositoryLocalMCPServer:
             return {"error": f"Repository not found: {project_path}"}
         
         try:
-            events = analyzer.analyze_commit()
+            events = analyzer.analyze_commit_changes()
             return {
                 "success": True,
                 "events_detected": len(events),

@@ -85,7 +85,7 @@ def test_third_developer():
     print("=" * 50)
     
     # Use the current SVCS repository which has semantic notes
-    current_repo = "/Users/markomanninen/Documents/GitHub/svcs"
+    current_repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     test_dir = tempfile.mkdtemp(prefix="third_dev_")
     third_dev_repo = os.path.join(test_dir, "third_developer")
     

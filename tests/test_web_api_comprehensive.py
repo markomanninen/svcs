@@ -19,6 +19,9 @@ from pathlib import Path
 from typing import Dict, Any, List
 from datetime import datetime
 
+# Get repo root dynamically
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 class SVCSWebAPITester:
     """Comprehensive tester for SVCS Web API endpoints."""
     
@@ -475,7 +478,7 @@ class TestClass:
         self.measure_performance("pr_analysis",
             self.test_endpoint, "PR Analysis (Repository-Local)", "POST", "/api/ci/pr_analysis",
             {
-                "repository_path": "/Users/markomanninen/Documents/GitHub/svcs",
+                "repository_path": REPO_ROOT,
                 "target_branch": "main"
             })
         
@@ -483,7 +486,7 @@ class TestClass:
         self.measure_performance("quality_gate",
             self.test_endpoint, "Quality Gate (Repository-Local)", "POST", "/api/ci/quality_gate",
             {
-                "repository_path": "/Users/markomanninen/Documents/GitHub/svcs",
+                "repository_path": REPO_ROOT,
                 "strict": False
             })
     
@@ -495,7 +498,7 @@ class TestClass:
         self.measure_performance("natural_query",
             self.test_endpoint, "Natural Language Query", "POST", "/api/query/natural_language",
             {
-                "repository_path": "/Users/markomanninen/Documents/GitHub/svcs",
+                "repository_path": REPO_ROOT,
                 "query": "show recent changes"
             })
     
@@ -506,18 +509,18 @@ class TestClass:
         # Test notes sync
         self.measure_performance("notes_sync",
             self.test_endpoint, "Notes Sync", "POST", "/api/notes/sync",
-            {"repository_path": "/Users/markomanninen/Documents/GitHub/svcs"})
+            {"repository_path": REPO_ROOT})
         
         # Test notes fetch
         self.measure_performance("notes_fetch",
             self.test_endpoint, "Notes Fetch", "POST", "/api/notes/fetch",
-            {"repository_path": "/Users/markomanninen/Documents/GitHub/svcs"})
+            {"repository_path": REPO_ROOT})
         
         # Test show note
         self.measure_performance("notes_show",
             self.test_endpoint, "Show Note", "POST", "/api/notes/show",
             {
-                "repository_path": "/Users/markomanninen/Documents/GitHub/svcs",
+                "repository_path": REPO_ROOT,
                 "commit_hash": "HEAD"
             })
     
@@ -528,17 +531,17 @@ class TestClass:
         # Test database stats
         self.measure_performance("database_stats",
             self.test_endpoint, "Database Stats", "POST", "/api/cleanup/database_stats",
-            {"repository_path": "/Users/markomanninen/Documents/GitHub/svcs"})
+            {"repository_path": REPO_ROOT})
         
         # Test orphaned data cleanup
         self.measure_performance("orphaned_cleanup",
             self.test_endpoint, "Orphaned Data Cleanup", "POST", "/api/cleanup/orphaned_data",
-            {"repository_path": "/Users/markomanninen/Documents/GitHub/svcs"})
+            {"repository_path": REPO_ROOT})
         
         # Test unreachable commits cleanup
         self.measure_performance("unreachable_cleanup", 
             self.test_endpoint, "Unreachable Commits Cleanup", "POST", "/api/cleanup/unreachable_commits",
-            {"repository_path": "/Users/markomanninen/Documents/GitHub/svcs"})
+            {"repository_path": REPO_ROOT})
 
 
 def main():

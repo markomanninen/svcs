@@ -10,7 +10,7 @@ This test simulates a realistic collaborative development workflow:
             print(f"  ⚠️  SVCS init failed, trying direct script: {output}")
             # Try using the direct script approach
             success, _ = self.run_command(f"python3 svcs_repo_local.py --register {self.central_repo}", 
-                                        cwd="/Users/markomanninen/Documents/GitHub/svcs")epository with initial code
+                                        cwd="os.path.dirname(os.path.dirname(os.path.abspath(__file__)))")epository with initial code
 2. Two developers clone the repo
 3. Each developer works on different features
 4. SVCS semantic analysis is performed on their changes
@@ -247,7 +247,7 @@ pytest==6.2.4
             if not success:
                 print(f"  ⚠️  SVCS init failed for {dev_name}, trying direct script")
                 success, _ = self.run_command(f"python3 svcs_repo_local.py --register {repo_path}", 
-                                            cwd="/Users/markomanninen/Documents/GitHub/svcs")
+                                            cwd="os.path.dirname(os.path.dirname(os.path.abspath(__file__)))")
             if not success:
                 print(f"  ⚠️  SVCS initialization failed for {dev_name}, continuing without it")
         
@@ -365,7 +365,7 @@ def initialize_app():"""
             print(f"  ⚠️  Semantic analysis not available yet: {output}")
             # Try to process the commit manually if needed
             success, _ = self.run_command(f"python3 svcs_repo_local.py --analyze HEAD", 
-                                        cwd="/Users/markomanninen/Documents/GitHub/svcs")
+                                        cwd="os.path.dirname(os.path.dirname(os.path.abspath(__file__)))")
             if success:
                 print("  ✅ Semantic analysis completed for user management")
             else:
@@ -485,7 +485,7 @@ def start_api_server():
             print(f"  ⚠️  Semantic analysis not available yet: {output}")
             # Try to process the commit manually if needed
             success, _ = self.run_command(f"python3 svcs_repo_local.py --analyze HEAD", 
-                                        cwd="/Users/markomanninen/Documents/GitHub/svcs")
+                                        cwd="os.path.dirname(os.path.dirname(os.path.abspath(__file__)))")
             if success:
                 print("  ✅ Semantic analysis completed for API endpoints")
             else:
