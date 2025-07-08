@@ -767,6 +767,9 @@ This test validates:
 
 #### **Additional Test Categories**
 ```bash
+# GitHub collaboration workflow (can create new repos automatically!)
+python test_github_collaboration.py
+
 # Complete functionality test
 python test_complete_functionality.py
 

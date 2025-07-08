@@ -24,6 +24,45 @@ python test_bare_hooks.py
 
 **Expected output:** Should detect 20+ semantic events and pass all critical tests.
 
+### 🤝 `test_github_collaboration.py` - GitHub Collaboration Test
+**REAL-WORLD COLLABORATION TESTING**
+
+This test simulates realistic collaboration between two developers using SVCS with a GitHub remote repository.
+
+```bash
+cd tests
+python test_github_collaboration.py
+```
+
+**What it tests:**
+- Real GitHub repository integration (existing or new)
+- Two-developer workflow simulation
+- Semantic event synchronization via GitHub remote
+- SVCS pull/push operations with semantic data
+- Cross-developer semantic event sharing
+- Complete project lifecycle collaboration
+
+**Requirements:**
+- GitHub account
+- Git configured with credentials
+- Internet connection
+- For NEW repo creation: GitHub Personal Access Token (with 'repo' scope)
+- Python 'requests' library (for automatic repo creation)
+
+**Expected output:** Both developers should have synchronized semantic events and code changes.
+
+**Interactive workflow:**
+1. Choose between existing repository OR create new automatically
+2. For existing: provide repository URL
+3. For new: provide repository name and GitHub token
+4. Script simulates two developers making changes
+5. Verifies semantic event synchronization via GitHub
+6. Shows final comparison of semantic events across both developer workspaces
+
+**Repository options:**
+- **Option 1**: Existing repository (provide GitHub URL)
+- **Option 2**: NEW repository (automatically created with GitHub API)
+
 ### 🧪 `test_complete_functionality.py` - Comprehensive Feature Test
 Tests the complete SVCS feature set including all layers of semantic analysis.
 
@@ -136,6 +175,7 @@ When adding new tests:
 | Category | Purpose | Key Files |
 |----------|---------|-----------|
 | **Bare Repo** | Validate bare repository functionality | `test_bare_hooks.py` |
+| **GitHub Collaboration** | Real-world GitHub workflow testing | `test_github_collaboration.py` |
 | **Git Integration** | Test Git workflow integration | `test_git_integration.py`, `test_complete_git_integration.py` |
 | **CLI** | Command-line interface testing | `test_cli.py`, `test_cli_integration.py` |
 | **API** | Web API and endpoint testing | `test_api_comprehensive.py`, `test_web_api_comprehensive.py` |
