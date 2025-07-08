@@ -1,6 +1,7 @@
 # SVCS Screenshots & Demos Production Plan
+**Updated for Current SVCS Architecture - January 2025**
 
-This document provides detailed task-level instructions for creating screenshots and demo videos for the SVCS project. Each section is designed to be followed step-by-step during screen recording sessions, with Copilot providing real-time guidance.
+This document provides detailed task-level instructions for creating screenshots and demo videos for the SVCS project. Each section is designed to be followed step-by-step during screen recording sessions.
 
 ## 📋 Table of Contents
 
@@ -8,10 +9,10 @@ This document provides detailed task-level instructions for creating screenshots
 2. [Core Feature Demonstrations](#core-feature-demonstrations)
 3. [MCP Server Integration](#mcp-server-integration)
 4. [Web Dashboard & Analytics](#web-dashboard--analytics)
-5. [Project Management & Cleanup](#project-management--cleanup)
+5. [Enhanced Git Integration](#enhanced-git-integration)
 6. [Multi-Language Support Demos](#multi-language-support-demos)
 7. [AI-Powered Features](#ai-powered-features)
-8. [CLI Interface Demonstrations](#cli-interface-demonstrations)
+8. [Project Management & Tours](#project-management--tours)
 9. [Real-World Use Cases](#real-world-use-cases)
 10. [Production Quality Checks](#production-quality-checks)
 
@@ -20,17 +21,17 @@ This document provides detailed task-level instructions for creating screenshots
 ## 🔧 Setup & Preparation
 
 ### Pre-Recording Checklist
-- [ ] Clean terminal with readable font size (16-18pt)
-- [ ] VS Code with SVCS MCP server configured
+- [ ] Clean terminal with readable font size (16-18pt, recommend JetBrains Mono or Fira Code)
+- [ ] VS Code/Cursor with SVCS MCP server configured
 - [ ] Fresh clone of SVCS repository from GitHub
 - [ ] Virtual environment created and activated
-- [ ] All dependencies installed from requirements.txt AND requirements_web.txt
-- [ ] Google API key set for Layer 5b features (optional)
-- [ ] Clean browser for web dashboard demos
-- [ ] Screen recording software configured (1080p minimum)
-- [ ] Test project directory ready for demo
+- [ ] SVCS installed globally with `pip install -e .`
+- [ ] Google API key set for Layer 5b features (optional but recommended)
+- [ ] Clean browser for web dashboard demos (Chrome/Safari recommended)
+- [ ] Screen recording software configured (1080p minimum, 4K preferred)
+- [ ] Demo project directories prepared
 
-### Environment Setup Commands
+### Environment Setup Commands (Updated 2025)
 ```bash
 # Clone the SVCS repository
 git clone https://github.com/markomanninen/svcs.git
@@ -38,116 +39,143 @@ cd svcs
 
 # Create and activate virtual environment
 python3 -m venv venv
-source venv/bin/activate
+source venv/bin/activate  # or `venv\Scripts\activate` on Windows
 
-# Install MCP server (provides 'svcs' command)
-cd svcs_mcp
+# Install SVCS globally (creates 'svcs' command)
 pip install -e .
-cd ..
 
-# Install ALL dependencies (includes language parsers)
-pip install -r requirements.txt
+# Install enhanced language parsing (recommended)
+pip install tree-sitter tree-sitter-php esprima
 
-# Install web dashboard dependencies
-pip install -r requirements_web.txt
+# Install enhanced language parsing (recommended)
+pip install tree-sitter tree-sitter-php esprima
 
 # Set API key (optional, for Layer 5b AI features)
 export GOOGLE_API_KEY="your_key_here"
 
 # Verify installation
 svcs --help
-python3 svcs.py --help
+svcs --version
 
-# Note: svcs (MCP CLI) has full features, svcs.py has basic log/prune only
-# Use 'svcs' for all modern features, 'svcs.py' only for legacy log viewing
-
-# Verify web dashboard
-./start_dashboard.sh &
+# Verify web dashboard capability
+svcs web start --port 8080 &
 curl http://127.0.0.1:8080/health
+svcs web stop
 ```
+
+### ⚠️ Important Updates from Previous Documentation
+
+**What Changed:**
+- ✅ **Single Installation**: Just `pip install -e .` provides complete functionality
+- ✅ **Unified CLI**: All commands now use `svcs` (no more separate `svcs.py`)
+- ✅ **Centralized Architecture**: No file copying, git hooks call centralized installation
+- ✅ **Enhanced Project Management**: `svcs init-project` provides interactive tours
+- ✅ **Improved Web Dashboard**: Standalone server with advanced features
+- ✅ **Enhanced Git Integration**: `svcs pull`, `svcs push`, `svcs merge` with semantic sync
+
+**Removed/Deprecated:**
+- ❌ `svcs.py` separate CLI (now unified under `svcs`)
+- ❌ `./start_dashboard.sh` script (now `svcs web start`)
+- ❌ Manual file copying during setup
+- ❌ Separate MCP installation (integrated into main package)
 
 ---
 
 ## 🚀 Core Feature Demonstrations
 
-### Demo 1: Initial Project Setup and First Analysis
-**Duration**: 3-4 minutes
-**Objective**: Show complete installation and first-time project setup
+### Demo 1: Modern Project Setup and First Analysis
+**Duration**: 4-5 minutes
+**Objective**: Show streamlined installation and interactive project creation
 
 #### Recording Script:
-1. **Create and setup demo project**
+1. **Show SVCS installation verification**
    ```bash
-   mkdir demo_project && cd demo_project
-   git init
+   svcs --help
+   svcs --version
    ```
+   - **Narration**: "SVCS provides a unified CLI with all features integrated"
 
-2. **Register project with SVCS**
+2. **Create new project with interactive tour**
    ```bash
-   svcs init --name "Demo Project" .
+   svcs init-project DemoApp
    ```
-   - **Narration**: "SVCS registers the project and sets up git hooks automatically"
+   - **Narration**: "SVCS includes an interactive tour for new users"
+   - Follow the interactive prompts
+   - Show the guided creation of sample code
+   - Demonstrate the commit and analysis process
 
-3. **Create initial code files**
-   ```python
-   # Create test.py
-   def greet(name):
-       return f"Hello, {name}!"
-   
-   class Calculator:
-       def add(self, a, b):
-           return a + b
-   ```
-
-4. **Make first commit and show analysis**
+3. **Explore initial analysis results**
    ```bash
-   git add test.py
-   git commit -m "Initial implementation"
+   svcs status
+   svcs events --limit 10
    ```
-   - **Narration**: "Watch SVCS automatically analyze the semantic changes"
+   - **Screenshot point**: Rich terminal output with semantic events
 
-5. **Query the semantic history**
+4. **Show SVCS configuration**
    ```bash
-   svcs search --project . --limit 10
+   svcs config list
+   cat .svcs/config.json
    ```
-   - **Screenshot point**: Terminal output showing semantic events
 
 #### Expected Outputs to Highlight:
-- Git hook execution messages
+- Interactive tour interface with rich formatting
+- Automatic git repository initialization
+- Git hook installation messages
 - Semantic events detected (node_added, class_added, etc.)
-- Rich terminal formatting with colors and structure
+- SVCS configuration and database setup
 
 ---
 
-### Demo 2: 5-Layer Analysis in Action
-**Duration**: 4-5 minutes
-**Objective**: Demonstrate the progression through analysis layers
+### Demo 2: Enhanced Git Integration Workflow
+**Duration**: 5-6 minutes
+**Objective**: Demonstrate git-integrated semantic workflow
 
 #### Recording Script:
-1. **Show simple structural change (Layers 1-2)**
-   ```python
-   # Modify test.py - add parameter
-   def greet(name, greeting="Hello"):
-       return f"{greeting}, {name}!"
-   ```
+1. **Initialize existing repository**
    ```bash
-   git commit -am "Add greeting parameter"
-   svcs search --project . --limit 5
+   cd existing-project
+   svcs init
+   ```
+   - **Narration**: "SVCS integrates seamlessly with existing git repositories"
+
+2. **Make code changes and show enhanced commits**
+   ```python
+   # Modify existing function
+   def calculate_score(items, weights=None):
+       if not items:
+           raise ValueError("Items cannot be empty")
+       
+       if weights:
+           return sum(item * weight for item, weight in zip(items, weights))
+       return sum(items)
    ```
 
-2. **Show behavioral change (Layers 3-4)**
-   ```python
-   # Add error handling
-   def greet(name, greeting="Hello"):
-       if not name:
-           raise ValueError("Name cannot be empty")
-       return f"{greeting}, {name}!"
-   ```
+3. **Demonstrate enhanced git operations**
    ```bash
-   git commit -am "Add input validation"
-   svcs search --project . --limit 5
+   git add calculate.py
+   git commit -m "Add error handling and weighted calculation"
+   
+   # Show semantic sync
+   svcs sync
+   
+   # Enhanced git operations
+   svcs pull  # Enhanced pull with semantic notes
+   svcs push  # Enhanced push with semantic notes
    ```
 
-3. **Show pattern recognition (Layer 5a)**
+4. **Show semantic evolution tracking**
+   ```bash
+   svcs evolution "func:calculate_score"
+   svcs search --pattern-type error_handling
+   ```
+
+#### Screenshot Points:
+- Git hook execution during commit
+- Enhanced git operations output
+- Semantic evolution timeline
+- Pattern recognition results
+
+---
    ```python
    # Refactor to functional style
    def validate_input(name):
@@ -181,123 +209,195 @@ curl http://127.0.0.1:8080/health
 
 ## 🤖 MCP Server Integration
 
-### Demo 3: VS Code MCP Integration
-**Duration**: 4-5 minutes
-**Objective**: Show SVCS working with AI assistants in VS Code
+### Demo 3: VS Code/Cursor MCP Integration  
+**Duration**: 6-7 minutes
+**Objective**: Show SVCS working with AI assistants in modern IDEs
 
 #### Recording Script:
-1. **Show MCP configuration in VS Code**
-   - Open VS Code settings.json
-   - Show SVCS MCP server configuration
-
-2. **Demonstrate MCP tools in chat**
-   ```
-   @copilot list svcs projects
-   @copilot show recent activity for this project
-   @copilot find performance improvements in my code
-   @copilot analyze the current commit
+1. **Start SVCS MCP server**
+   ```bash
+   svcs mcp start --background
+   svcs mcp status
    ```
 
-3. **Show project management commands**
+2. **Show MCP configuration**
+   - Display VS Code/Cursor settings for SVCS MCP server
+   - Show connection status in IDE
+
+3. **Demonstrate semantic queries in IDE chat**
    ```
-   @copilot register this project with SVCS
-   @copilot get project statistics
+   @copilot Show me all registered SVCS projects
+   @copilot What semantic patterns were detected in the last week?
+   @copilot Get a summary of commit abc123 including all semantic events
+   @copilot How has the authenticate function evolved over time?
+   @copilot Find all performance optimizations in my code
+   @copilot Show recent architecture improvements with high confidence
    ```
 
-4. **Demonstrate semantic queries**
+4. **Show project management through AI**
    ```
-   @copilot search for error handling patterns
-   @copilot show functions that were added last week
-   @copilot find architecture improvements with high confidence
+   @copilot List all projects in SVCS registry
+   @copilot Get project statistics for current repository
+   @copilot Search for error handling patterns in this project
    ```
 
-5. **Show git integration queries**
+5. **Demonstrate git integration queries**
    ```
-   @copilot get changed files for commit abc123
-   @copilot show me the diff for commit abc123
-   @copilot summarize commit abc123
+   @copilot Get changed files for commit abc123
+   @copilot Show me the complete diff for that commit
+   @copilot What were the semantic events in the latest merge?
    ```
 
 #### Screenshot Points:
-- MCP server configuration
-- Chat interface with SVCS responses
-- Rich semantic data in AI responses
-- Git integration features
+- MCP server status and logs
+- IDE chat interface with SVCS responses
+- Rich semantic data visualization in AI responses
+- Project management through natural language
 
 ---
 
 ## 📊 Web Dashboard & Analytics
 
 ### Demo 4: Interactive Web Dashboard
-**Duration**: 6-7 minutes
-**Objective**: Show the full web interface for SVCS data exploration
+**Duration**: 8-10 minutes
+**Objective**: Show the comprehensive web interface for SVCS data exploration
 
 #### Recording Script:
-1. **Launch dashboard**
+1. **Launch modern web dashboard**
    ```bash
-   ./start_dashboard.sh
+   svcs web start --port 8080
    ```
    - Open browser to http://127.0.0.1:8080
+   - **Narration**: "The web dashboard provides a rich interface for semantic data exploration"
 
-2. **Show main features**
-   - Project selection dropdown
-   - Timeline visualization
-   - Event type filters
-   - Author filters
+2. **Show main dashboard features**
+   - Project selection and multi-project support
+   - Real-time analytics dashboard
+   - Interactive timeline visualizations
+   - Event type and confidence filtering
 
-3. **Demonstrate semantic search**
-   - Use pattern search for "performance"
-   - Filter by confidence scores
-   - Show event details
+3. **Demonstrate advanced search capabilities**
+   - Pattern search with confidence thresholds
+   - Author and time-based filtering
+   - Location-based filtering (files/directories)
+   - Quick action buttons for common patterns
 
-4. **Show git integration**
-   - Click on commit hash
-   - View changed files
-   - Show diff viewer
-   - Demonstrate commit summary
+4. **Show git integration features**
+   - Click on commit hashes to view details
+   - Interactive file change viewer with syntax highlighting
+   - Side-by-side diff viewer
+   - Commit summary with semantic context
 
-5. **Show analytics section**
+5. **Demonstrate analytics and evolution tracking**
    - Quality trends over time
    - Developer activity patterns
-   - Event type distribution
+   - Function/class evolution timelines
+   - Network diagrams of code dependencies
 
-6. **Demonstrate evolution tracking**
-   - Search for specific function
-   - Show evolution timeline
-   - Track method signature changes
+6. **Show project management interface**
+   - Multi-project dashboard
+   - Project health monitoring
+   - Database statistics and maintenance tools
 
 #### Screenshot Points:
-- Main dashboard overview
-- Semantic search results
-- Git integration features
-- Analytics visualizations
-- Evolution tracking interface
+- Main dashboard overview with analytics
+- Advanced search interface with filters
+- Git integration with syntax-highlighted diffs
+- Evolution tracking visualizations
+- Project management interface
 
 ---
 
 ### Demo 5: Static Dashboard Generation
-**Duration**: 2-3 minutes
-**Objective**: Show HTML dashboard generation for sharing/reports
+**Duration**: 3-4 minutes
+**Objective**: Show standalone dashboard creation for sharing/reports
 
 #### Recording Script:
 1. **Generate static dashboard**
    ```bash
-   python3 svcs_web.py
+   svcs dashboard --output comprehensive_report.html --theme light
    ```
 
-2. **Open generated HTML file**
-   - Show browser opening svcs_dashboard.html
-   - Navigate through interactive elements
+2. **Open and demonstrate static features**
+   - Show browser opening the standalone HTML file
+   - Navigate through interactive elements (no server needed)
+   - Demonstrate offline functionality
 
-3. **Highlight static features**
-   - Standalone HTML (no server needed)
-   - Interactive charts and graphs
-   - Timeline visualization
-   - Network diagrams
+3. **Show customization options**
+   ```bash
+   svcs dashboard --output dark_theme_report.html --theme dark
+   ```
+
+#### Expected Features:
+- Fully self-contained HTML with embedded CSS/JS
+- Interactive charts and graphs
+- Timeline visualizations
+- Network diagrams
 
 ---
 
-## 🗂️ Project Management & Cleanup
+## 🔄 Enhanced Git Integration
+
+### Demo 6: Advanced Git Workflow with Semantic Sync
+**Duration**: 6-7 minutes  
+**Objective**: Demonstrate enhanced git operations with automatic semantic synchronization
+
+#### Recording Script:
+1. **Setup collaborative scenario**
+   ```bash
+   # Setup remote repository simulation
+   git remote add origin <remote-url>
+   svcs config set auto-sync true
+   ```
+
+2. **Demonstrate enhanced git operations**
+   ```bash
+   # Enhanced pull with semantic notes sync
+   svcs pull
+   
+   # Make changes and enhanced push
+   echo "# New feature" >> feature.py
+   git add feature.py
+   git commit -m "Add new feature module"
+   svcs push origin main
+   ```
+
+3. **Show advanced merge operations**
+   ```bash
+   # Create and switch to feature branch
+   git checkout -b feature-auth
+   
+   # Make changes and commit
+   echo "class Auth: pass" >> auth.py
+   git add auth.py
+   git commit -m "Add authentication module"
+   
+   # Enhanced merge with semantic event transfer
+   git checkout main
+   svcs merge feature-auth
+   ```
+
+4. **Demonstrate semantic sync utilities**
+   ```bash
+   svcs sync-all  # Complete synchronization
+   svcs auto-fix  # Auto-detect and fix issues
+   svcs merge-resolve  # Resolve post-merge semantic issues
+   ```
+
+5. **Show configuration management**
+   ```bash
+   svcs config list
+   svcs config set auto-sync false
+   svcs config get auto-sync
+   ```
+
+#### Screenshot Points:
+- Enhanced git operation outputs
+- Semantic event transfer during merge
+- Configuration management interface
+- Sync status and resolution tools
+
+---
 
 ### Demo 6: Project Lifecycle Management
 **Duration**: 5-6 minutes
@@ -739,4 +839,17 @@ videos/
 └── gifs/           # Animated highlights
 ```
 
-This plan provides comprehensive, step-by-step guidance for creating professional screenshots and demos of all SVCS features. Each section can be followed independently during screen recording sessions, with Copilot providing real-time assistance and verification.
+This updated plan provides comprehensive, step-by-step guidance for creating professional screenshots and demos of all current SVCS features (January 2025). Each section reflects the modern unified CLI architecture, centralized installation, enhanced git integration, and production-ready functionality.
+
+**Key Updates in This Revision:**
+- ✅ Updated for unified `svcs` CLI command
+- ✅ Reflects centralized installation architecture  
+- ✅ Includes enhanced git integration features
+- ✅ Documents modern web dashboard capabilities
+- ✅ Shows current MCP server integration
+- ✅ Demonstrates interactive project tours
+- ✅ Includes AI-powered features and conversational interface
+- ✅ Updated command syntax and examples
+- ✅ Realistic timing estimates for current feature set
+
+Each demo section can be followed independently during screen recording sessions to create high-quality promotional and educational content that accurately represents SVCS's production capabilities.
