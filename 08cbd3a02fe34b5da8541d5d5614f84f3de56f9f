@@ -1,0 +1,485 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-07-08T10:45:10.146623",
+  "semantic_events": [
+    {
+      "node_id": "func:analyze_commit",
+      "location": "svcs/analyzers/comprehensive_analyzer.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "added 1 new literals",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:setup_centralized_git_hooks",
+      "location": "svcs/centralized_utils.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "control_flow_changed",
+      "details": "if count changed from 1 to 2",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:smart_init_svcs",
+      "location": "svcs/centralized_utils.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "logical_operator_usage_changed",
+      "details": "added Or",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:smart_init_svcs",
+      "location": "svcs/centralized_utils.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "added 1 new literals",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:setup_centralized_git_hooks",
+      "location": "svcs/centralized_utils.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "function_complexity_changed",
+      "details": "Function complexity increased from 5 to 6",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:setup_centralized_git_hooks",
+      "location": "svcs/centralized_utils.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "logical_operator_usage_changed",
+      "details": "added And",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:setup_centralized_git_hooks",
+      "location": "svcs/centralized_utils.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "added 3 new literals",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "code_complication",
+      "node_id": "complexity:svcs/centralized_utils.py",
+      "location": "svcs/centralized_utils.py",
+      "details": "Code complexity significantly increased",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.8,
+      "reasoning": "Complexity increased from 47 to 57",
+      "impact": "Potential maintainability concern",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:cmd_process_hook",
+      "location": "svcs/commands/events.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "control_flow_changed",
+      "details": "for count changed from 0 to 2; if count changed from 12 to 24",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:cmd_process_hook",
+      "location": "svcs/commands/events.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "internal_call_added",
+      "details": "Now calls: c.strip, commit_range.split, len, line.split, line.strip, ref_name.replace, ref_name.startswith",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:cmd_process_hook",
+      "location": "svcs/commands/events.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "comprehension_usage_changed",
+      "details": "list comprehensions: 0\u21921",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:cmd_process_hook",
+      "location": "svcs/commands/events.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "function_complexity_changed",
+      "details": "Function complexity increased from 14 to 28",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:cmd_process_hook",
+      "location": "svcs/commands/events.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "functional_programming_adopted",
+      "details": "Functional programming patterns introduced",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:cmd_process_hook",
+      "location": "svcs/commands/events.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "attribute_access_changed",
+      "details": "Attribute access patterns changed",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:cmd_process_hook",
+      "location": "svcs/commands/events.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "subscript_access_changed",
+      "details": "Subscript access patterns changed",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:cmd_process_hook",
+      "location": "svcs/commands/events.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "assignment_pattern_changed",
+      "details": "Assignment patterns changed",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:cmd_process_hook",
+      "location": "svcs/commands/events.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "augmented_assignment_changed",
+      "details": "Augmented assignment patterns changed",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:cmd_process_hook",
+      "location": "svcs/commands/events.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "binary_operator_usage_changed",
+      "details": "added Add",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:cmd_process_hook",
+      "location": "svcs/commands/events.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "unary_operator_usage_changed",
+      "details": "added Not",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:cmd_process_hook",
+      "location": "svcs/commands/events.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "comparison_operator_usage_changed",
+      "details": "added Eq, GtE",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:cmd_process_hook",
+      "location": "svcs/commands/events.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "added 28 new literals",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:cmd_process_hook",
+      "location": "svcs/commands/events.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "numeric_literal_usage_changed",
+      "details": "added 4 new literals",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:cmd_process_hook",
+      "location": "svcs/commands/events.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "boolean_literal_usage_changed",
+      "details": "added 3 True",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "file:overall",
+      "location": "svcs/commands/events.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "functional_programming_adopted",
+      "details": "Functional programming patterns introduced at file level",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "code_complication",
+      "node_id": "complexity:svcs/commands/events.py",
+      "location": "svcs/commands/events.py",
+      "details": "Code complexity significantly increased",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.8,
+      "reasoning": "Complexity increased from 51 to 77",
+      "impact": "Potential maintainability concern",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:_query_llm",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "control_flow_changed",
+      "details": "if count changed from 5 to 13",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:_parse_llm_response",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "internal_call_removed",
+      "details": "No longer calls: print",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:_query_llm",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "function_complexity_changed",
+      "details": "Function complexity increased from 13 to 21",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:_query_llm",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "removed 12 literals",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "func:_parse_llm_response",
+      "location": "svcs/layers/layer5b_true_ai.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "removed 1 literals",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "file_added",
+      "node_id": "file:tests/test_bare_hooks.py",
+      "location": "tests/test_bare_hooks.py",
+      "details": "New file created",
+      "layer": "1",
+      "layer_description": "File and module structure analysis",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "dependency_added",
+      "node_id": "module:tests/test_bare_hooks.py",
+      "location": "tests/test_bare_hooks.py",
+      "details": "Added dependencies: os, pathlib, re, shutil, subprocess, sys, tempfile, time",
+      "layer": "1",
+      "layer_description": "File and module structure analysis",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:test_bare_repository_hooks",
+      "location": "tests/test_bare_hooks.py",
+      "details": "New func added",
+      "layer": "1",
+      "layer_description": "File and module structure analysis",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:run_command",
+      "location": "tests/test_bare_hooks.py",
+      "details": "New func added",
+      "layer": "1",
+      "layer_description": "File and module structure analysis",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "node_id": "file:overall",
+      "location": "tests/test_bare_hooks.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "functional_programming_adopted",
+      "details": "Functional programming patterns introduced at file level",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:gcd",
+      "location": "tests/test_bare_hooks.py",
+      "details": "Possible method extraction: gcd",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:test_bare_repository_hooks",
+      "location": "tests/test_bare_hooks.py",
+      "details": "Possible method extraction: test_bare_repository_hooks",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:divide",
+      "location": "tests/test_bare_hooks.py",
+      "details": "Possible method extraction: divide",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:lcm",
+      "location": "tests/test_bare_hooks.py",
+      "details": "Possible method extraction: lcm",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:multiply",
+      "location": "tests/test_bare_hooks.py",
+      "details": "Possible method extraction: multiply",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:factorial",
+      "location": "tests/test_bare_hooks.py",
+      "details": "Possible method extraction: factorial",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:fibonacci",
+      "location": "tests/test_bare_hooks.py",
+      "details": "Possible method extraction: fibonacci",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:__init__",
+      "location": "tests/test_bare_hooks.py",
+      "details": "Possible method extraction: __init__",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:subtract",
+      "location": "tests/test_bare_hooks.py",
+      "details": "Possible method extraction: subtract",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:is_prime",
+      "location": "tests/test_bare_hooks.py",
+      "details": "Possible method extraction: is_prime",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:run_command",
+      "location": "tests/test_bare_hooks.py",
+      "details": "Possible method extraction: run_command",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:add",
+      "location": "tests/test_bare_hooks.py",
+      "details": "Possible method extraction: add",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    },
+    {
+      "event_type": "code_complication",
+      "node_id": "complexity:tests/test_bare_hooks.py",
+      "location": "tests/test_bare_hooks.py",
+      "details": "Code complexity significantly increased",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.8,
+      "reasoning": "Complexity increased from 0 to 114",
+      "impact": "Potential maintainability concern",
+      "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "08cbd3a02fe34b5da8541d5d5614f84f3de56f9f"
+}
