@@ -497,3 +497,662 @@ Fast-forward
 ✅ SVCS successfully synchronized semantic events via GitHub
 ✅ Both developers have complete project history
 ✅ Code and semantic data are properly synchronized
+
+*****
+
+python tests/test_github_collaboration.py
+🚀 Starting SVCS GitHub Collaboration Test
+This test requires:
+  - GitHub account
+  - Git configured with your credentials
+  - Internet connection
+
+💡 OPTIONS:
+   1. Use existing GitHub repository (provide URL)
+   2. Create NEW repository automatically (provide name + GitHub token)
+
+🔑 For option 2, you'll need a GitHub Personal Access Token with 'repo' scope
+   Get one at: GitHub → Settings → Developer settings → Personal access tokens
+
+Do you want to continue? (y/n): y
+🤝 SVCS GitHub Collaboration Test
+==================================================
+This test simulates two developers collaborating on a project using SVCS
+with semantic synchronization via GitHub remote repository.
+
+🔗 GitHub Repository Setup
+==================================================
+Do you want to:
+1. Use existing repository (I'll provide the URL)
+2. Create NEW repository automatically (I'll provide the name)
+Choice (1/2): 1
+
+📋 Using existing repository
+💡 This can be any existing GitHub repository (empty or with content)
+Enter GitHub repository URL: https://github.com/markomanninen/svcs-test-12347.git
+
+📍 Using repository: https://github.com/markomanninen/svcs-test-12347.git
+📋 Repository type: Existing
+
+🧪 Test environment: /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy
+👨‍💻 Developer 1 workspace: developer1
+👩‍💻 Developer 2 workspace: developer2
+
+============================================================
+📱 PHASE 1: Developer 1 Initial Setup
+============================================================
+📂 current: git clone https://github.com/markomanninen/svcs-test-12347.git /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1
+  ⚠️  Cloning into '/var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1'...
+
+⚙️  Setting up git configuration in developer1
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1: git config --global user.name
+  ✅ Marko Manninen
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1: git config --global user.email
+  ✅ elonmedia@gmail.com
+
+🔧 Initializing SVCS for Developer 1...
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1: /Users/markomanninen/Documents/GitHub/svcs/.venv/bin/python3 /Users/markomanninen/Documents/GitHub/svcs/svcs/cli.py init
+  ✅ 🔧 Initializing SVCS for repository: /private/var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1
+📄 Created centralized SVCS configuration
+✅ Installed centralized git hooks: post-commit, post-merge, post-checkout, post-receive, update
+📝 Repository registered in central registry: unnamed
+🔄 Checking for existing semantic notes...
+✅ Existing semantic notes fetched from origin
+✅ Imported 81 semantic events from notes
+✅ SVCS initialized for repository at /private/var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1 (branch: main)
+
+📝 Developer1 creating code changes (iteration 1)
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1: git add .
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1: git status --porcelain
+  ✅ M  app.py
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1: git commit -m Add web application with user management
+  ✅ [main 459db20] Add web application with user management
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+  ⚠️  🔍 SVCS: Analyzing commit for semantic events...
+🔍 SVCS: Analyzing semantic changes...
+ℹ️ SVCS: No semantic changes detected
+✅ Created initial commit
+
+📤 Developer 1 pushing to GitHub...
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1: python -m svcs push origin main
+  ✅ 🔄 Enhanced git push with semantic notes sync...
+📤 Step 1: Syncing semantic notes to remote...
+✅ Semantic notes synced to remote
+📤 Step 2: Pushing code changes to remote...
+✅ Git push completed successfully
+🎉 Enhanced push completed! Code and semantic notes are now on remote.
+✅ Developer 1 setup complete!
+
+============================================================
+👩‍💻 PHASE 2: Developer 2 Joins Project
+============================================================
+📂 current: git clone https://github.com/markomanninen/svcs-test-12347.git /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer2
+  ⚠️  Cloning into '/var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer2'...
+
+⚙️  Setting up git configuration in developer2
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer2: git config --global user.name
+  ✅ Marko Manninen
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer2: git config --global user.email
+  ✅ elonmedia@gmail.com
+
+🔧 Initializing SVCS for Developer 2...
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer2: python -m svcs init
+  ✅ 🔧 Initializing SVCS for repository: /private/var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer2
+📄 Created centralized SVCS configuration
+✅ Installed centralized git hooks: post-commit, post-merge, post-checkout, post-receive, update
+📝 Repository registered in central registry: unnamed
+🔄 Checking for existing semantic notes...
+✅ Existing semantic notes fetched from origin
+✅ Imported 81 semantic events from notes
+✅ SVCS initialized for repository at /private/var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer2 (branch: main)
+
+📊 Checking semantic events synchronization...
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer2: python -m svcs events
+  ✅ 📊 Semantic Events (20 found)
+============================================================
+🔍 file_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 file:monitoring.py @ monitoring.py
+   💬 New file created
+   🧠 None
+
+🔍 dependency_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 module:monitoring.py @ monitoring.py
+   💬 Added dependencies: database, datetime, functools, logging, psutil, threading, time
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:get_health_status @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:__init__ @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:register_check @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:wrapper @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:get_system_stats @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:run_check @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:decorator @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 class:HealthChecker @ monitoring.py
+   💬 New class added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:record_metric @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 class:PerformanceMonitor @ monitoring.py
+   💬 New class added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:timing_decorator @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:database_health_check @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 refactoring_extract_method
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:run_check @ monitoring.py
+   💬 Possible method extraction: run_check
+   🧠 New function detected with increased code size
+
+🔍 refactoring_extract_method
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:wrapper @ monitoring.py
+   💬 Possible method extraction: wrapper
+   🧠 New function detected with increased code size
+
+🔍 refactoring_extract_method
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:register_check @ monitoring.py
+   💬 Possible method extraction: register_check
+   🧠 New function detected with increased code size
+
+🔍 refactoring_extract_method
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:get_health_status @ monitoring.py
+   💬 Possible method extraction: get_health_status
+   🧠 New function detected with increased code size
+
+🔍 refactoring_extract_method
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:timing_decorator @ monitoring.py
+   💬 Possible method extraction: timing_decorator
+   🧠 New function detected with increased code size
+
+🔍 refactoring_extract_method
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:record_metric @ monitoring.py
+   💬 Possible method extraction: record_metric
+   🧠 New function detected with increased code size
+✅ Developer 2 found 20 semantic events from Developer 1
+✅ Developer 2 setup complete!
+
+============================================================
+🤝 PHASE 3: Collaborative Development
+============================================================
+
+📝 Developer2 creating code changes (iteration 2)
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer2: git add .
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer2: git status --porcelain
+  ✅ M  auth.py
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer2: git commit -m Add authentication and security features by Developer2
+  ✅ [main 1a038e9] Add authentication and security features by Developer2
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+  ⚠️  🔍 SVCS: Analyzing commit for semantic events...
+🔍 SVCS: Analyzing semantic changes...
+ℹ️ SVCS: No semantic changes detected
+✅ Developer 2 committed changes
+
+📤 Developer 2 pushing changes with SVCS...
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer2: python -m svcs push origin main
+  ✅ 🔄 Enhanced git push with semantic notes sync...
+📤 Step 1: Syncing semantic notes to remote...
+✅ Semantic notes synced to remote
+📤 Step 2: Pushing code changes to remote...
+✅ Git push completed successfully
+🎉 Enhanced push completed! Code and semantic notes are now on remote.
+
+📥 Developer 1 pulling changes...
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1: python -m svcs pull
+  ✅ 🔄 Enhanced git pull with semantic data sync...
+📥 Step 1: Pulling latest changes from remote...
+✅ Git pull completed successfully
+ℹ️  Updating 459db20..1a038e9
+Fast-forward
+ auth.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+📥 Step 2: Fetching semantic notes from remote...
+✅ Semantic notes fetched successfully
+📊 Step 3: Importing semantic events from notes...
+ℹ️  No new semantic events to import
+🔀 Step 4: Processing merge operations...
+ℹ️  No merge operations needed
+🎉 Enhanced pull completed! Code and semantic data are now synchronized.
+
+📝 Developer1 creating code changes (iteration 3)
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1: git add .
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1: git status --porcelain
+  ✅ M  database.py
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1: git commit -m Add database layer and API improvements by Developer1
+  ✅ [main 1901df4] Add database layer and API improvements by Developer1
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+  ⚠️  🔍 SVCS: Analyzing commit for semantic events...
+🔍 SVCS: Analyzing semantic changes...
+ℹ️ SVCS: No semantic changes detected
+✅ Developer 1 committed more changes
+
+📤 Developer 1 pushing new changes with SVCS...
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1: python -m svcs push origin main
+  ✅ 🔄 Enhanced git push with semantic notes sync...
+📤 Step 1: Syncing semantic notes to remote...
+✅ Semantic notes synced to remote
+📤 Step 2: Pushing code changes to remote...
+✅ Git push completed successfully
+🎉 Enhanced push completed! Code and semantic notes are now on remote.
+
+📥 Developer 2 pulling latest changes...
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer2: python -m svcs pull
+  ✅ 🔄 Enhanced git pull with semantic data sync...
+📥 Step 1: Pulling latest changes from remote...
+✅ Git pull completed successfully
+ℹ️  Updating 1a038e9..1901df4
+Fast-forward
+ database.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+📥 Step 2: Fetching semantic notes from remote...
+✅ Semantic notes fetched successfully
+📊 Step 3: Importing semantic events from notes...
+ℹ️  No new semantic events to import
+🔀 Step 4: Processing merge operations...
+ℹ️  No merge operations needed
+🎉 Enhanced pull completed! Code and semantic data are now synchronized.
+
+📝 Developer2 creating code changes (iteration 4)
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer2: git add .
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer2: git status --porcelain
+  ✅ M  monitoring.py
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer2: git commit -m Add monitoring and health checking by Developer2
+  ✅ [main 29cadd1] Add monitoring and health checking by Developer2
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+  ⚠️  🔍 SVCS: Analyzing commit for semantic events...
+🔍 SVCS: Analyzing semantic changes...
+ℹ️ SVCS: No semantic changes detected
+✅ Developer 2 committed final changes
+
+📤 Developer 2 pushing final changes with SVCS...
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer2: python -m svcs push origin main
+  ✅ 🔄 Enhanced git push with semantic notes sync...
+📤 Step 1: Syncing semantic notes to remote...
+✅ Semantic notes synced to remote
+📤 Step 2: Pushing code changes to remote...
+✅ Git push completed successfully
+🎉 Enhanced push completed! Code and semantic notes are now on remote.
+
+============================================================
+📊 PHASE 4: Final Verification
+============================================================
+
+📥 Developer 1 final sync...
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1: python -m svcs pull
+  ✅ 🔄 Enhanced git pull with semantic data sync...
+📥 Step 1: Pulling latest changes from remote...
+✅ Git pull completed successfully
+ℹ️  Updating 1901df4..29cadd1
+Fast-forward
+ monitoring.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+📥 Step 2: Fetching semantic notes from remote...
+✅ Semantic notes fetched successfully
+📊 Step 3: Importing semantic events from notes...
+ℹ️  No new semantic events to import
+🔀 Step 4: Processing merge operations...
+ℹ️  No merge operations needed
+🎉 Enhanced pull completed! Code and semantic data are now synchronized.
+
+📊 Final semantic events comparison:
+
+👨‍💻 Developer 1 semantic events:
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1: python -m svcs events
+  ✅ 📊 Semantic Events (20 found)
+============================================================
+🔍 file_added
+   📝 9d8fd161 | main | Marko Manninen | 2025-07-08 17:20:49
+   🎯 file:app.py @ app.py
+   💬 New file created
+   🧠 None
+
+🔍 dependency_added
+   📝 9d8fd161 | main | Marko Manninen | 2025-07-08 17:20:49
+   🎯 module:app.py @ app.py
+   💬 Added dependencies: flask, logging
+   🧠 None
+
+🔍 node_added
+   📝 9d8fd161 | main | Marko Manninen | 2025-07-08 17:20:49
+   🎯 func:get_user @ app.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 9d8fd161 | main | Marko Manninen | 2025-07-08 17:20:49
+   🎯 class:UserManager @ app.py
+   💬 New class added
+   🧠 None
+
+🔍 node_added
+   📝 9d8fd161 | main | Marko Manninen | 2025-07-08 17:20:49
+   🎯 func:__init__ @ app.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 9d8fd161 | main | Marko Manninen | 2025-07-08 17:20:49
+   🎯 func:create_user @ app.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 9d8fd161 | main | Marko Manninen | 2025-07-08 17:20:49
+   🎯 func:health_check @ app.py
+   💬 New func added
+   🧠 None
+
+🔍 functional_programming_adopted
+   📝 9d8fd161 | main | Marko Manninen | 2025-07-08 17:20:49
+   🎯 file:overall @ app.py
+   💬 Functional programming patterns introduced at file level
+   🧠 None
+
+🔍 refactoring_extract_method
+   📝 9d8fd161 | main | Marko Manninen | 2025-07-08 17:20:49
+   🎯 func:__init__ @ app.py
+   💬 Possible method extraction: __init__
+   🧠 New function detected with increased code size
+
+🔍 refactoring_extract_method
+   📝 9d8fd161 | main | Marko Manninen | 2025-07-08 17:20:49
+   🎯 func:health_check @ app.py
+   💬 Possible method extraction: health_check
+   🧠 New function detected with increased code size
+
+🔍 refactoring_extract_method
+   📝 9d8fd161 | main | Marko Manninen | 2025-07-08 17:20:49
+   🎯 func:create_user @ app.py
+   💬 Possible method extraction: create_user
+   🧠 New function detected with increased code size
+
+🔍 refactoring_extract_method
+   📝 9d8fd161 | main | Marko Manninen | 2025-07-08 17:20:49
+   🎯 func:get_user @ app.py
+   💬 Possible method extraction: get_user
+   🧠 New function detected with increased code size
+
+🔍 code_complication
+   📝 9d8fd161 | main | Marko Manninen | 2025-07-08 17:20:49
+   🎯 complexity:app.py @ app.py
+   💬 Code complexity significantly increased
+   🧠 Complexity increased from 0 to 11
+
+🔍 file_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:48
+   🎯 file:monitoring.py @ monitoring.py
+   💬 New file created
+   🧠 None
+
+🔍 dependency_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:48
+   🎯 module:monitoring.py @ monitoring.py
+   💬 Added dependencies: database, datetime, functools, logging, psutil, threading, time
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:48
+   🎯 func:get_health_status @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:48
+   🎯 func:__init__ @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:48
+   🎯 func:register_check @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:48
+   🎯 func:wrapper @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:48
+   🎯 func:get_system_stats @ monitoring.py
+   💬 New func added
+   🧠 None
+  📈 Total events: 20
+
+👩‍💻 Developer 2 semantic events:
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer2: python -m svcs events
+  ✅ 📊 Semantic Events (20 found)
+============================================================
+🔍 file_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 file:monitoring.py @ monitoring.py
+   💬 New file created
+   🧠 None
+
+🔍 dependency_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 module:monitoring.py @ monitoring.py
+   💬 Added dependencies: database, datetime, functools, logging, psutil, threading, time
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:get_health_status @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:__init__ @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:register_check @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:wrapper @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:get_system_stats @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:run_check @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:decorator @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 class:HealthChecker @ monitoring.py
+   💬 New class added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:record_metric @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 class:PerformanceMonitor @ monitoring.py
+   💬 New class added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:timing_decorator @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 node_added
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:database_health_check @ monitoring.py
+   💬 New func added
+   🧠 None
+
+🔍 refactoring_extract_method
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:run_check @ monitoring.py
+   💬 Possible method extraction: run_check
+   🧠 New function detected with increased code size
+
+🔍 refactoring_extract_method
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:wrapper @ monitoring.py
+   💬 Possible method extraction: wrapper
+   🧠 New function detected with increased code size
+
+🔍 refactoring_extract_method
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:register_check @ monitoring.py
+   💬 Possible method extraction: register_check
+   🧠 New function detected with increased code size
+
+🔍 refactoring_extract_method
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:get_health_status @ monitoring.py
+   💬 Possible method extraction: get_health_status
+   🧠 New function detected with increased code size
+
+🔍 refactoring_extract_method
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:timing_decorator @ monitoring.py
+   💬 Possible method extraction: timing_decorator
+   🧠 New function detected with increased code size
+
+🔍 refactoring_extract_method
+   📝 e6b1b00a | main | Marko Manninen | 2025-07-08 17:20:55
+   🎯 func:record_metric @ monitoring.py
+   💬 Possible method extraction: record_metric
+   🧠 New function detected with increased code size
+  📈 Total events: 20
+
+📁 Files in Developer 1 repo: ['auth.py', 'monitoring.py', 'database.py', 'app.py']
+📁 Files in Developer 2 repo: ['auth.py', 'monitoring.py', 'database.py', 'app.py']
+
+============================================================
+🎉 COLLABORATION TEST RESULTS
+============================================================
+✅ Developer 1 has 20 semantic events
+✅ Developer 2 has 20 semantic events
+✅ Semantic events synchronized between developers
+✅ Core application files synchronized
+✅ Authentication module synchronized
+
+============================================================
+🔍 PHASE 5: Semantic Notes Remote Verification
+============================================================
+
+🔍 Verifying semantic notes sync to GitHub...
+
+💾 Checking local semantic notes...
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1: git notes --ref=svcs-semantic list
+  ✅ 3fd1672081790102f34febf5843a90c89228ed22 9d8fd161f8da706ad3ca39f3629c7ae8b4dfd3f7
+27b934cb96882af23a953785a70a18cda7158727 af6e173fb3c2f3a37d5264981783537df21b1f02
+9bed75ddd0edb104de1be695dfbec0ff5ada4755 c27179c57531ee21fe073dceb077a669a7cd6637
+703217773d5332431638ce6b9b1e7ed6fe5db1c4 e6b1b00a3ec51819afa52dfe98d73ab759bbb81f
+  ✅ Found 4 local semantic notes
+
+📡 Checking remote refs for semantic notes...
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1: git ls-remote origin refs/notes/*
+  ✅ d0f9a3844e03496fd05723194e5ade7acf0d5554   refs/notes/svcs-semantic
+  ✅ Found 1 remote notes refs:
+    📋 d0f9a3844e03496fd05723194e5ade7acf0d5554 refs/notes/svcs-semantic
+
+🔄 Testing note fetch from remote...
+📂 /var/folders/1t/xzhjq5g1027f9mtd62jc31xh0000gp/T/tmpf_8fi9dy/developer1: git fetch origin +refs/notes/*:refs/notes/*
+  ✅ Notes are fetchable from remote
+
+📊 Semantic Notes Verification Summary:
+==================================================
+✅ Local notes: 4 notes found
+✅ Remote refs: 1 refs found
+✅ Fetchability: Notes can be fetched from remote
+
+🎉 ✅ SEMANTIC NOTES VERIFICATION PASSED!
+✅ Semantic notes are properly synchronized to GitHub
+
+🎉 ✅ GITHUB COLLABORATION TEST PASSED!
+✅ SVCS successfully synchronized semantic events via GitHub
+✅ Both developers have complete project history
+✅ Code and semantic data are properly synchronized
+✅ Semantic notes are available on GitHub remote
