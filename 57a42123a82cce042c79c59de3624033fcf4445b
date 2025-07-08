@@ -1,0 +1,35 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-07-08T08:21:46.942007",
+  "semantic_events": [
+    {
+      "node_id": "func:cmd_process_hook",
+      "location": "svcs/commands/events.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "control_flow_changed",
+      "details": "if count changed from 13 to 12",
+      "commit_hash": "57a42123a82cce042c79c59de3624033fcf4445b"
+    },
+    {
+      "node_id": "func:cmd_process_hook",
+      "location": "svcs/commands/events.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "function_complexity_changed",
+      "details": "Function complexity decreased from 15 to 14",
+      "commit_hash": "57a42123a82cce042c79c59de3624033fcf4445b"
+    },
+    {
+      "node_id": "func:cmd_process_hook",
+      "location": "svcs/commands/events.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "added 2 new literals; removed 10 literals",
+      "commit_hash": "57a42123a82cce042c79c59de3624033fcf4445b"
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "57a42123a82cce042c79c59de3624033fcf4445b"
+}
