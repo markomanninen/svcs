@@ -17,6 +17,7 @@ SVCS tracks semantic meaning in code changes beyond traditional line-by-line dif
 - [Module Documentation](#-module-documentation)
 - [MCP Server Interface](#-mcp-server-interface)
 - [Development Setup](#-development-setup)
+- [Testing](#-testing)
 - [System Requirements](#-system-requirements)
 - [Limitations](#-limitations)
 - [Future Development](#-future-development)
@@ -668,7 +669,7 @@ svcs mcp restart --background          # Restart to apply changes
 
 #### **🔧 Available MCP Tools (11 Total)**
 
-When the MCP server is running, these tools are available in Claude/VS Code:
+When the MCP server is running, these tools are available in Claude or VS Code:
 
 **📊 Project Overview & Statistics**
 - **list_projects** - List all registered SVCS repositories
@@ -737,9 +738,61 @@ pip install -e svcs_mcp/
 python3 -m pytest tests/
 python3 tests/test_svcs_complete_5layer.py
 
+# For comprehensive validation (see tests/README.md for more options)
+python3 tests/test_bare_hooks.py
+
 # Install development dependencies
 pip install black pytest pre-commit
 ```
+
+## 🧪 **Testing**
+
+SVCS includes comprehensive test coverage for all major functionality. The test suite is located in the `tests/` directory.
+
+### **Key Test Scripts**
+
+#### **Primary Validation Test**
+```bash
+# Comprehensive bare repository hooks test (RECOMMENDED)
+cd tests
+python test_bare_hooks.py
+```
+
+This test validates:
+- Bare repository initialization and hook installation  
+- Semantic analysis triggering during git push operations
+- Semantic event generation and storage
+- Automatic semantic notes retrieval in fresh clones
+- Database persistence and content verification
+
+#### **Additional Test Categories**
+```bash
+# Complete functionality test
+python test_complete_functionality.py
+
+# Git integration test  
+python test_git_integration.py
+
+# CLI interface test
+python test_cli_integration.py
+
+# MCP server functionality
+python test_mcp_initialization.py
+```
+
+### **Test Environment Setup**
+```bash
+# Install test dependencies (if not already installed)
+pip install -r requirements.txt
+
+# For tests that might hang, use timeout
+gtimeout 60s python test_bare_hooks.py
+```
+
+### **Test Documentation**
+For detailed information about all available tests, test categories, and troubleshooting:
+
+📖 **[See tests/README.md](tests/README.md)** for complete testing documentation.
 
 ## 🖥️ **System Requirements**
 

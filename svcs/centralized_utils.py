@@ -19,7 +19,8 @@ if str(parent_dir) not in sys.path:
 
 def smart_init_svcs(repo_path: Path):
     """Smart SVCS initialization with auto-detection."""
-    git_exists = (repo_path / '.git').exists()
+    # Check for both regular and bare git repositories
+    git_exists = (repo_path / '.git').exists() or (repo_path / 'HEAD').exists()
     svcs_exists = (repo_path / '.svcs').exists()
     has_files = any(repo_path.iterdir()) if repo_path.exists() else False
     
@@ -135,7 +136,14 @@ def init_svcs_centralized(repo_path: Path):
 
 def setup_centralized_git_hooks(repo_path: Path):
     """Set up git hooks that reference centralized SVCS installation."""
-    hooks_dir = repo_path / '.git' / 'hooks'
+    # Determine if this is a bare repository
+    if (repo_path / 'HEAD').exists() and not (repo_path / '.git').exists():
+        # Bare repository - hooks are directly in hooks/
+        hooks_dir = repo_path / 'hooks'
+    else:
+        # Regular repository - hooks are in .git/hooks/
+        hooks_dir = repo_path / '.git' / 'hooks'
+    
     hooks_dir.mkdir(exist_ok=True)
     
     # Get path to centralized SVCS installation
@@ -174,11 +182,18 @@ fi
 """,
             'post-receive': f"""#!/bin/bash
 # SVCS Post-Receive Hook - For bare repositories
-echo "� SVCS: Post-receive hook executed"
+if [ -d ".svcs" ]; then
+    {svcs_cmd} process-hook post-receive "$@" || echo "⚠️ SVCS: Post-receive processing failed"
+fi
 """,
             'update': f"""#!/bin/bash
 # SVCS Update Hook - For handling note updates in bare repos
-echo "🔄 SVCS: Update hook executed"
+if [ -d ".svcs" ]; then
+    # Only process if this is a notes update, not a branch update
+    if [[ "$1" == refs/notes/* ]]; then
+        {svcs_cmd} process-hook update "$1" "$2" "$3" || echo "⚠️ SVCS: Update processing failed"
+    fi
+fi
 """
         }
         

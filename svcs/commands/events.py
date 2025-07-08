@@ -172,5 +172,101 @@ def cmd_process_hook(args):
             print(f"❌ SVCS: Pre-push processing error: {e}")
             # Don't fail the push if semantic notes sync fails
         
+    elif hook_name.endswith('post-receive'):
+        # Post-receive: analyze pushed commits in bare repository
+        try:
+            import sys
+            from svcs_repo_local import RepositoryLocalSVCS
+            from svcs.semantic_analyzer import SVCSModularAnalyzer
+            
+            print("📥 SVCS: Processing pushed commits...")
+            svcs = RepositoryLocalSVCS(str(repo_path))
+            analyzer = SVCSModularAnalyzer(str(repo_path))
+            
+            total_analyzed = 0
+            
+            # Read stdin for pushed refs (format: old-sha new-sha ref-name)
+            for line in sys.stdin:
+                line = line.strip()
+                if not line:
+                    continue
+                    
+                parts = line.split()
+                if len(parts) >= 3:
+                    old_sha, new_sha, ref_name = parts[0], parts[1], parts[2]
+                    
+                    # Only process branch updates (not tags or notes)
+                    if ref_name.startswith('refs/heads/'):
+                        branch_name = ref_name.replace('refs/heads/', '')
+                        
+                        # Get list of new commits
+                        if old_sha == '0000000000000000000000000000000000000000':
+                            # New branch - analyze recent commits (limit to avoid overwhelming)
+                            commit_range = f"{new_sha} --max-count=10"
+                        else:
+                            # Updated branch - analyze new commits
+                            commit_range = f"{old_sha}..{new_sha}"
+                        
+                        # Get commit hashes
+                        result = subprocess.run(['git', 'rev-list', '--reverse'] + commit_range.split(), 
+                                              cwd=repo_path, capture_output=True, text=True, check=True)
+                        commit_hashes = [c.strip() for c in result.stdout.split('\n') if c.strip()]
+                        
+                        # Analyze each new commit
+                        branch_analyzed = 0
+                        for commit_hash in commit_hashes:
+                            try:
+                                semantic_events = analyzer.analyze_commit_changes(commit_hash)
+                                if semantic_events:
+                                    stored_count, _ = svcs.analyze_and_store_commit(commit_hash, semantic_events)
+                                    branch_analyzed += stored_count
+                            except Exception as e:
+                                print(f"⚠️ SVCS: Failed to analyze commit {commit_hash[:8]}: {e}")
+                        
+                        if branch_analyzed > 0:
+                            print(f"✅ SVCS: Analyzed {branch_analyzed} semantic events for {branch_name}")
+                        total_analyzed += branch_analyzed
+            
+            if total_analyzed == 0:
+                print("ℹ️ SVCS: No semantic changes detected in pushed commits")
+            else:
+                print(f"✅ SVCS: Total {total_analyzed} semantic events analyzed")
+                
+        except subprocess.CalledProcessError as e:
+            print(f"❌ SVCS: Git command failed: {e}")
+        except Exception as e:
+            print(f"❌ SVCS: Post-receive processing error: {e}")
+    
+    elif hook_name.endswith('update'):
+        # Update: handle reference updates (especially semantic notes)
+        try:
+            # Get arguments: ref-name old-sha new-sha
+            if len(args.hook_args) >= 3:
+                ref_name = args.hook_args[0]
+                old_sha = args.hook_args[1]
+                new_sha = args.hook_args[2]
+                
+                # Handle semantic notes updates
+                if ref_name == 'refs/notes/svcs-semantic':
+                    print("📝 SVCS: Processing semantic notes update...")
+                    
+                    from svcs_repo_local import RepositoryLocalSVCS
+                    svcs = RepositoryLocalSVCS(str(repo_path))
+                    
+                    # Import updated semantic events from notes
+                    imported_count = svcs.import_semantic_events_from_notes()
+                    if imported_count > 0:
+                        print(f"✅ SVCS: Imported {imported_count} semantic events from notes")
+                    else:
+                        print("ℹ️ SVCS: No new semantic events to import")
+                else:
+                    # For other refs, just acknowledge
+                    print(f"🔄 SVCS: Reference {ref_name} updated ({old_sha[:8]}..{new_sha[:8]})")
+            else:
+                print("⚠️ SVCS: Update hook called with insufficient arguments")
+                
+        except Exception as e:
+            print(f"❌ SVCS: Update processing error: {e}")
+        
     else:
         print(f"⚠️ SVCS: Unknown hook type: {hook_name}")

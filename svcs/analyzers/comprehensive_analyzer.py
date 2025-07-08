@@ -128,8 +128,9 @@ class ComprehensiveAnalyzer:
         
         try:
             # Get changed files in the commit
+            # Use --root flag to handle initial commits properly
             result = subprocess.run(
-                ['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', commit_hash],
+                ['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', '--root', commit_hash],
                 cwd=repo_path,
                 capture_output=True,
                 text=True,

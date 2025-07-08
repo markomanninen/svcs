@@ -272,11 +272,10 @@ If no significant semantic changes are detected, return: []
     def _query_llm(self, prompt: str, filepath: str = "") -> str:
         """Query LLM with fallback to multiple models."""
         
-        # Display which file is being analyzed
+        # Only show analysis message if debug mode or we have working AI
         file_display = f" for {filepath}" if filepath else ""
-        print(f"🔍 Analyzing{file_display}...")
-        
         if self.config['debug']:
+            print(f"🔍 Analyzing{file_display}...")
             print(f"🐛 Debug: Prompt length: {len(prompt)} characters")
             print(f"🐛 Debug: Available providers: {self._get_available_providers()}")
         
@@ -287,15 +286,17 @@ If no significant semantic changes are detected, return: []
                 genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
                 model = genai.GenerativeModel(self.config['google_model'])
                 response = model.generate_content(prompt)
-                print(f"✅ Gemini analysis successful{file_display}")
+                if self.config['debug']:
+                    print(f"✅ Gemini analysis successful{file_display}")
                 return response.text
             except Exception as e:
-                print(f"⚠️ Gemini analysis failed{file_display}, trying fallbacks...")
+                pass  # Silent fallback
         
         # Try OpenAI (fallback)
         if os.getenv('OPENAI_API_KEY'):
             try:
-                print(f"🔄 Trying OpenAI {self.config['openai_model']}{file_display}...")
+                if self.config['debug']:
+                    print(f"🔄 Trying OpenAI {self.config['openai_model']}{file_display}...")
                 import openai
                 client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
                 response = client.chat.completions.create(
@@ -308,15 +309,17 @@ If no significant semantic changes are detected, return: []
                     temperature=0.1,
                     timeout=self.config['ai_timeout']
                 )
-                print(f"✅ OpenAI analysis successful{file_display}")
+                if self.config['debug']:
+                    print(f"✅ OpenAI analysis successful{file_display}")
                 return response.choices[0].message.content
             except Exception as e:
-                print(f"⚠️ OpenAI analysis failed{file_display}, trying more fallbacks...")
+                pass  # Silent fallback
         
         # Try Anthropic Claude (fallback)
         if os.getenv('ANTHROPIC_API_KEY'):
             try:
-                print(f"🔄 Trying Anthropic {self.config['anthropic_model']}{file_display}...")
+                if self.config['debug']:
+                    print(f"🔄 Trying Anthropic {self.config['anthropic_model']}{file_display}...")
                 import anthropic
                 client = anthropic.Anthropic()
                 response = client.messages.create(
@@ -327,14 +330,16 @@ If no significant semantic changes are detected, return: []
                         {"role": "user", "content": prompt}
                     ]
                 )
-                print(f"✅ Anthropic analysis successful{file_display}")
+                if self.config['debug']:
+                    print(f"✅ Anthropic analysis successful{file_display}")
                 return response.content[0].text
             except Exception as e:
-                print(f"⚠️ Anthropic analysis failed{file_display}, trying local models...")
+                pass  # Silent fallback
         
         # Try Ollama local models (fallback - no API key needed)
         try:
-            print(f"🔄 Trying Ollama {self.config['ollama_model']}{file_display}...")
+            if self.config['debug']:
+                print(f"🔄 Trying Ollama {self.config['ollama_model']}{file_display}...")
             import ollama
             
             # Configure Ollama client if custom URL is provided
@@ -349,12 +354,11 @@ If no significant semantic changes are detected, return: []
                     model=self.config['ollama_model'],
                     prompt=prompt
                 )
-                print(f"✅ Ollama analysis successful{file_display}")
+                if self.config['debug']:
+                    print(f"✅ Ollama analysis successful{file_display}")
                 return response['response']
             except Exception as e:
-                print(f"⚠️ Ollama generate failed{file_display}: {e}")
-                
-                # Try alternative Ollama chat format
+                # Silently try alternative Ollama chat format
                 try:
                     response = ollama_client.chat(
                         model=self.config['ollama_model'],
@@ -362,17 +366,18 @@ If no significant semantic changes are detected, return: []
                             {"role": "user", "content": prompt}
                         ]
                     )
-                    print(f"✅ Ollama chat analysis successful{file_display}")
+                    if self.config['debug']:
+                        print(f"✅ Ollama chat analysis successful{file_display}")
                     return response['message']['content']
                 except Exception as e2:
-                    print(f"⚠️ Ollama chat also failed{file_display}: {e2}")
+                    pass  # Silent fallback
                     
         except ImportError:
-            print(f"⚠️ Ollama library not available{file_display}")
+            pass  # Ollama library not available - silent fallback
         except Exception as e:
-            print(f"⚠️ Ollama failed{file_display}: {e}")
+            pass  # Ollama failed - silent fallback
         
-        print(f"⚠️ All AI analysis methods failed{file_display}")
+        # All AI analysis methods failed - silent fallback
         return "[]"
     
     def _parse_llm_response(self, response: str, filepath: str) -> List[LLMChange]:
@@ -401,9 +406,7 @@ If no significant semantic changes are detected, return: []
                         changes.append(change)
             
         except (json.JSONDecodeError, ValueError) as e:
-            print(f"Warning: Could not parse LLM response: {e}")
-            
-            # Fallback: try to extract key information with regex
+            # Silent fallback: try to extract key information with regex
             changes.extend(self._fallback_parse_response(response, filepath))
         
         return changes
