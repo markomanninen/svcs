@@ -1,148 +1,96 @@
-# SVCS - Semantic Version Control System
+# SVCS - Semantic Versi## 🌟 Key Features
 
-SVCS tracks semantic meaning in code changes beyond traditional line-by-line diffs. It uses a 5-layer analysis system combining Abstract Syntax Tree (AST) analysis with optional AI-powered semantic understanding.
+- **🧠 5-Layer Semantic Analysis** - From AST parsing to AI-powered pattern recognition
+- **📁 Repository-Local Architecture** - Each repository maintains its own semantic database  
+- **🤝 Git-Integrated Team Collaboration** - Semantic data shared automatically via git notes
+- **🌍 Multi-Language Support** - Python (complete), PHP (modern), JavaScript/TypeScript (AST-based)
+- **🌐 Interactive Web Dashboard** - Modern browser-based interface for exploring semantic data
+- **🤖 Model Context Protocol (MCP) Server** - AI assistant integration for VS Code, Claude, etc.
+- **⚡ Real-Time Git Hooks** - Automatic semantic analysis on every commit
+- **💬 Conversational AI Interface** - Natural language queries about code evolution
+- **🛠️ Complete CLI Toolkit** - Rich command-line interface for all features
+- **🔧 Project Management** - Multi-project support with centralized registrySystem
+
+SVCS is a **repository-local semantic analysis system** that tracks the meaning of code changes beyond traditional line-by-line diffs. It uses a 5-layer analysis system combining Abstract Syntax Tree (AST) analysis with optional AI-powered semantic understanding.
+
+🚀 **Production Ready** - Complete system with CLI, web dashboard, MCP server, and team collaboration features.
 
 ## Table of Contents
 
 - [Key Features](#-key-features)
 - [Why SVCS? Value Proposition](#-why-svcs-value-proposition)
-- [Use Cases & Creative Applications](#-use-cases--creative-applications)
 - [5-Layer Analysis Architecture](#-5-layer-analysis-architecture)
 - [Language Support](#-language-support)
 - [Installation](#-installation)
 - [Quick Start](#-quick-start)
-- [Usage Guide](#-usage-guide)
-- [Project Management & Cleanup](#-project-management--cleanup)
-- [Database Maintenance](#-database-maintenance)
-- [Module Documentation](#-module-documentation)
+- [Complete CLI Reference](#-complete-cli-reference)
+- [Web Dashboard](#-web-dashboard)
 - [MCP Server Interface](#-mcp-server-interface)
+- [Advanced Features](#-advanced-features)
 - [Development Setup](#-development-setup)
-- [Testing](#-testing)
 - [System Requirements](#-system-requirements)
 - [Limitations](#-limitations)
-- [Future Development](#-future-development)
+- [Contributing](#-contributing)
 
-## 🌟 **Key Features**
+## 🌟 Key Features
 
 - **🧠 5-Layer Semantic Analysis** - From AST parsing to optional AI understanding
-- **🤖 Model Context Protocol (MCP) Server** - Modern AI integration architecture
-- **🌍 Multi-Language Support** - Python (complete), PHP (modern with Tree-sitter), JavaScript/TypeScript (AST-based)
-- **� Git-Integrated Team Architecture** - Repository-local semantic data with git notes for collaboration
-- **🌿 Branch-Aware Analysis** - Track semantic changes across branches with comparison tools
-- **⚡ Real-Time Git Hooks** - Automatic semantic analysis on commit, merge, and branch switch
-- **�💬 Conversational Interface** - Natural language queries about code evolution
-- **📊 Analytics & Visualization** - Web dashboard and quality insights
-- **🔧 CI/CD Integration** - Automated quality gates and PR analysis
-- **🗂️ Multi-Repository Management** - Track multiple projects with unified interface
+- **📁 Repository-Local Architecture** - Each repository maintains its own semantic database
+- **🤝 Git-Integrated Team Collaboration** - Semantic data shared via git notes
+- **🌍 Multi-Language Support** - Python (complete), PHP (modern), JavaScript/TypeScript (AST-based)
+- **🤖 Model Context Protocol (MCP) Server** - AI assistant integration for VS Code, Claude, etc.
+- **⚡ Real-Time Git Hooks** - Automatic semantic analysis on commit
+- **💬 Conversational AI Interface** - Natural language queries about code evolution
+- **📊 Interactive Web Dashboard** - Visualize semantic patterns and evolution
+- **� Complete CLI Toolkit** - Rich command-line interface for all features
 
-## 🚀 **Why SVCS? Value Proposition**
+## 🚀 Why SVCS? Value Proposition
 
-### **Beyond Traditional Git: The Semantic Gap**
+### Beyond Traditional Git: The Semantic Gap
 
 While Git tracks *what* changed (lines, files), SVCS understands *what those changes mean*:
 
 - **Git shows**: `+def calculate_score(items): return sum(x.value * x.weight for x in items)`
 - **SVCS reveals**: "Added weighted calculation algorithm, introduced functional programming pattern, improved mathematical abstraction"
 
-### **Complementing AI Code Review Tools**
+### Perfect for AI-Enhanced Development
 
-Modern AI agents (GitHub Copilot, Claude, GPT) excel at immediate code analysis but lack **temporal context**. SVCS provides the missing historical dimension:
+Modern AI assistants (GitHub Copilot, Claude, GPT) excel at immediate code analysis but lack **temporal context**. SVCS provides the missing historical dimension:
 
-| **Traditional AI Agents** | **SVCS + AI Agents** |
-|----------------------------|----------------------|
+| **Traditional AI Tools** | **SVCS + AI Tools** |
+|---------------------------|----------------------|
 | ✅ Analyze current code | ✅ **+ Track evolution patterns** |
 | ✅ Suggest improvements | ✅ **+ Learn from past decisions** |
 | ✅ Detect code smells | ✅ **+ Identify improvement trends** |
 | ❌ No historical context | ✅ **Rich semantic history** |
-| ❌ No team learning | ✅ **Rich semantic insights** |
+| ❌ No team learning | ✅ **Team semantic intelligence** |
 
-### **The SVCS Advantage**
+### Use Cases
 
-1. **Semantic Memory**: Your codebase remembers why changes were made
-2. **Pattern Recognition**: Identify successful architectural decisions over time
-3. **Personal Code Intelligence**: Learn from your own coding evolution
-4. **AI Enhancement**: Provide LLM agents with rich context for better assistance
-5. **Educational Tool**: Deep insights into programming evolution and best practices
-
-## 🎯 **Use Cases & Creative Applications**
-
-### **🤖 AI Agent Enhancement**
-SVCS + MCP provides rich semantic context to AI assistants, enabling them to understand your project's evolution patterns and provide context-aware suggestions based on historical changes.
-
-### **📚 Code Learning & Investigation**
-- **Programming Skill Development**: Track your coding evolution and identify improvement patterns
-- **Code Archaeology**: Investigate complex bugs by tracing when complexity was introduced
-- **Personal Knowledge Base**: Build semantic understanding of your codebase evolution
-
-### **🔗 Git Integration**
-Every semantic event links to its exact git commit, enabling complete traceability. Query specific commits, view diffs, and understand the relationship between semantic changes and actual code changes.
-
-### **🤝 Team Collaboration** (Planned - Git-Integrated)
-SVCS will integrate directly with git's team workflow for natural semantic collaboration:
-
-#### **Feature Branch → PR → Merge Workflow**
-1. **Developer creates feature branch** → inherits semantic context from main branch
-2. **Commits with semantic analysis** → analysis stored as git notes attached to commits  
-3. **Pushes feature branch** → git notes automatically included, semantic data available for review
-4. **Code review enhanced** → reviewers can query semantic changes: `svcs diff-branches main..feature/auth`
-5. **PR merge to main** → semantic data automatically merges, team gets integrated semantic history
-6. **Team pulls main** → everyone automatically receives shared semantic intelligence
-
-#### **SVCS-Enhanced Code Review**
-```bash
-# Reviewer queries semantic impact of PR:
-svcs search --branch feature/user-auth --event-type "security_improvement"
-svcs semantic-impact feature/user-auth    # Show semantic changes this PR introduces
-svcs merge-preview feature/user-auth      # Preview semantic impact of merge
-
-# Compare semantic evolution between branches:
-svcs diff-branches main..feature/user-auth
-# + Added: class:AuthService (security enhancement)
-# + Added: function:validateToken (error handling improvement)  
-# ~ Modified: class:UserController (performance optimization)
-```
-
-#### **Team Semantic Intelligence**
-```bash
-# After merge, query collective team intelligence:
-svcs team-activity --since "1 week"       # Recent semantic changes across team
-svcs cross-developer-evolution class:AuthService  # Track class evolution across developers
-svcs search --author "Alice" --event-type "performance_optimization"
-```
-
-**Benefits**: Semantic data follows exact same workflow as source code through git's collaboration mechanisms - no separate infrastructure needed, works with any git hosting platform.
-
-### **🏢 Enterprise Applications**
-- **Code Review Enhancement**: Find exemplary refactoring examples for training
-- **Technical Debt Management**: Track debt accumulation and improvement patterns  
-- **CI/CD Integration**: Semantic-aware testing and deployment risk assessment
-- **Quality Gates**: Block deployments based on semantic complexity spikes
-
-### **💡 Research & Analytics**
-- **Pattern Recognition**: Identify successful architectural decisions over time
-- **Code Metrics**: Track "semantic velocity" and architectural coherence
-- **Multi-Project Insights**: Compare evolution patterns across your personal projects
-
+- **🎯 Code Learning & Investigation** - Track your coding evolution and identify improvement patterns
+- **🔗 Complete Git Integration** - Every semantic event links to its exact git commit for full traceability
+- **🤝 Team Collaboration** - Git-integrated workflow for natural semantic data sharing
+- **🏢 Enterprise Applications** - Code review enhancement, technical debt management, CI/CD integration
 ## 🧠 5-Layer Analysis Architecture
 
-SVCS employs a multi-layer analysis system:
+SVCS employs a multi-layer analysis system that provides increasingly sophisticated semantic understanding:
 
-### **Core Layers (1-4): Structural & Syntactic Analysis**
+### Layers 1-4: Structural & Syntactic Analysis
 - **Layer 1-2**: AST parsing and structural changes (functions, classes, imports)
 - **Layer 3-4**: Behavioral patterns (control flow, data access, complexity)
 
-### **Layer 5a: Rule-Based Pattern Recognition** 
+### Layer 5a: Rule-Based Pattern Recognition
 - Pattern detection using programmatic rules
 - Identifies architectural and quality improvements
 - Detects error handling patterns and functional programming adoption
 
-### **Layer 5b: LLM-Powered Analysis** 🤖
+### Layer 5b: LLM-Powered Analysis 🤖
 - **Requires Google Gemini API key** (`GOOGLE_API_KEY` environment variable)
 - **Intelligent Filtering**: Only analyzes non-trivial, complex changes
-- **Without API key**: SVCS uses layers 1-5a only
+- **Without API key**: SVCS uses layers 1-5a (still very powerful!)
 - Detects abstract concepts like:
   - Architecture improvements and design pattern adoption
-  - Performance optimizations and maintainability enhancements  
+  - Performance optimizations and maintainability enhancements
   - Code readability improvements and abstraction refinements
   - Error handling strategy changes
 
@@ -155,11 +103,11 @@ SVCS employs a multi-layer analysis system:
 | **JavaScript** | `.js` | **AST-based** | esprima AST parser + regex fallback | ES6+ classes, arrow functions, async/await, inheritance changes, method signatures, constructor parameters, import/export tracking |
 | **TypeScript** | `.ts` | **AST-based** | esprima AST parser + regex fallback | Same as JavaScript with TypeScript syntax support |
 
-### **Parser Architecture & Robustness**
+### Parser Architecture & Robustness
 
 SVCS uses a **multi-tier fallback system** for maximum reliability:
 
-#### **PHP Analysis**
+#### PHP Analysis
 1. **Primary**: Tree-sitter PHP parser (supports PHP 7.4+ and 8.x)
    - Modern features: enums, attributes, typed properties, union types
    - Accurate AST-based parsing with full semantic understanding
@@ -167,7 +115,7 @@ SVCS uses a **multi-tier fallback system** for maximum reliability:
    - Maintains compatibility with older codebases
 3. **Final Fallback**: Regex parsing for basic structural detection
 
-#### **JavaScript/TypeScript Analysis** 
+#### JavaScript/TypeScript Analysis
 1. **Primary**: esprima AST parser with tolerance mode
    - Full ES6+ syntax support including classes, arrow functions, async/await
    - Detailed parameter and inheritance tracking
@@ -175,7 +123,14 @@ SVCS uses a **multi-tier fallback system** for maximum reliability:
 2. **Fallback**: Enhanced regex parsing with modern JS patterns
    - Comprehensive pattern matching for various function declarations
 
-#### **Detected Change Types by Language**
+#### Detected Change Types by Language
+
+**Python (Complete Support)**:
+- ✅ Functions, classes, methods, properties, decorators
+- ✅ Async/await patterns, generators, comprehensions
+- ✅ Type annotations, inheritance tracking
+- ✅ Import statements, exception handling
+- ✅ 31+ distinct semantic event types
 
 **PHP (Modern Support)**:
 - ✅ Classes, interfaces, traits, enums (PHP 8.1+)
@@ -195,804 +150,677 @@ SVCS uses a **multi-tier fallback system** for maximum reliability:
 - ✅ TypeScript syntax compatibility
 - ✅ Variable scope and declaration changes
 
-**Note**: Python provides the most comprehensive semantic analysis. PHP and JavaScript now offer robust structural and semantic change detection suitable for production use in git hooks.
+> **Note**: Python provides the most comprehensive semantic analysis. PHP and JavaScript offer robust structural and semantic change detection suitable for production use in git hooks.
+## 🛠️ Installation
 
-## 🛠️ **Installation**
+**Requirements**: Python 3.8+, Git, Unix-based system (Linux, macOS, or Windows WSL)
 
-**Note**: SVCS uses symbolic links for git hooks and is designed for Unix-based systems (Linux, macOS). Windows support requires WSL.
-
-### **1. Install with Virtual Environment** (Recommended)
+### 1. Install SVCS
 
 ```bash
 # Clone the repository
 git clone https://github.com/markomanninen/svcs.git
 cd svcs
 
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows WSL: venv/bin/activate
-
-# Install MCP server
-cd svcs_mcp
+# Install SVCS globally (creates 'svcs' command)
 pip install -e .
 
-# Install enhanced language parsing dependencies
+# Install enhanced language parsing (optional but recommended)
 pip install tree-sitter tree-sitter-php esprima
 
-# Install core SVCS dependencies
-pip install -r ../requirements.txt
-
-# Install AI analysis dependencies (optional)
-pip install -r requirements_ai.txt
-
 # Verify installation
-cd ..
 svcs --help
 ```
 
-### **2. Configuration Setup**
+### 2. Optional: AI Analysis Setup
 
-SVCS uses environment variables for configuration. Set up your environment:
+For Layer 5b AI analysis, set up Google Gemini API:
 
 ```bash
-# Copy the example environment file
-cp .env.example .env
+# Get your API key from: https://makersuite.google.com/app/apikey
+export GOOGLE_API_KEY="your-api-key"
 
-# Edit .env with your API keys and preferences
-nano .env  # or use your preferred editor
+# Or add to your shell profile (.bashrc, .zshrc, etc.)
+echo 'export GOOGLE_API_KEY="your-api-key"' >> ~/.bashrc
 ```
 
-**Required for AI Analysis (Layer 5b)**:
-- `GOOGLE_API_KEY` - Google Gemini API key (primary)
-- `OPENAI_API_KEY` - OpenAI API key (fallback)  
-- `ANTHROPIC_API_KEY` - Anthropic Claude API key (fallback)
-- `OLLAMA_MODEL` - Local Ollama model (fallback, default: deepseek-r1:8b)
+**Note**: Without the API key, SVCS still provides powerful semantic analysis through layers 1-5a.
 
-**Optional Configuration**:
-- `AI_COMPLEXITY_THRESHOLD` - Minimum complexity for AI analysis (default: 2)
-- `AI_TIMEOUT` - AI analysis timeout in seconds (default: 30)
-- `SVCS_DEBUG` - Enable debug output (default: false)
+## 🚀 Quick Start
 
-See `.env.example` for complete configuration options.
-
-### **3. Configure MCP Server in VS Code**
-
-Add to your VS Code `settings.json`:
-
-```json
-{
-  "mcp": {
-    "servers": {
-      "svcs": {
-        "command": "python3",
-        "args": ["/path/to/svcs/svcs_mcp/mcp_server.py"],
-        "env": {}
-      }
-    }
-  }
-}
-```
-
-> **💡 Note**: For enhanced PHP and JavaScript/TypeScript support, ensure you have installed the language parsing dependencies: `tree-sitter`, `tree-sitter-php`, and `esprima`. Without these, SVCS will fall back to basic regex parsing.
-
-## 🚀 **Quick Start**
-
-### **Option A: Repository-Local SVCS** (Recommended for New Projects)
-
-**Git-integrated team collaboration with repository-local storage:**
+### 1. Initialize SVCS in Your Repository
 
 ```bash
 # Navigate to your git project
 cd your-project
 
-# Initialize repository-local SVCS (includes git hooks)
-python3 svcs_local_cli.py init
+# Initialize SVCS (installs git hooks automatically)
+svcs init
 
-# Make changes and commit (automatic semantic analysis)
+# For new projects, SVCS can initialize git too
+svcs init --git-init
+```
+
+### 2. Use Your Normal Git Workflow
+
+```bash
+# Make changes to your code
 echo "def new_function(): pass" >> code.py
+
+# Commit as usual - SVCS analyzes automatically
 git add code.py
 git commit -m "Add new function"
 # 🔍 SVCS: Analyzing semantic changes...
-# ✅ SVCS: Stored 2 semantic events
-# 📝 SVCS: Semantic data saved as git notes
-
-# View semantic evolution
-python3 svcs_local_cli.py events --limit 5
-
-# Sync semantic data with team (push/pull git notes)
-python3 svcs_local_cli.py notes sync
-git push origin main  # Semantic notes automatically included
+# ✅ SVCS: Detected semantic events stored locally and in git notes
 ```
 
-### **Option B: Global SVCS**
-
-**Traditional global database approach:**
+### 3. Explore Your Code Evolution
 
 ```bash
-# Navigate to your git project
-cd your-project
+# View recent semantic changes
+svcs events --limit 10
 
-# Register with SVCS MCP server
-svcs init --name "My Project" .
+# Search for specific patterns
+svcs search "authentication"
 
-# OR take an interactive tour to initialize a new project
-svcs init-project
-# This will guide you through creating a project, e.g., 'svcs_demo_project'.
-# It sets up SVCS, creates sample files, and makes an initial commit.
-
-# For non-interactive setup (e.g., scripting):
-svcs init-project MyNewProject --path ./projects --non-interactive
-# This creates './projects/MyNewProject' with defaults, ready to use.
-```
-
-### **2. Make Changes and Commit** (Both Architectures)
-
-```bash
-# Create test files in different languages
-echo "def hello(): return 'world'" > test.py
-echo "<?php function hello() { return 'world'; } ?>" > test.php
-echo "function hello() { return 'world'; }" > test.js
-
-git add test.py test.php test.js
-git commit -m "Add hello function in multiple languages"
-
-# SVCS automatically detects and analyzes all supported languages
-# You'll see semantic analysis output for each file in the terminal
-```
-
-### **3. Query Your Code Evolution**
-
-**Repository-Local SVCS:**
-```bash
-# View semantic events for current branch
-python3 svcs_local_cli.py events --limit 10
-
-# View git notes with semantic data
-python3 svcs_local_cli.py notes show
+# Track function evolution
+svcs evolution "func:new_function"
 
 # Check repository status
-python3 svcs_local_cli.py status
+svcs status
 ```
 
-**Global SVCS:**
-```bash
-# Via MCP tools in VS Code/Cursor:
-> list svcs projects
-> show stats for my project
+### 4. Explore Advanced Interfaces
 
-# Via command line:
-svcs search --limit=20
-svcs discuss --query "summarize my project"  # Enhanced CLI integration
-svcs query "show recent performance changes" # One-shot queries
+```bash
+# Interactive web dashboard
+svcs web start
+# Open http://127.0.0.1:8080 in your browser
+
+# Start MCP server for AI integration
+svcs mcp start --background
+
+# Conversational interface
+svcs discuss --query "summarize recent changes"
 ```
 
-## 📖 **Usage Guide**
+## 📋 Complete CLI Reference
 
-### **Core SVCS CLI (`svcs`)**
+### Quick Reference Table
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| **Core Repository Management** |
+| `svcs init` | Initialize SVCS in current repository | `svcs init` |
+| `svcs init-project [name]` | Interactive project setup with tour | `svcs init-project MyApp` |
+| `svcs status` | Show repository status and semantic stats | `svcs status` |
+| `svcs cleanup` | Repository maintenance and optimization | `svcs cleanup --show-stats` |
+| **Semantic Data Exploration** |
+| `svcs events` | List recent semantic events | `svcs events --limit 50` |
+| `svcs search` | Advanced semantic search | `svcs search "authentication"` |
+| `svcs evolution` | Track function/class evolution | `svcs evolution "func:authenticate"` |
+| `svcs compare` | Compare semantic patterns between branches | `svcs compare main develop` |
+| **Analytics and Quality** |
+| `svcs analytics` | Generate comprehensive analytics report | `svcs analytics --output report.json` |
+| `svcs quality` | Code quality analysis | `svcs quality --verbose` |
+| **Web Dashboard** |
+| `svcs web start` | Start interactive web dashboard | `svcs web start --port 9000` |
+| `svcs dashboard` | Generate static HTML dashboard | `svcs dashboard --output dash.html` |
+| **AI Integration** |
+| `svcs discuss` | Start conversational interface | `svcs discuss --query "recent changes"` |
+| `svcs query` | One-shot natural language query | `svcs query "show performance issues"` |
+| `svcs mcp start` | Start MCP server for AI assistants | `svcs mcp start --background` |
+| **Enhanced Git Operations** |
+| `svcs pull` | Enhanced git pull with semantic sync | `svcs pull` |
+| `svcs push` | Enhanced git push with semantic notes | `svcs push origin main` |
+| `svcs merge` | Enhanced git merge with event transfer | `svcs merge feature-branch` |
+| `svcs sync` | Sync semantic data with remote | `svcs sync` |
+| `svcs sync-all` | Complete sync after complex operations | `svcs sync-all` |
+| **Configuration & CI** |
+| `svcs config` | Configure SVCS settings | `svcs config set auto-sync true` |
+| `svcs ci` | CI/CD integration commands | `svcs ci pr-analysis` |
+| **Utilities** |
+| `svcs notes` | Git notes management | `svcs notes sync` |
+| `svcs workflow` | Show workflow guide | `svcs workflow --type team` |
+| `svcs help` | Quick help and examples | `svcs help` |
+
+### Core Repository Management
 
 ```bash
-# Project management (Global architecture)
-svcs init --name "My Project" .              # Register project
-svcs list                                    # List projects
-svcs stats                                   # Project statistics
-svcs recent --days=7                         # Recent activity
-
-# Search semantic history
-svcs search --limit=20                       # Basic search
-svcs search --author="John Doe"              # Filter by author
-svcs search --event-types="node_signature_changed"  # Filter by event type
-svcs evolution "func:greet"                  # Track specific function
-svcs search --min-confidence=0.8             # High-confidence AI insights
-
-# Database maintenance
-svcs cleanup --show-stats                    # Show database status
-svcs prune --all-projects                    # Clean orphaned data
+svcs init                    # Initialize SVCS in current repository
+svcs init --git-init         # Initialize git repository + SVCS
+svcs status                  # Show repository status and semantic stats
+svcs cleanup                 # Repository maintenance and optimization
 ```
 
-### **Repository-Local SVCS CLI (`svcs`)**
-
-**New git-integrated team collaboration interface:**
+### Semantic Data Exploration
 
 ```bash
-# Repository initialization and management
-svcs init                              # Initialize SVCS for current repository
-svcs status                            # Show repository SVCS status
-svcs remove                            # Remove SVCS from repository
+# View semantic events
+svcs events                  # Recent semantic events (default: 20)
+svcs events --limit 50       # Show more events
+svcs events --branch main    # Events for specific branch
+svcs events --type "function_added"  # Filter by event type
 
-# Semantic analysis and events
-svcs events --limit 10                 # List semantic events for current branch
-svcs events --branch feature/auth      # Events for specific branch
-svcs analyze --commit abc123           # Manually analyze a commit
+# Advanced search
+svcs search "authentication"               # Search semantic events
+svcs search --author "john@example.com"    # Filter by author
+svcs search --since "1 week ago"           # Time-based filtering
+svcs search --pattern-type performance     # Search for patterns
 
-# Git notes team collaboration
-svcs notes sync                        # Sync semantic notes to remote
-svcs notes fetch                       # Fetch semantic notes from remote
-svcs notes show --commit abc123        # View semantic note for commit
+# Track evolution
+svcs evolution "func:authenticate"   # Track specific function
+svcs evolution "class:UserManager"   # Track class evolution
 ```
 
-### **Conversational Interface**
-
-Natural language queries about code evolution available through multiple interfaces:
+### Analytics and Insights
 
 ```bash
-# CLI Integration (New!)
-svcs discuss                            # Start interactive session
-svcs discuss --query "summarize recent changes"  # Start with initial query
-svcs query "show performance optimizations"      # One-shot query
-
-# Example queries:
-"What performance optimizations were made last week?"
-"Show me all dependency changes by Alice"
-"How has the DataProcessor class evolved?"
-"Which commits had the most significant semantic changes?"
-"Show me only the changes to auth.py in commit abc123"
+svcs analytics               # Generate analytics report
+svcs quality                 # Code quality analysis
+svcs compare main develop    # Compare branches
 ```
 
-### **Web Dashboard (`svcs_web.py`)**
-
-Generate interactive HTML dashboards:
+### Web and AI Interfaces
 
 ```bash
-python3 svcs_web.py
-# Creates: svcs_dashboard.html (open in browser)
+# Web dashboard
+svcs web start               # Start interactive web dashboard
+svcs web start --port 9000   # Custom port
+svcs dashboard               # Generate static HTML dashboard
+
+# AI-powered interfaces
+svcs discuss                 # Start interactive conversation
+svcs discuss --query "what changed recently?"  # Start with query
+svcs query "show performance improvements"     # One-shot query
+
+# MCP server for AI assistants
+svcs mcp start               # Start MCP server (foreground)
+svcs mcp start --background  # Background mode
+svcs mcp status              # Check server status
+svcs mcp stop                # Stop server
 ```
 
-**Usage**: Open the generated `svcs_dashboard.html` file in your web browser to explore:
-- Interactive timeline of semantic changes
-- Network graphs of code relationships  
-- Quality metrics visualization
-- Developer activity heatmaps
-
-### **Interactive Web Dashboard**
-
-Launch a full-featured web interface for exploring SVCS data:
+### Git Integration
 
 ```bash
-# Quick start
-./start_dashboard.sh
-
-# Manual start
-source .svcs/venv/bin/activate
-pip install Flask Flask-CORS
-python3 svcs_web_server.py
+svcs notes sync              # Sync semantic notes with remote
+svcs notes fetch             # Fetch team semantic data
+svcs notes show --commit abc123  # View semantic note for commit
 ```
 
-**Access**: Open `http://127.0.0.1:8080` in your browser
-
-**Features**:
-- 🔍 **Semantic Search**: Advanced filtering and quick pattern searches
-- 📝 **Git Integration**: View changed files, diffs, and commit summaries
-- 📈 **Evolution Tracking**: Track specific functions/classes over time
-- 🎯 **Pattern Analysis**: AI-detected performance, architecture, and quality patterns
-- 📋 **System Logs**: Monitor LLM inference and error logs
-- 🗂️ **Project Management**: 
-  - Multi-project support and statistics
-  - Project registration and unregistration
-  - **Soft Delete** (unregister): Remove from tracking, keep data for recovery
-  - **Hard Delete** (purge): Permanently remove all project data
-  - Cleanup utilities with inactive project detection
-  - Database statistics and optimization tools
-- 📊 **Analytics**: Quality trends and comprehensive reporting
-- 🔧 **Database Maintenance**: Clean orphaned data and optimize storage
-
-**Project Management Safety Features**:
-- **Confirmation dialogs** for destructive operations
-- **Clear distinction** between soft and hard delete options
-- **Recovery guidance** for accidentally removed projects
-- **Cleanup insights** showing inactive projects and wasted storage
-
-See `docs/INTERACTIVE_DASHBOARD_GUIDE.md` for detailed usage instructions.
-
-### **Analytics & Quality Reports**
+### Project Tours and Help
 
 ```bash
-# Generate comprehensive analytics report
-python3 svcs_analytics.py
+svcs init-project            # Interactive project setup tour
+svcs init-project MyProject --non-interactive  # Automated setup
+svcs workflow               # Show workflow guide
+svcs help                   # Quick help and examples
+```
 
-# Quality trend analysis
-python3 svcs_quality.py
+### Advanced Git Integration & Sync Commands
+
+```bash
+# Enhanced git operations with automatic semantic sync
+svcs pull                    # Enhanced git pull with semantic notes sync
+svcs push [remote] [branch]  # Enhanced git push with semantic notes sync  
+svcs merge <branch>          # Enhanced git merge with semantic event transfer
+svcs sync                    # Sync semantic data with remote repository
+svcs sync-all                # Complete sync after complex git operations
+svcs merge-resolve           # Resolve post-merge semantic event issues
+svcs auto-fix                # Auto-detect and fix common SVCS issues
+
+# Configuration management
+svcs config set auto-sync true     # Configure automatic sync behavior
+svcs config get auto-sync          # View current configuration
+svcs config list                   # List all configuration settings
 
 # CI/CD integration
-python3 svcs_repo_ci.py --pr-analysis --target=main
+svcs ci pr-analysis          # Analyze pull request semantic impact
+svcs ci quality-gate         # Run quality gate checks
+svcs ci report               # Generate CI reports
+
+# Project management
+svcs init-project            # Interactive project creation with guided tour
+svcs delete-project          # Remove project from SVCS tracking
+
+# Internal/Hook commands (typically used by git hooks)
+svcs process-hook post-commit       # Process git post-commit hook
 ```
 
-## 📊 **Database Maintenance**
+## 🌐 Web Dashboard
 
-SVCS includes database maintenance tools to keep semantic data clean and optimized. When git history is modified (rebasing, squashing, force-pushing), some semantic data may become "orphaned" - linked to commits that no longer exist.
+SVCS provides a comprehensive web-based interface for exploring semantic data, project management, and analytics.
 
-**Available through**:
-- Interactive web dashboard (recommended)
-- CLI commands (`svcs prune`, `svcs cleanup`)
-- MCP server integration
+### Quick Start
 
-**Best Practices**:
-- Always backup before major operations: `cp ~/.svcs/global.db ~/.svcs/global.db.backup`
-- Use soft delete by default: `svcs remove /path/to/project` (preserves data)
-- Review inactive projects before purging: `svcs cleanup --show-inactive`
+```bash
+# Start the interactive web dashboard  
+svcs web start
 
-For comprehensive maintenance documentation, see [`docs/DATABASE_MAINTENANCE_GUIDE.md`](docs/DATABASE_MAINTENANCE_GUIDE.md).
+# Custom port
+svcs web start --port 9000
 
-## �📚 **Module Documentation**
+# Open in browser
+# http://127.0.0.1:8080
+```
 
-### **Core Analysis Engine**
+### Dashboard Features
 
-#### **`svcs` - CLI Interface**
-- Command-line interface with rich terminal output
-- Project management (init, list, stats, recent)
-- Advanced semantic search with filtering capabilities
-- Event type and confidence-based queries
-- Author and time-based filtering
-- Evolution tracking for specific code elements
-- Database maintenance operations (prune, cleanup)
+**🔍 Semantic Search & Analysis**
+- Advanced filtering by author, date range, confidence level, and analysis layer
+- Quick action buttons for common searches (performance, architecture, error handling)
+- Real-time results with formatted display and confidence scores
 
-#### **`svcs_discuss.py` - Conversational AI Interface**
-- Natural language query processing
-- Context-aware responses about code evolution
-- Integration with all SVCS data layers
-- **Requires**: `GOOGLE_API_KEY` environment variable
+**📝 Git Integration**
+- View changed files for any commit with syntax highlighting
+- Display raw git diffs with comprehensive commit analysis
+- Browse recent commits with semantic context and evolution tracking
 
-### **Analytics & Insights**
+**📈 Code Evolution & Analytics**
+- Track specific functions/classes over time with detailed evolution history
+- AI-detected pattern analysis (performance, architecture, error handling)
+- Confidence-based filtering and temporal pattern analysis
 
-#### **`svcs_analytics.py` - Data Analytics Engine**
-- Temporal analysis of semantic changes
-- Developer contribution patterns
-- Code quality trend analysis
-- Event type distribution statistics
+**🗂️ Project Management**
+- Multi-project support with centralized repository discovery and management
+- Project statistics, health monitoring, and comprehensive analytics
+- Database maintenance tools with cleanup and optimization features
 
-#### **`svcs_quality.py` - Code Quality Insights**
-- Error handling pattern improvements
-- Code maintainability trends
-- Performance optimization detection
-- Technical debt accumulation/reduction
+**📊 Interactive Visualizations**
+- Timeline visualizations of semantic evolution
+- Event type distribution charts and analytics dashboards
+- Network diagrams showing code structure and dependencies
 
-#### **`svcs_web.py` - Web Dashboard Generator**
-- Interactive HTML dashboards for visualizing semantic evolution
-- Timeline visualizations
-- Network graphs of code relationships
-- Quality metrics charts
+### Static Dashboard Generation
 
-### **CI/CD Integration**
+```bash
+# Generate standalone HTML dashboard
+svcs dashboard --output my_report.html
 
-#### **`svcs_repo_ci.py` - Continuous Integration Support**
-- **PR Analysis**: Semantic impact assessment of pull requests
-- **Quality Gates**: Automated quality checks based on semantic patterns
-- **Trend Monitoring**: Continuous quality trend analysis
-- **Report Generation**: Automated reporting for stakeholders
+# Open the generated file in any browser
+# No server required - fully self-contained
+```
 
-### **Multi-Language Support**
+## 🤖 MCP Server Interface
 
-#### **`svcs_multilang.py` - Advanced Language Extension Framework**
-- **Production-ready multi-language semantic analysis** with robust fallback systems
-- **Python**: Complete support (.py, .pyx, .pyi) - Functions, classes, async/await, decorators, comprehensions
-- **PHP**: Complete modern support (PHP 7.4+/8.x) with Tree-sitter parser + phply legacy fallback
-- **JavaScript/TypeScript**: AST-based analysis with esprima parser + intelligent regex fallback
-- **Extensible architecture**: Easy addition of new language analyzers with standardized interface
+SVCS provides a **Model Context Protocol (MCP) server** that integrates with AI assistants like Claude, VS Code Copilot, and other MCP-compatible tools.
 
-#### **Real-world Git Hook Integration**
-- **Tested in production scenarios**: Multi-language analysis in git post-commit hooks
-- **Error resilience**: Graceful handling of syntax errors, missing parsers, binary files
-- **Performance optimized**: Efficient parsing with minimal git hook overhead
+### Quick Start
 
-## 🤖 **MCP Server Interface**
+```bash
+# Start MCP server
+svcs mcp start --background
 
-Modern AI-integrated interface for multiple projects:
+# Check status
+svcs mcp status
 
-### **Available MCP Tools**
+# View logs
+svcs mcp logs
 
-#### **Project Management**
-- `list_projects` - List all registered SVCS projects
-- `register_project` - Register new project for tracking
-- `unregister_project` - Soft delete project (mark inactive, preserve data)
+# Stop server
+svcs mcp stop
+```
+
+### Available MCP Tools
+
+**Project Management**
+- `list_projects` - List all SVCS repositories
 - `get_project_statistics` - Get semantic statistics for project
 
-#### **Semantic Analysis**
-- `query_semantic_events` - Query events with filtering
+**Semantic Analysis**
+- `search_events_advanced` - Advanced search with comprehensive filtering
 - `get_recent_activity` - Get recent semantic changes
 - `search_semantic_patterns` - AI-powered pattern search
 - `get_filtered_evolution` - Track specific code element evolution
-- `search_events_advanced` - Advanced filtering and search
-- `analyze_current_commit` - Analyze most recent commit
 
-#### **Git Integration**
-- `get_commit_changed_files` - List files changed in a specific commit
-- `get_commit_diff` - Get git diff for a commit (optionally filtered to specific file)
-- `get_commit_summary` - Comprehensive commit information including metadata, files, and semantic events
+**Git Integration**
+- `get_commit_changed_files` - List files changed in commits
+- `get_commit_summary` - Comprehensive commit analysis with semantic events
 
-#### **Database Maintenance**
-- `prune_orphaned_data` - Remove semantic data for commits no longer in git history
-- `debug_query_tools` - Diagnostic information for database debugging
+### Usage in AI Assistants
 
-### **Usage in MCP-Compatible IDEs**
+Once the MCP server is running, you can ask natural language questions in compatible AI interfaces:
 
-In VS Code, Cursor, or other MCP-compatible editors:
-
+**VS Code/Cursor with Copilot Chat:**
 ```
-# Project management
-> list svcs projects
-> register this project with SVCS
-> show stats for /path/to/project
-
-# Semantic queries  
-> find performance improvements in my project
-> show recent architecture changes
-> analyze error handling patterns
-
-# Git integration
-> get changed files for commit abc123
-> show me the diff for commit abc123
-> summarize commit abc123
+@copilot Show me all registered SVCS projects
+@copilot What semantic patterns were detected in the last week?
+@copilot Get a summary of commit abc123 including all semantic events
+@copilot How has the authenticate function evolved over time?
+@copilot Find all performance optimizations in my code
+@copilot Show recent architecture improvements with high confidence
 ```
 
-### **MCP Server Integration (AI Chat Interfaces)**
-
-SVCS provides a fully integrated **Model Context Protocol (MCP) server** for AI chat interfaces like Claude and VS Code Chat. The MCP server enables semantic code analysis through natural conversation.
-
-#### **🚀 MCP Server Management**
-
-```bash
-# Start MCP server for IDE integration
-svcs mcp start                         # Start in foreground (see output)
-svcs mcp start --background            # Start in background
-
-# Server management
-svcs mcp stop                          # Stop the MCP server
-svcs mcp status                        # Check if server is running
-svcs mcp restart                       # Restart the server
-svcs mcp restart --background          # Restart in background
-
-# Monitoring and debugging
-svcs mcp logs                          # View recent server logs
-svcs mcp logs --lines 100              # View more log lines
-svcs mcp logs --follow                 # Follow logs in real-time
-```
-
-#### **🛠️ MCP Server Usage**
-
-**For Development/Testing:**
-```bash
-svcs mcp start                         # Start in foreground to see output
-# Use the tools in Claude/VS Code
-svcs mcp stop                          # Stop when done
-```
-
-**For Production/IDE Integration:**
-```bash
-svcs mcp start --background            # Start and detach
-svcs mcp status                        # Check if running
-svcs mcp logs                          # Check for any issues
-```
-
-**After Code Changes:**
-```bash
-svcs mcp restart --background          # Restart to apply changes
-```
-
-#### **🔧 Available MCP Tools (11 Total)**
-
-When the MCP server is running, these tools are available in Claude or VS Code:
-
-**📊 Project Overview & Statistics**
-- **list_projects** - List all registered SVCS repositories
-- **get_project_statistics** - Get semantic statistics for a project
-
-**🔍 Semantic Event Queries**
-- **query_semantic_events** - Query semantic events from database
-- **search_events_advanced** - Advanced search with comprehensive filtering
-- **get_recent_activity** - Get recent project activity with filtering
-- **search_semantic_patterns** - Search for AI-detected semantic patterns
-
-**📈 Code Evolution Tracking**
-- **get_filtered_evolution** - Get evolution history for specific functions/classes
-
-**🤖 Conversational Interface**
-- **conversational_query** - Natural language interface for semantic analysis
-
-**📝 Commit Analysis**
-- **get_commit_summary** - Comprehensive commit analysis including semantic events
-- **get_commit_changed_files** - List files changed in specific commits
-
-**🔧 Debug & Diagnostics**
-- **debug_query_tools** - Diagnostic information for troubleshooting
-
-#### **💬 Example MCP Queries**
-
-Once the MCP server is running, you can ask natural language questions in Claude or VS Code:
-
-> *"Show me all registered projects"*
-
-> *"What semantic patterns were detected in the last week?"*
-
-> *"Get a summary of commit abc123 including all semantic events"*
-
+**Claude Desktop:**
+> *"Show me all registered projects"*  
+> *"What semantic patterns were detected in the last week?"*  
+> *"Get a summary of commit abc123 including all semantic events"*  
 > *"How has the authenticate function evolved over time?"*
 
-> *"Show me recent performance optimization patterns with high confidence"*
+### IDE Integration
 
-> *"What files were changed in the last commit and what semantic events occurred?"*
+The MCP server integrates seamlessly with modern development environments:
 
-#### **🔗 Integration with Claude/VS Code**
+- **Claude Desktop** - Add SVCS server to your MCP configuration for natural language semantic queries
+- **VS Code with Copilot Chat** - Use `@copilot` commands to access SVCS semantic insights directly in your editor
+- **Cursor IDE** - Native MCP support for AI-powered semantic code analysis
+- **Any MCP-compatible AI interface** - Standard Model Context Protocol support ensures broad compatibility
 
-The MCP server automatically integrates with:
-- **Claude Desktop** - Add SVCS server to your MCP configuration
-- **VS Code with MCP Extension** - Connect to local SVCS server
-- **Any MCP-compatible AI interface** - Standard Model Context Protocol support
+## 🔬 Advanced Features
 
-**Log Location:** `~/Library/Logs/Claude/mcp-server-svcs.log` (macOS)
+### Team Collaboration
 
-## 🧑‍💻 **Development Setup**
+SVCS provides git-integrated team collaboration through semantic notes:
+
+```bash
+# Share semantic insights with team
+svcs notes sync                  # Push semantic data to remote
+git push origin main             # Semantic notes included automatically
+
+# Receive team insights
+git pull origin main             # Semantic notes synced automatically
+svcs notes fetch                 # Explicit fetch if needed
+
+# View team semantic data
+svcs notes show --commit abc123  # See semantic note for specific commit
+```
+
+### Branch Comparison
+
+```bash
+# Compare semantic evolution between branches
+svcs compare main develop        # See semantic differences
+svcs compare --limit 20          # Show more comparison data
+```
+
+### Pattern Analysis
+
+```bash
+# Search for specific semantic patterns
+svcs search --pattern-type performance     # Performance improvements
+svcs search --pattern-type architecture    # Architectural changes
+svcs search --pattern-type error_handling  # Error handling patterns
+```
+
+### CI/CD Integration
+
+```bash
+# Analyze pull request semantic impact
+svcs ci pr-analysis --target main
+
+# Run quality gate checks
+svcs ci quality-gate --strict
+
+# Generate CI reports
+svcs ci report --format json
+```
+
+### Configuration Management
+
+```bash
+# View current configuration
+svcs config list
+
+# Configure automatic sync with remotes
+svcs config set auto-sync true
+
+# Set AI analysis confidence threshold
+svcs config set ai-threshold 0.8
+
+# Configure web dashboard settings
+svcs config set web-port 9000
+svcs config set web-host 0.0.0.0
+```
+
+### Project Management
+
+```bash
+# Interactive project creation and setup
+svcs init-project MyNewProject
+
+# Non-interactive project creation
+svcs init-project MyProject --path /path/to/project --non-interactive
+
+# Remove project from SVCS tracking
+svcs delete-project --path /path/to/project
+
+# List all registered projects
+svcs list
+
+# Project cleanup and maintenance
+svcs cleanup --git-unreachable
+svcs cleanup --show-stats
+```
+
+## 🧑‍💻 Development Setup
 
 ```bash
 # Clone and setup development environment
 git clone https://github.com/markomanninen/svcs.git
 cd svcs
 
-# Create development environment
-python3 -m venv venv
-source venv/bin/activate
-
-# Install in development mode
+# Install in development mode with all dependencies
 pip install -e .
-pip install -e svcs_mcp/
 
-# Run tests
-python3 -m pytest tests/
-python3 tests/test_svcs_complete_5layer.py
-
-# For comprehensive validation (see tests/README.md for more options)
-python3 tests/test_bare_hooks.py
+# Install enhanced language parsing (recommended)
+pip install tree-sitter tree-sitter-php esprima
 
 # Install development dependencies
-pip install black pytest pre-commit
+pip install pytest black pre-commit
+
+# Install git hooks for development
+pre-commit install
+
+# Verify installation
+svcs --help
 ```
 
-## 🧪 **Testing**
+### Running Tests
 
-SVCS includes comprehensive test coverage for all major functionality. The test suite is located in the `tests/` directory.
-
-### **Key Test Scripts**
-
-#### **Primary Validation Test**
 ```bash
-# Comprehensive bare repository hooks test (RECOMMENDED)
-cd tests
-python test_bare_hooks.py
-```
+# Core functionality tests
+python -m pytest tests/
 
-This test validates:
-- Bare repository initialization and hook installation  
-- Semantic analysis triggering during git push operations
-- Semantic event generation and storage
-- Automatic semantic notes retrieval in fresh clones
-- Database persistence and content verification
+# Comprehensive integration tests
+python tests/test_complete_functionality.py
 
-#### **Additional Test Categories**
-```bash
-# GitHub collaboration workflow (can create new repos automatically!)
-python test_github_collaboration.py
-
-# Complete functionality test
-python test_complete_functionality.py
-
-# Git integration test  
-python test_git_integration.py
-
-# CLI interface test
-python test_cli_integration.py
-
-# MCP server functionality
-python test_mcp_initialization.py
-```
-
-### **Test Environment Setup**
-```bash
-# Install test dependencies (if not already installed)
-pip install -r requirements.txt
-
-# For tests that might hang, use timeout
-gtimeout 60s python test_bare_hooks.py
-```
-
-#### **GitHub Collaboration Testing**
-```bash
-# Full GitHub collaboration workflow test (creates repos automatically)
+# GitHub collaboration workflow tests
 python tests/test_github_collaboration.py
 
-# Verify semantic notes are accessible on GitHub remote
-python tests/test_github_notes_verification.py
+# MCP server functionality tests
+python tests/test_mcp_tools.py
+
+# Web dashboard tests
+python tests/test_comprehensive_dashboard.py
 ```
 
-**Note**: The GitHub collaboration test demonstrates real-world semantic sync via GitHub. 
-While GitHub's web UI can't display git notes content (this is normal), the semantic 
-notes are properly stored and accessible via git commands, enabling full team collaboration.
+## 🖥️ System Requirements
 
-### **Test Documentation**
-For detailed information about all available tests, test categories, and troubleshooting:
+### Core Requirements
+- **Python**: 3.8+ (recommended: 3.11+)
+- **Git**: 2.0+
+- **OS**: Unix-based system (Linux, macOS, or Windows WSL)
+- **Memory**: 2GB+ RAM
+- **Storage**: 100MB+ for databases and logs
 
-📖 **[See tests/README.md](tests/README.md)** for complete testing documentation.
+### Dependencies
+SVCS automatically installs required dependencies:
 
-## 🖥️ **System Requirements**
-
-### **Core Requirements**
-- Python 3.8+ (recommended: Python 3.11+)
-- Git 2.0+ 
-- Unix-based system (Linux, macOS) or Windows WSL
-- 4GB+ RAM (for AI analysis)
-- 1GB+ disk space (for databases and logs)
-
-### **Dependencies**
 ```bash
-# Essential packages (auto-installed)
-rich>=10.0.0              # Terminal UI and formatting
-click>=8.0.0               # CLI framework
-sqlite3                    # Database (built-in)
+# Essential (auto-installed)
+rich>=12.0.0                    # Terminal UI and formatting
+click>=8.0.0                    # CLI framework  
+sqlite3                         # Database (built-in)
+google-generativeai>=0.3.0      # Gemini AI integration
+tenacity>=8.0.0                 # Retry logic for API calls
 
-# Optional but recommended for Layer 5b
-google-generativeai>=0.3.0 # Gemini AI integration
+# Language parsing (auto-installed)
+tree-sitter>=0.20.0             # Modern parsing engine
+tree-sitter-php>=0.20.0         # PHP AST support
+esprima>=4.0.1                  # JavaScript/TypeScript support
+phply>=1.2.6                    # PHP fallback parser
 
-# MCP Server dependencies
-mcp>=0.1.0                 # Model Context Protocol
+# Web dashboard (optional)
+Flask>=2.0.0                    # Web server
+Flask-CORS>=3.0.0               # Cross-origin requests
+
+# MCP server (optional)
+mcp                             # Model Context Protocol
 ```
 
-### **API Requirements**
-- **Google API Key** - Required for Layer 5b AI analysis and conversational interface
-  - Get one at [Google AI Studio](https://makersuite.google.com/app/apikey)
+### API Requirements
+- **Google Gemini API** (optional) - Required for Layer 5b AI analysis
+  - Get free key at: https://makersuite.google.com/app/apikey
   - Free tier: 1000 requests/day
-  - Without API key: SVCS uses layers 1-5a only
+  - Without API key: SVCS uses layers 1-5a (still very powerful!)
 
-### **Performance Characteristics**
-- **Layer 1-4 analysis**: ~100-200ms per commit (fast, always runs)
-- **Layer 5a analysis**: ~200-500ms per commit (rule-based patterns)
-- **Layer 5b analysis**: ~2-10s per commit (only for complex changes, requires API key)
-- **MCP server startup**: ~500ms (global database initialization)
+### Performance Characteristics
+- **Layer 1-4 analysis**: ~100-200ms per commit (fast AST-based analysis)
+- **Layer 5a analysis**: ~200-500ms per commit (rule-based pattern detection)
+- **Layer 5b analysis**: ~2-10s per commit (AI analysis, only for complex changes, requires API key)
 - **Database queries**: ~10-50ms (optimized with indices)
+- **Web dashboard startup**: ~1-3s (includes project discovery)
+- **MCP server response**: ~100-500ms per query (depending on complexity)
 
-**TODO**: Real benchmarks needed for production workloads.
+## ⚠️ Limitations
 
-### **Resource Usage**
-**TODO**: Comprehensive testing needed for:
-- Memory usage patterns across different project sizes
-- Disk space requirements for long-term history
-- Network usage for API calls
-- CPU utilization profiles
+### Current Limitations
+- **Windows Support**: Requires WSL due to symbolic link usage for git hooks and shell script dependencies
+- **Database Scale**: SQLite-based storage may require optimization for very large repositories (>100k commits)
+- **API Dependencies**: Layer 5b AI analysis requires external Google Gemini API access and consumes API tokens
+- **Real-time Analysis**: Git hook-based approach requires commits to trigger analysis (no live code analysis)
+- **Memory Usage**: Large repositories may require 2-4GB RAM for comprehensive analysis
 
-## ⚠️ **Limitations**
+### Language Support Status
+- **Python**: Comprehensive semantic analysis with 31+ event types, full AST support
+- **PHP**: Modern language support (PHP 7.4+/8.x) with Tree-sitter parser + phply fallback
+- **JavaScript/TypeScript**: AST-based analysis with comprehensive ES6+ syntax support
+- **Other Languages**: Planned support for Go, Rust, Java, C++, and other popular languages
 
-### **Current Limitations**
-- **Large Context Analysis**: SVCS analyzes individual commits/files, not whole application stack impacts
-- **Cross-Project Dependencies**: Limited visibility into changes affecting multiple projects
-- **Real-time Analysis**: Git hook-based, requires commits to trigger analysis
-- **Windows Support**: Requires WSL due to symbolic link usage for git hooks
-- **API Dependency**: Layer 5b features require external Google API
+### Scalability Considerations
+- **Repository Size**: Optimized for typical project sizes (1k-10k commits)
+- **Team Size**: Repository-local architecture scales naturally with distributed teams
+- **Performance Impact**: Git hook approach adds ~200ms-2s to commit time depending on analysis layers
+- **Storage Requirements**: ~10-50MB additional storage per 1000 commits for semantic data
+- **Network Usage**: Git notes synchronization adds minimal overhead to git operations
 
-### **Language Support Status**
-- **Python**: Comprehensive semantic analysis with 31+ event types
-- **PHP**: Modern language support with Tree-sitter parsing (PHP 7.4+/8.x) and phply fallback
-- **JavaScript/TypeScript**: AST-based analysis using esprima parser with comprehensive syntax support
-- **Cross-language projects**: Multi-language repository support for mixed codebases
+## 🆘 Getting Help
 
-### **Scalability Considerations**
-- SQLite database may not scale to very large repositories
-- LLM API costs can accumulate with frequent complex changes
-- Git hook approach may impact commit performance on large files
+### Built-in Help Commands
 
-## 🔮 **Future Development**
-
-### **Time Crystal VCS Origin**
-This project originated from the "Time Crystal VCS" concept - a science fiction-like invention by ChatGPT O3 (see `docs/TimeCrystalVCS.pdf`), from which the practical implementation was determined and developed as an AI-assisted coding project initiated by Marko T. Manninen, 06/2025, in roughly one day using:
-- Gemini 2.5 Pro (initial planning and setup script)
-- VS Code Claude 4 Preview agent (main coding)
-- A code contribution from OpenAI O3 (debug persistent click cli --event-types parsing problem)
-
-## 🔮 **Future Development**
-
-### **Current Limitations**
-
-## Team Collaboration
-
-SVCS provides repository-local, git-integrated team collaboration:
-
-### **Repository-Local Architecture**
-
-Each repository maintains its own semantic database with team sharing through git:
-- Repository-local semantic database (`.svcs/semantic.db`)
-- Git notes integration for team sharing
-- Branch-aware semantic analysis
-- Repository-specific git hooks for automatic analysis
-- Team collaboration through git push/pull workflow
-
-### **Current Features**
-
-✅ **Implemented**: Full repository-local architecture with git integration
-- Repository-local database storage and analysis
-- Semantic data shared as git notes attached to commits
-- Branch-aware semantic tracking and comparison
-- Automatic analysis through git hooks
-- Team collaboration via standard git workflows
-- MCP server integration for AI-powered analysis
-- Web dashboard for visualization and exploration
-
-### **Planned Git-Integrated Team Features**
-
-We're designing **git-native team collaboration** that integrates with existing git workflows:
-
-#### **Git-Integrated Team Collaboration** (Planned)
-- **Git Notes Integration**: Semantic analysis stored as git notes attached to commits
-- **Automatic Sync**: Semantic data travels with commits via push/pull operations  
-- **Branch-Aware Analysis**: Semantic evolution tracked per git branch
-- **Merge Integration**: Semantic data automatically merges when branches merge
-- **Natural Team Workflow**: No separate servers needed - works with any git hosting
-
-#### **Technical Roadmap** (In Progress)
-
-✅ **Phase 1 - Core Architecture** (Completed):
 ```bash
-# Implemented repository-local CLI commands
-svcs init                         # Initialize SVCS for repository
-svcs status                       # Show repository status and branch info
-svcs events --branch main --limit 10  # Branch-specific semantic events
-svcs notes sync                   # Sync semantic notes to remote
-svcs notes fetch                  # Fetch team's semantic data
+# Quick help and examples
+svcs help
+
+# Show SVCS workflow guide  
+svcs workflow
+
+# Show team collaboration workflow
+svcs workflow --type team
+
+# Show troubleshooting guide
+svcs workflow --type troubleshooting
+
+# Get help for specific commands
+svcs init --help
+svcs search --help
+svcs web --help
 ```
 
-🚧 **Phase 2 - Integration** (In Progress):
+### Common Issues & Solutions
+
+**Installation Issues**
 ```bash
-# Planned integration with existing SVCS components
-svcs search --event-type "security_improvement"  # Advanced semantic search
-svcs diff-branches main..feature    # Compare semantic evolution between branches
-svcs team-activity --since "1 week" # Team's semantic changes across branches
-svcs merge-preview feature/auth     # Preview semantic impact of branch merge
+# Verify installation
+pip install -e .
+svcs --version
+
+# Install with optional dependencies
+pip install -e ".[ai,web,mcp]"
 ```
 
-📋 **Phase 3 - Team Features** (Planned):
-- Full MCP server integration with repository-local mode
-- Web dashboard for repository-local semantic data
-- Advanced branch comparison and merge preview
-- Team activity analytics and collaboration insights
+**Setup Issues**
+```bash
+# Initialize SVCS in existing repository
+svcs init
 
-#### **Git-Native Team Workflow** (Planned)
-1. **Developer commits** → semantic analysis stored as git notes
-2. **Push branch** → git notes automatically included  
-3. **Teammates pull** → get commits + semantic analysis automatically
-4. **Branch merges** → semantic events transfer to target branch
-5. **Team collaboration** → everyone sees shared semantic evolution
+# Check repository status
+svcs status
 
-#### **Architecture Goals**
-- **Git-Native**: Leverages git's existing collaboration mechanisms
-- **Zero Infrastructure**: No separate servers needed, works with GitHub/GitLab/etc.
-- **Automatic Sync**: Semantic data follows same workflow as source code
-- **Branch Aware**: Understands git branches and merge relationships
+# Run diagnostics
+svcs auto-fix
+```
 
-### **Technical Improvements**
-- **Enhanced Language Support**: Full semantic analysis for more languages (Go, Rust, Java, C++, etc.)
-- **Cross-Language Analysis**: Detection of architectural changes spanning multiple languages  
-- **Real-time Analysis**: File-watching based analysis for immediate feedback
-- **Advanced AI Integration**: Support for multiple LLM providers and local models
-- **Visual Interfaces**: Rich IDE extensions and web-based exploration tools
+**Performance Issues**
+```bash
+# Clean up database
+svcs cleanup --show-stats
 
-### **Development Credits**
+# Optimize repository
+svcs cleanup --git-unreachable
+```
 
-This project has been developed with substantial AI assistance:
-- VS Code Claude 4 Preview agent (main coding)
-- A code contribution from OpenAI O3 (debug persistent click cli --event-types parsing problem)
+### Documentation & Resources
 
-### **Research Areas**
-- Semantic change impact prediction across application layers
-- Code evolution pattern recognition and recommendation systems
-- Automated refactoring suggestions based on semantic analysis
-- Git-integrated semantic data synchronization and branch-aware analysis
+- **Quick Start**: Follow the examples in the "🚀 Quick Start" section above
+- **Complete CLI Reference**: See the command table and detailed sections above
+- **Web Dashboard**: Interactive interface with built-in help tooltips
+- **MCP Integration**: Built-in AI assistant tools for natural language queries
+- **Project Examples**: Use `svcs init-project` for guided setup with real examples
 
-## 🆘 Troubleshooting
+## 🤝 Contributing
 
-*This section is intentionally left empty as we don't have extensive real-world usage experience yet. Issues and solutions will be documented as they are discovered through actual usage.*
+We welcome contributions! Here's how to get started:
 
-## 📸 Screenshots & Demos
+### Development Workflow
 
-*TODO: Add screenshots and short videos/GIFs demonstrating:*
-- *SVCS analysis output in terminal*
-- *MCP integration in VS Code*
-- *Web dashboard interface*
-- *Conversational interface examples*
+```bash
+# Fork and clone
+git clone https://github.com/yourusername/svcs.git
+cd svcs
+
+# Set up development environment
+pip install -e .
+pip install pytest black pre-commit
+
+# Install pre-commit hooks
+pre-commit install
+
+# Make changes and test
+python -m pytest tests/
+python tests/test_complete_functionality.py
+
+# Submit pull request
+```
+
+### Areas for Contribution
+- **Language Support**: Add parsers for new programming languages (Go, Rust, Java, C++)
+- **AI Integration**: Improve semantic pattern detection algorithms and confidence scoring
+- **Performance Optimization**: Enhance analysis speed, memory usage, and database efficiency
+- **Web Dashboard**: Add new visualizations, analytics features, and user interface improvements
+- **Documentation**: Improve user guides, API documentation, and example projects
+- **Testing**: Expand test coverage for edge cases, multi-language projects, and large repositories
+- **Platform Support**: Native Windows support without WSL dependency
+
+### Code Style
+- Follow PEP 8 for Python code
+- Use type hints where possible
+- Add docstrings for public functions
+- Run `black` for code formatting
+- Test your changes thoroughly
+
+### Reporting Issues
+- **Bug Reports**: Use GitHub Issues with minimal reproduction examples and system information
+- **Feature Requests**: Describe use cases and expected behavior clearly
+- **Performance Issues**: Include repository size, commit frequency, and analysis timing data
+- **Documentation Issues**: Suggest specific improvements or clarifications needed
+- **System Requirements**: Always include SVCS version, Python version, and operating system details
 
 ## 📄 License
 
-[MIT License](LICENCE)
+[MIT License](LICENSE) - See the LICENSE file for details.
+
+---
+
+**SVCS** - Bringing semantic understanding to version control through repository-local analysis, team collaboration, and AI integration. Built with ❤️ for developers who care about understanding code evolution beyond traditional diffs.
