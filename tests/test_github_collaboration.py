@@ -138,13 +138,6 @@ def validate_git_remote_url(url):
         r'^ssh://git@github\.com/[\w\-\.]+/[\w\-\.]+(?:\.git)?/?$'
     ]
     return any(re.match(pattern, url, re.IGNORECASE) for pattern in patterns)
-    """Validate if the provided URL looks like a valid git remote."""
-    patterns = [
-        r'^https://github\.com/[\w\-\.]+/[\w\-\.]+(?:\.git)?/?$',
-        r'^git@github\.com:[\w\-\.]+/[\w\-\.]+(?:\.git)?/?$',
-        r'^ssh://git@github\.com/[\w\-\.]+/[\w\-\.]+(?:\.git)?/?$'
-    ]
-    return any(re.match(pattern, url, re.IGNORECASE) for pattern in patterns)
 
 def get_repo_info():
     """Get repository information from user."""
@@ -224,6 +217,9 @@ def setup_git_config(repo_path):
 
 def create_sample_code_changes(repo_path, developer_name, iteration):
     """Create realistic code changes for testing."""
+    import datetime
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    
     print(f"\n📝 {developer_name} creating code changes (iteration {iteration})")
     
     if iteration == 1:
@@ -232,6 +228,7 @@ def create_sample_code_changes(repo_path, developer_name, iteration):
         app_file.write_text(f"""#!/usr/bin/env python3
 \"\"\"
 Simple web application - {developer_name}'s contribution
+Created at: {timestamp}
 \"\"\"
 
 from flask import Flask, request, jsonify
@@ -293,6 +290,7 @@ if __name__ == '__main__':
         auth_file.write_text(f"""#!/usr/bin/env python3
 \"\"\"
 Authentication module - Enhanced by {developer_name}
+Last updated: {timestamp}
 \"\"\"
 
 import hashlib
@@ -385,6 +383,7 @@ auth_service = AuthenticationService()
         db_file.write_text(f"""#!/usr/bin/env python3
 \"\"\"
 Database layer - Implemented by {developer_name}
+Implementation timestamp: {timestamp}
 \"\"\"
 
 import sqlite3
@@ -512,6 +511,7 @@ db_manager = DatabaseManager()
         utils_file.write_text(f"""#!/usr/bin/env python3
 \"\"\"
 Monitoring and utilities - Enhanced by {developer_name}
+Enhanced timestamp: {timestamp}
 \"\"\"
 
 import time
@@ -663,6 +663,99 @@ health_checker.register_check('database', database_health_check, critical=True)
         
         return f"Add monitoring and health checking by {developer_name}"
 
+def verify_semantic_notes_on_remote(repo_path, repo_url):
+    """Verify that semantic notes are properly pushed to and available on the GitHub remote."""
+    print("\n🔍 Verifying semantic notes sync to GitHub...")
+    
+    verification_results = {
+        'local_notes_exist': False,
+        'remote_refs_exist': False,
+        'notes_fetchable': False,
+        'local_notes_count': 0,
+        'remote_refs_count': 0
+    }
+    
+    # Check if local notes exist
+    print("\n💾 Checking local semantic notes...")
+    result = run_command(['git', 'notes', '--ref=svcs-semantic', 'list'], cwd=repo_path)
+    if result and result.returncode == 0 and result.stdout.strip():
+        local_notes = result.stdout.strip().split('\n')
+        verification_results['local_notes_exist'] = True
+        verification_results['local_notes_count'] = len(local_notes)
+        print(f"  ✅ Found {len(local_notes)} local semantic notes")
+    else:
+        print("  ❌ No local semantic notes found")
+    
+    # Check if notes refs exist on remote
+    print("\n📡 Checking remote refs for semantic notes...")
+    result = run_command(['git', 'ls-remote', 'origin', 'refs/notes/*'], cwd=repo_path)
+    if result and result.returncode == 0 and result.stdout.strip():
+        remote_refs = result.stdout.strip().split('\n')
+        verification_results['remote_refs_exist'] = True
+        verification_results['remote_refs_count'] = len(remote_refs)
+        print(f"  ✅ Found {len(remote_refs)} remote notes refs:")
+        for ref in remote_refs:
+            print(f"    📋 {ref}")
+    else:
+        print("  ❌ No semantic notes refs found on remote")
+        print("  ❗ This indicates SVCS push is not properly syncing notes to GitHub")
+    
+    # Test fetching notes from remote (in a fresh context)
+    print("\n🔄 Testing note fetch from remote...")
+    
+    # Try to fetch notes explicitly
+    result = run_command(['git', 'fetch', 'origin', '+refs/notes/*:refs/notes/*'], cwd=repo_path)
+    if result and result.returncode == 0:
+        verification_results['notes_fetchable'] = True
+        print("  ✅ Notes are fetchable from remote")
+    else:
+        print("  ❌ Failed to fetch notes from remote")
+        if result and result.stderr:
+            print(f"     Error: {result.stderr}")
+    
+    # Final assessment
+    print("\n📊 Semantic Notes Verification Summary:")
+    print("=" * 50)
+    
+    if verification_results['local_notes_exist']:
+        print(f"✅ Local notes: {verification_results['local_notes_count']} notes found")
+    else:
+        print("❌ Local notes: Not found")
+    
+    if verification_results['remote_refs_exist']:
+        print(f"✅ Remote refs: {verification_results['remote_refs_count']} refs found")
+    else:
+        print("❌ Remote refs: Not found - SEMANTIC NOTES NOT SYNCED TO GITHUB!")
+    
+    if verification_results['notes_fetchable']:
+        print("✅ Fetchability: Notes can be fetched from remote")
+    else:
+        print("❌ Fetchability: Cannot fetch notes from remote")
+    
+    # Overall assessment
+    all_checks_passed = (
+        verification_results['local_notes_exist'] and 
+        verification_results['remote_refs_exist'] and 
+        verification_results['notes_fetchable']
+    )
+    
+    if all_checks_passed:
+        print("\n🎉 ✅ SEMANTIC NOTES VERIFICATION PASSED!")
+        print("✅ Semantic notes are properly synchronized to GitHub")
+        return True
+    else:
+        print("\n❌ SEMANTIC NOTES VERIFICATION FAILED!")
+        print("❌ Semantic notes are NOT properly synchronized to GitHub")
+        
+        # Provide debugging hints
+        if not verification_results['remote_refs_exist']:
+            print("\n💡 Debugging hints:")
+            print("   - Check if 'svcs push' is being used instead of 'git push'")
+            print("   - Verify that pre-push hooks are properly installed")
+            print("   - Check if manual 'svcs sync' is needed after 'git push'")
+        
+        return False
+
 def test_github_collaboration():
     """Test SVCS collaboration workflow with GitHub remote."""
     
@@ -738,17 +831,28 @@ def test_github_collaboration():
             commit_msg = create_sample_code_changes(dev1_repo, "Developer1", 1)
             
             run_command(['git', 'add', '.'], cwd=dev1_repo)
-            result = run_command(['git', 'commit', '-m', commit_msg], cwd=dev1_repo)
-            if not result or result.returncode != 0:
-                print("❌ Failed to create initial commit")
-                return False
+            
+            # Check if there's anything to commit
+            status_result = run_command(['git', 'status', '--porcelain'], cwd=dev1_repo)
+            if status_result and status_result.stdout.strip():
+                result = run_command(['git', 'commit', '-m', commit_msg], cwd=dev1_repo)
+                if not result or result.returncode != 0:
+                    print("❌ Failed to create initial commit")
+                    return False
+                print("✅ Created initial commit")
+            else:
+                print("ℹ️  No changes to commit - repository already contains this content")
             
             # Push to GitHub
             print("\n📤 Developer 1 pushing to GitHub...")
             if is_new:
                 result = run_command(['git', 'push', '-u', 'origin', 'main'], cwd=dev1_repo)
+                if result and result.returncode == 0:
+                    # Now sync semantic notes
+                    notes_result = run_command(['python', '-m', 'svcs', 'sync'], cwd=dev1_repo)
             else:
-                result = run_command(['git', 'push', 'origin', 'main'], cwd=dev1_repo)
+                # Use SVCS push for subsequent pushes (pushes code + notes)
+                result = run_command(['python', '-m', 'svcs', 'push', 'origin', 'main'], cwd=dev1_repo)
             
             if not result or result.returncode != 0:
                 print("❌ Failed to push to GitHub")
@@ -771,7 +875,7 @@ def test_github_collaboration():
             
             # Initialize SVCS for developer 2
             print("\n🔧 Initializing SVCS for Developer 2...")
-            result = run_command([sys.executable, str(svcs_cli_path), 'init'], 
+            result = run_command(['python', '-m', 'svcs', 'init'], 
                                cwd=dev2_repo, 
                                input_text="y\n",
                                timeout=15)
@@ -781,7 +885,7 @@ def test_github_collaboration():
             
             # Check semantic events sync
             print("\n📊 Checking semantic events synchronization...")
-            result = run_command([sys.executable, str(svcs_cli_path), 'events'], cwd=dev2_repo)
+            result = run_command(['python', '-m', 'svcs', 'events'], cwd=dev2_repo)
             if result and result.returncode == 0:
                 lines = result.stdout.split('\n')
                 event_count = len([line for line in lines if line.strip().startswith('🔍')])
@@ -797,17 +901,27 @@ def test_github_collaboration():
             # Developer 2 makes changes
             commit_msg2 = create_sample_code_changes(dev2_repo, "Developer2", 2)
             run_command(['git', 'add', '.'], cwd=dev2_repo)
-            result = run_command(['git', 'commit', '-m', commit_msg2], cwd=dev2_repo)
             
-            print("\n📤 Developer 2 pushing changes...")
-            result = run_command(['git', 'push', 'origin', 'main'], cwd=dev2_repo)
+            # Check if there's anything to commit
+            status_result = run_command(['git', 'status', '--porcelain'], cwd=dev2_repo)
+            if status_result and status_result.stdout.strip():
+                result = run_command(['git', 'commit', '-m', commit_msg2], cwd=dev2_repo)
+                if not result or result.returncode != 0:
+                    print("❌ Failed to commit Developer 2 changes")
+                    return False
+                print("✅ Developer 2 committed changes")
+            else:
+                print("ℹ️  Developer 2: No changes to commit - repository already contains this content")
+            
+            print("\n📤 Developer 2 pushing changes with SVCS...")
+            result = run_command(['python', '-m', 'svcs', 'push', 'origin', 'main'], cwd=dev2_repo)
             if not result or result.returncode != 0:
                 print("❌ Developer 2 failed to push")
                 return False
             
             # Developer 1 pulls changes
             print("\n📥 Developer 1 pulling changes...")
-            result = run_command([sys.executable, str(svcs_cli_path), 'pull'], cwd=dev1_repo)
+            result = run_command(['python', '-m', 'svcs', 'pull'], cwd=dev1_repo)
             if not result or result.returncode != 0:
                 print("❌ Developer 1 failed to pull")
                 return False
@@ -815,27 +929,47 @@ def test_github_collaboration():
             # Developer 1 makes more changes
             commit_msg3 = create_sample_code_changes(dev1_repo, "Developer1", 3)
             run_command(['git', 'add', '.'], cwd=dev1_repo)
-            result = run_command(['git', 'commit', '-m', commit_msg3], cwd=dev1_repo)
             
-            print("\n📤 Developer 1 pushing new changes...")
-            result = run_command(['git', 'push', 'origin', 'main'], cwd=dev1_repo)
+            # Check if there's anything to commit
+            status_result = run_command(['git', 'status', '--porcelain'], cwd=dev1_repo)
+            if status_result and status_result.stdout.strip():
+                result = run_command(['git', 'commit', '-m', commit_msg3], cwd=dev1_repo)
+                if not result or result.returncode != 0:
+                    print("❌ Failed to commit Developer 1 changes")
+                    return False
+                print("✅ Developer 1 committed more changes")
+            else:
+                print("ℹ️  Developer 1: No changes to commit - repository already contains this content")
+            
+            print("\n📤 Developer 1 pushing new changes with SVCS...")
+            result = run_command(['python', '-m', 'svcs', 'push', 'origin', 'main'], cwd=dev1_repo)
             if not result or result.returncode != 0:
                 print("❌ Developer 1 failed to push")
                 return False
             
             # Developer 2 pulls and adds final changes
             print("\n📥 Developer 2 pulling latest changes...")
-            result = run_command([sys.executable, str(svcs_cli_path), 'pull'], cwd=dev2_repo)
+            result = run_command(['python', '-m', 'svcs', 'pull'], cwd=dev2_repo)
             if not result or result.returncode != 0:
                 print("❌ Developer 2 failed to pull")
                 return False
             
             commit_msg4 = create_sample_code_changes(dev2_repo, "Developer2", 4)
             run_command(['git', 'add', '.'], cwd=dev2_repo)
-            result = run_command(['git', 'commit', '-m', commit_msg4], cwd=dev2_repo)
             
-            print("\n📤 Developer 2 pushing final changes...")
-            result = run_command(['git', 'push', 'origin', 'main'], cwd=dev2_repo)
+            # Check if there's anything to commit
+            status_result = run_command(['git', 'status', '--porcelain'], cwd=dev2_repo)
+            if status_result and status_result.stdout.strip():
+                result = run_command(['git', 'commit', '-m', commit_msg4], cwd=dev2_repo)
+                if not result or result.returncode != 0:
+                    print("❌ Failed to commit Developer 2 final changes")
+                    return False
+                print("✅ Developer 2 committed final changes")
+            else:
+                print("ℹ️  Developer 2: No final changes to commit - repository already contains this content")
+            
+            print("\n📤 Developer 2 pushing final changes with SVCS...")
+            result = run_command(['python', '-m', 'svcs', 'push', 'origin', 'main'], cwd=dev2_repo)
             
             # === PHASE 4: Final synchronization and verification ===
             print("\n" + "="*60)
@@ -844,20 +978,20 @@ def test_github_collaboration():
             
             # Developer 1 final sync
             print("\n📥 Developer 1 final sync...")
-            result = run_command([sys.executable, str(svcs_cli_path), 'pull'], cwd=dev1_repo)
+            result = run_command(['python', '-m', 'svcs', 'pull'], cwd=dev1_repo)
             
             # Check final semantic events in both repos
             print("\n📊 Final semantic events comparison:")
             
             print("\n👨‍💻 Developer 1 semantic events:")
-            result1 = run_command([sys.executable, str(svcs_cli_path), 'events'], cwd=dev1_repo)
+            result1 = run_command(['python', '-m', 'svcs', 'events'], cwd=dev1_repo)
             if result1 and result1.returncode == 0:
                 lines1 = result1.stdout.split('\n')
                 event_count1 = len([line for line in lines1 if line.strip().startswith('🔍')])
                 print(f"  📈 Total events: {event_count1}")
             
             print("\n👩‍💻 Developer 2 semantic events:")
-            result2 = run_command([sys.executable, str(svcs_cli_path), 'events'], cwd=dev2_repo)
+            result2 = run_command(['python', '-m', 'svcs', 'events'], cwd=dev2_repo)
             if result2 and result2.returncode == 0:
                 lines2 = result2.stdout.split('\n')
                 event_count2 = len([line for line in lines2 if line.strip().startswith('🔍')])
@@ -886,15 +1020,29 @@ def test_github_collaboration():
             for indicator in success_indicators:
                 print(indicator)
             
-            if len(success_indicators) >= 4:
+            # === PHASE 5: Verify semantic notes are on GitHub remote ===
+            print("\n" + "="*60)
+            print("🔍 PHASE 5: Semantic Notes Remote Verification")
+            print("="*60)
+            
+            # Verify semantic notes are properly pushed to remote
+            notes_verified = verify_semantic_notes_on_remote(dev1_repo, repo_url)
+            if notes_verified:
+                success_indicators.append("✅ Semantic notes are synchronized to GitHub remote")
+            
+            if len(success_indicators) >= 4 and notes_verified:
                 print("\n🎉 ✅ GITHUB COLLABORATION TEST PASSED!")
                 print("✅ SVCS successfully synchronized semantic events via GitHub")
                 print("✅ Both developers have complete project history")
                 print("✅ Code and semantic data are properly synchronized")
+                print("✅ Semantic notes are available on GitHub remote")
                 return True
             else:
                 print("\n❌ GITHUB COLLABORATION TEST FAILED!")
-                print(f"❌ Only {len(success_indicators)}/4 success criteria met")
+                if not notes_verified:
+                    print("❌ CRITICAL: Semantic notes are NOT synchronized to GitHub!")
+                    print("❌ This means other developers cannot access semantic events")
+                print(f"❌ Only {len(success_indicators)}/5 success criteria met")
                 return False
                 
         except KeyboardInterrupt:

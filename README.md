@@ -792,6 +792,19 @@ pip install -r requirements.txt
 gtimeout 60s python test_bare_hooks.py
 ```
 
+#### **GitHub Collaboration Testing**
+```bash
+# Full GitHub collaboration workflow test (creates repos automatically)
+python tests/test_github_collaboration.py
+
+# Verify semantic notes are accessible on GitHub remote
+python tests/test_github_notes_verification.py
+```
+
+**Note**: The GitHub collaboration test demonstrates real-world semantic sync via GitHub. 
+While GitHub's web UI can't display git notes content (this is normal), the semantic 
+notes are properly stored and accessible via git commands, enabling full team collaboration.
+
 ### **Test Documentation**
 For detailed information about all available tests, test categories, and troubleshooting:
 
@@ -917,7 +930,7 @@ We're designing **git-native team collaboration** that integrates with existing 
 svcs init                         # Initialize SVCS for repository
 svcs status                       # Show repository status and branch info
 svcs events --branch main --limit 10  # Branch-specific semantic events
-svcs notes sync                   # Sync semantic data via git notes
+svcs notes sync                   # Sync semantic notes to remote
 svcs notes fetch                  # Fetch team's semantic data
 ```
 
