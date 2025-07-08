@@ -1,0 +1,374 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-07-08T17:15:06.416254",
+  "semantic_events": [
+    {
+      "event_type": "dependency_added",
+      "node_id": "module:tests/test_github_collaboration.py",
+      "location": "tests/test_github_collaboration.py",
+      "details": "Added dependencies: datetime",
+      "layer": "1",
+      "layer_description": "File and module structure analysis",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:verify_semantic_notes_on_remote",
+      "location": "tests/test_github_collaboration.py",
+      "details": "New func added",
+      "layer": "1",
+      "layer_description": "File and module structure analysis",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "node_id": "func:test_github_collaboration",
+      "location": "tests/test_github_collaboration.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "control_flow_changed",
+      "details": "if count changed from 24 to 34",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "node_id": "func:test_github_collaboration",
+      "location": "tests/test_github_collaboration.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "return_pattern_changed",
+      "details": "Return statements changed from 17 to 20",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "node_id": "func:test_github_collaboration",
+      "location": "tests/test_github_collaboration.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "internal_call_added",
+      "details": "Now calls: verify_semantic_notes_on_remote",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "node_id": "func:validate_git_remote_url",
+      "location": "tests/test_github_collaboration.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "return_pattern_changed",
+      "details": "Return statements changed from 2 to 1",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "node_id": "func:validate_git_remote_url",
+      "location": "tests/test_github_collaboration.py",
+      "layer": "3",
+      "layer_description": "Logic and semantic meaning analysis",
+      "event_type": "comprehension_usage_changed",
+      "details": "generator comprehensions: 2\u21921",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "node_id": "func:test_github_collaboration",
+      "location": "tests/test_github_collaboration.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "function_complexity_changed",
+      "details": "Function complexity increased from 45 to 58",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "node_id": "func:test_github_collaboration",
+      "location": "tests/test_github_collaboration.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "attribute_access_changed",
+      "details": "Attribute access patterns changed",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "node_id": "func:test_github_collaboration",
+      "location": "tests/test_github_collaboration.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "assignment_pattern_changed",
+      "details": "Assignment patterns changed",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "node_id": "func:test_github_collaboration",
+      "location": "tests/test_github_collaboration.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "added 24 new literals; removed 4 literals",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "node_id": "func:test_github_collaboration",
+      "location": "tests/test_github_collaboration.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "boolean_literal_usage_changed",
+      "details": "added 3 False",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "node_id": "func:create_sample_code_changes",
+      "location": "tests/test_github_collaboration.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "attribute_access_changed",
+      "details": "Attribute access patterns changed",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "node_id": "func:create_sample_code_changes",
+      "location": "tests/test_github_collaboration.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "assignment_pattern_changed",
+      "details": "Assignment patterns changed",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "node_id": "func:create_sample_code_changes",
+      "location": "tests/test_github_collaboration.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "string_literal_usage_changed",
+      "details": "added 6 new literals; removed 1 literals",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "node_id": "func:validate_git_remote_url",
+      "location": "tests/test_github_collaboration.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "function_complexity_changed",
+      "details": "Function complexity decreased from 2 to 1",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "node_id": "func:validate_git_remote_url",
+      "location": "tests/test_github_collaboration.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "functional_programming_changed",
+      "details": "Functional programming usage decreased",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "node_id": "file:overall",
+      "location": "tests/test_github_collaboration.py",
+      "layer": "4",
+      "layer_description": "Behavioral patterns and complexity analysis",
+      "event_type": "functional_programming_changed",
+      "details": "Functional programming usage decreased at file level",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:verify_semantic_notes_on_remote",
+      "location": "tests/test_github_collaboration.py",
+      "details": "Possible method extraction: verify_semantic_notes_on_remote",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "optimization_data_structure",
+      "node_id": "optimization:tests/test_github_collaboration.py",
+      "location": "tests/test_github_collaboration.py",
+      "details": "List membership check replaced with set/dict",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.9,
+      "reasoning": "List membership replaced with O(1) lookup",
+      "impact": "Significant performance improvement",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "security_improvement",
+      "node_id": "security:tests/test_github_collaboration.py",
+      "location": "tests/test_github_collaboration.py",
+      "details": "SQL injection prevention - parameterized queries",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.9,
+      "reasoning": "String formatting replaced with parameterized queries",
+      "impact": "Critical security improvement",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "code_complication",
+      "node_id": "complexity:tests/test_github_collaboration.py",
+      "location": "tests/test_github_collaboration.py",
+      "details": "Code complexity significantly increased",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.8,
+      "reasoning": "Complexity increased from 225 to 272",
+      "impact": "Potential maintainability concern",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "file_added",
+      "node_id": "file:tests/test_github_notes_verification.py",
+      "location": "tests/test_github_notes_verification.py",
+      "details": "New file created",
+      "layer": "1",
+      "layer_description": "File and module structure analysis",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "dependency_added",
+      "node_id": "module:tests/test_github_notes_verification.py",
+      "location": "tests/test_github_notes_verification.py",
+      "details": "Added dependencies: os, pathlib, subprocess, sys, tempfile",
+      "layer": "1",
+      "layer_description": "File and module structure analysis",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:run_command",
+      "location": "tests/test_github_notes_verification.py",
+      "details": "New func added",
+      "layer": "1",
+      "layer_description": "File and module structure analysis",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:test_remote_notes_access",
+      "location": "tests/test_github_notes_verification.py",
+      "details": "New func added",
+      "layer": "1",
+      "layer_description": "File and module structure analysis",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:run_command",
+      "location": "tests/test_github_notes_verification.py",
+      "details": "Possible method extraction: run_command",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:test_remote_notes_access",
+      "location": "tests/test_github_notes_verification.py",
+      "details": "Possible method extraction: test_remote_notes_access",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "security_improvement",
+      "node_id": "security:tests/test_github_notes_verification.py",
+      "location": "tests/test_github_notes_verification.py",
+      "details": "Input validation added",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.8,
+      "reasoning": "Validation function introduced",
+      "impact": "Security enhancement",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "code_complication",
+      "node_id": "complexity:tests/test_github_notes_verification.py",
+      "location": "tests/test_github_notes_verification.py",
+      "details": "Code complexity significantly increased",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.8,
+      "reasoning": "Complexity increased from 0 to 39",
+      "impact": "Potential maintainability concern",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "file_added",
+      "node_id": "file:tests/verify_remote_notes.py",
+      "location": "tests/verify_remote_notes.py",
+      "details": "New file created",
+      "layer": "1",
+      "layer_description": "File and module structure analysis",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "dependency_added",
+      "node_id": "module:tests/verify_remote_notes.py",
+      "location": "tests/verify_remote_notes.py",
+      "details": "Added dependencies: pathlib, subprocess, sys, tempfile",
+      "layer": "1",
+      "layer_description": "File and module structure analysis",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:run_command",
+      "location": "tests/verify_remote_notes.py",
+      "details": "New func added",
+      "layer": "1",
+      "layer_description": "File and module structure analysis",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "node_added",
+      "node_id": "func:test_remote_notes_access",
+      "location": "tests/verify_remote_notes.py",
+      "details": "New func added",
+      "layer": "1",
+      "layer_description": "File and module structure analysis",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:run_command",
+      "location": "tests/verify_remote_notes.py",
+      "details": "Possible method extraction: run_command",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "refactoring_extract_method",
+      "node_id": "func:test_remote_notes_access",
+      "location": "tests/verify_remote_notes.py",
+      "details": "Possible method extraction: test_remote_notes_access",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.7,
+      "reasoning": "New function detected with increased code size",
+      "impact": "Code organization improvement",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    },
+    {
+      "event_type": "code_complication",
+      "node_id": "complexity:tests/verify_remote_notes.py",
+      "location": "tests/verify_remote_notes.py",
+      "details": "Code complexity significantly increased",
+      "layer": "5a",
+      "layer_description": "AI-powered pattern recognition and analysis",
+      "confidence": 0.8,
+      "reasoning": "Complexity increased from 0 to 36",
+      "impact": "Potential maintainability concern",
+      "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+    }
+  ],
+  "analyzer": "svcs",
+  "commit_hash": "8bfa180b67476ce9ab9bef87dab8e7d63d3ab34b"
+}
