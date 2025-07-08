@@ -162,14 +162,12 @@ fi
 """,
             'post-merge': f"""#!/bin/bash
 # SVCS Post-Merge Hook - Sync semantic notes and analyze merge
-echo "🔄 SVCS: Processing merge and syncing semantic notes..."
 if [ -d ".svcs" ]; then
     {svcs_cmd} process-hook post-merge "$@" || echo "⚠️  SVCS: Post-merge processing failed"
 fi
 """,
             'post-checkout': f"""#!/bin/bash
 # SVCS Post-Checkout Hook - Fetch semantic notes after clone/checkout
-echo "📥 SVCS: Processing checkout and fetching semantic notes..."
 if [ -d ".svcs" ]; then
     {svcs_cmd} process-hook post-checkout "$@" || echo "⚠️  SVCS: Post-checkout processing failed"
 fi

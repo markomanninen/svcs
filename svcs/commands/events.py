@@ -87,10 +87,6 @@ def cmd_process_hook(args):
             if semantic_events:
                 stored_count, notes_success = svcs.analyze_and_store_commit(commit_hash, semantic_events)
                 print(f'✅ SVCS: Stored {stored_count} semantic events')
-                if notes_success:
-                    print('📝 SVCS: Semantic data saved as git notes')
-                else:
-                    print('⚠️ SVCS: Failed to save git notes')
             else:
                 print('ℹ️ SVCS: No semantic changes detected')
                 
@@ -102,8 +98,6 @@ def cmd_process_hook(args):
     elif hook_name.endswith('post-merge'):
         # Post-merge: handle merge analysis and transfer semantic events
         try:
-            print("🔍 SVCS: Processing merge...")
-            
             # Initialize SVCS
             from svcs_repo_local import RepositoryLocalSVCS
             svcs = RepositoryLocalSVCS(str(repo_path))
@@ -113,21 +107,20 @@ def cmd_process_hook(args):
             
             if auto_sync:
                 # Automatically fetch semantic notes from remote (in case they weren't fetched during git pull)
-                print("📥 SVCS: Auto-fetching semantic notes from remote...")
                 fetch_result = svcs.git_notes.fetch_notes_from_remote()
                 if fetch_result:
-                    print("✅ SVCS: Semantic notes fetched from remote")
+                    pass  # Successfully fetched, no need to announce
             else:
                 print("ℹ️ SVCS: Auto-sync disabled, use 'svcs notes fetch' manually if needed")
             
             # Import semantic events from git notes (for commits merged from remote)
             imported_count = svcs.import_semantic_events_from_notes()
             if imported_count > 0:
-                print(f"📥 SVCS: Imported {imported_count} semantic events from git notes")
+                print(f"✅ SVCS: Imported {imported_count} semantic events")
             
             # Finally, automatically process merge and transfer semantic events between branches
             result = svcs.process_merge()
-            print(f"✅ SVCS: {result}")
+            print(f"{result}")  # This already includes ✅ SVCS: prefix
             
         except Exception as e:
             print(f"❌ SVCS: Merge processing error: {e}")
@@ -135,22 +128,19 @@ def cmd_process_hook(args):
     elif hook_name.endswith('post-checkout'):
         # Post-checkout: handle branch switching and fetch notes
         try:
-            print("🔍 SVCS: Processing checkout...")
-            
             # Initialize SVCS
             from svcs_repo_local import RepositoryLocalSVCS
             svcs = RepositoryLocalSVCS(str(repo_path))
             
             # Fetch semantic notes when switching branches (they might have new commits)
-            print("📥 SVCS: Fetching semantic notes after checkout...")
             fetch_result = svcs.git_notes.fetch_notes_from_remote()
-            if fetch_result:
-                print("✅ SVCS: Semantic notes fetched from remote")
             
             # Import any new semantic events from notes
             imported_count = svcs.import_semantic_events_from_notes()
             if imported_count > 0:
-                print(f"📥 SVCS: Imported {imported_count} semantic events from git notes")
+                print(f"✅ SVCS: Imported {imported_count} semantic events")
+            elif fetch_result:
+                print("✅ SVCS: Semantic notes synced")
                 
         except Exception as e:
             print(f"❌ SVCS: Checkout processing error: {e}")
